@@ -25,6 +25,11 @@
       font-weight: 300;
       overflow-x: hidden;
       cursor: none;
+      }
+
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
     }
 
     /* ── CUSTOM CURSOR ── */
@@ -1017,9 +1022,24 @@
       }
     }
     function toggleMenu() {
+  const isOpen = document.getElementById('mainNav').classList.contains('open');
+  
   document.getElementById('hamburger').classList.toggle('open');
   document.getElementById('mainNav').classList.toggle('open');
+
+  // لو القايمة بتفتح → اسكرول لأول الصفحة
+  if (!isOpen) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
+// لو سكرول وهي مفتوحة → اقفلها
+window.addEventListener('scroll', () => {
+  const navOpen = document.getElementById('mainNav').classList.contains('open');
+  if (navOpen && window.scrollY > 50) {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('mainNav').classList.remove('open');
+  }
+});
 
 // اقفل المنيو لما تضغط على أي لينك
 document.querySelectorAll('#mainNav a').forEach(link => {
