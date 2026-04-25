@@ -25,6 +25,11 @@
       font-weight: 300;
       overflow-x: hidden;
       cursor: none;
+      }
+
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
     }
 
     /* ── CUSTOM CURSOR ── */
@@ -614,6 +619,61 @@
       .feature-strip { grid-template-columns: 1fr; }
       .cart-sidebar { width: 100%; }
     }
+    /* ── HAMBURGER ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: none;
+  z-index: 200;
+  padding: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--white);
+  transition: all 0.4s ease;
+}
+.hamburger.open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+
+  #mainNav {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    transform: translateX(100%);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 150;
+  }
+
+  #mainNav.open {
+    transform: translateX(0);
+  }
+
+  #mainNav a, #mainNav .cart-btn {
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--white) !important;
+  }
+}
   </style>
 </head>
 <body>
@@ -633,7 +693,10 @@
   <!-- HEADER -->
   <header>
     <a href="#" class="logo">MONO</a>
-    <nav>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="mainNav">
       <a href="#products">Collection</a>
       <a href="#about">About</a>
       <a href="#newsletter">Contact</a>
@@ -958,6 +1021,33 @@
         showNotif('Please enter a valid email');
       }
     }
+    function toggleMenu() {
+  const isOpen = document.getElementById('mainNav').classList.contains('open');
+  
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mainNav').classList.toggle('open');
+
+  // لو القايمة بتفتح → اسكرول لأول الصفحة
+  if (!isOpen) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+// لو سكرول وهي مفتوحة → اقفلها
+window.addEventListener('scroll', () => {
+  const navOpen = document.getElementById('mainNav').classList.contains('open');
+  if (navOpen && window.scrollY > 50) {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('mainNav').classList.remove('open');
+  }
+});
+
+// اقفل المنيو لما تضغط على أي لينك
+document.querySelectorAll('#mainNav a').forEach(link => {
+  link.addEventListener('click', () => {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('mainNav').classList.remove('open');
+  });
+});
   </script>
 </body>
 </html>
