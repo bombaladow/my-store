@@ -1012,15 +1012,23 @@
     }
 
     // ── NEWSLETTER ──
-    function subscribeNewsletter() {
-      const input = document.querySelector('.newsletter-input');
-      if (input.value.includes('@')) {
-        showNotif('Welcome to MONO ✓');
-        input.value = '';
-      } else {
-        showNotif('Please enter a valid email');
-      }
-    }
+    async function subscribeNewsletter() {
+  const input = document.querySelector('.newsletter-input');
+  const email = input.value.trim();
+  if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
+
+  showNotif('Subscribing...');
+  const res = await fetch('/api/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  const data = await res.json();
+
+  if (data.success) { showNotif('Welcome to MONO ✓'); input.value = ''; }
+  else if (data.message === 'already_subscribed') { showNotif('Already subscribed!'); }
+  else { showNotif('Something went wrong'); }
+}
     function toggleMenu() {
   const isOpen = document.getElementById('mainNav').classList.contains('open');
   
