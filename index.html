@@ -4,78 +4,148 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MONO - Premium Streetwear</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
-  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root { 
-      --black: #0f0f11; --white: #fff; --accent: #ff4757; --green: #2ed573; 
-      --bg-gradient: linear-gradient(135deg, #1e1e24 0%, #0f0f11 100%);
-      --gray: #718093; --light-bg: #f5f6fa;
+      --black: #000000; 
+      --white: #ffffff; 
+      --gray-dark: #111111;
+      --gray-light: #f5f5f7;
+      --gray-text: #666666;
+      --border: #e5e5e7;
     }
     
-    body { background: var(--white); color: var(--black); font-family: 'Outfit', sans-serif; overflow-x: hidden; }
-    nav { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; z-index: 100; background: rgba(15, 15, 17, 0.85); backdrop-filter: blur(10px); }
-    nav a.logo { color: var(--white); text-decoration: none; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.6rem; }
+    body { 
+      background: var(--white); 
+      color: var(--black); 
+      font-family: 'Geist', sans-serif; 
+      -webkit-font-smoothing: antialiased;
+    }
     
-    .cart-nav-btn { color: var(--white); background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; cursor: pointer; position: relative; }
-    .cart-badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: var(--white); font-size: 0.75rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    /* الـ Navbar الرايق الأبيض بتاع أول ملف */
+    nav { 
+      position: fixed; top: 0; width: 100%; 
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 24px 40px; z-index: 100; 
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav a.logo { 
+      color: var(--black); text-decoration: none; 
+      font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px; 
+    }
     
-    .hero { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: var(--bg-gradient); color: var(--white); }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 5vw; font-weight: 800; }
-    .hero h1 span { color: var(--accent); }
+    .cart-nav-btn { 
+      color: var(--black); font-size: 0.9rem; font-weight: 500; 
+      cursor: pointer; position: relative; display: flex; align-items: center; gap: 6px;
+    }
+    .cart-badge { 
+      background: var(--black); color: var(--white); 
+      font-size: 0.7rem; width: 18px; height: 18px; 
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 600;
+    }
     
-    .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 2.3rem; font-weight: 700; text-align: center; margin: 60px 0 30px; text-transform: uppercase; }
+    /* الـ Hero Section المينيمال الهادي */
+    .hero { 
+      min-height: 50vh; display: flex; flex-direction: column; justify-content: center; 
+      align-items: center; text-align: center; padding: 140px 20px 60px;
+      background: var(--white);
+    }
+    .hero h1 { 
+      font-size: 3.5rem; font-weight: 600; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px;
+    }
+    .hero p { font-size: 1.1rem; color: var(--gray-text); max-width: 500px; font-weight: 400; }
     
-    .products-grid { max-width: 1200px; margin: 0 auto 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; padding: 0 20px; }
-    .product-card { background: var(--white); padding: 25px; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); position: relative; border: 1px solid rgba(0,0,0,0.02); }
+    .section-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; text-align: center; margin: 40px 0 24px; }
     
-    .product-img { width: 100%; aspect-ratio: 3/4; background: #e2e8f0; margin-bottom: 20px; border-radius: 12px; }
-    .product-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-    .product-price { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin-bottom: 15px; }
-    
-    /* ستايل خانة المقاسات والكمية الجديد */
-    .product-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .size-selector { display: flex; gap: 8px; }
-    .size-btn { background: var(--light-bg); border: 1px solid transparent; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 6px; cursor: pointer; }
-    .size-btn.selected { background: var(--black); color: var(--white); }
-    
-    .qty-selector { display: flex; align-items: center; gap: 12px; background: var(--light-bg); width: max-content; padding: 4px 12px; border-radius: 6px; }
-    .qty-btn { background: transparent; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 24px; }
-    .qty-val { font-weight: 600; font-size: 0.95rem; }
+    /* أزرار الكاتجري المينيمال النظيفة */
+    .category-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; }
+    .tab-btn { 
+      background: transparent; color: var(--gray-text); border: 1px solid transparent; padding: 8px 16px; 
+      font-size: 0.85rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s;
+    }
+    .tab-btn.active { color: var(--black); font-weight: 600; border-color: var(--border); background: var(--gray-light); }
 
-    .add-to-cart-btn { background: var(--black); color: var(--white); border: none; padding: 14px; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; width: 100%; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-    .add-to-cart-btn:hover { background: var(--accent); }
+    /* شبكة المنتجات النظيفة جداً من أول ملف */
+    .products-grid { max-width: 1100px; margin: 0 auto 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 0 20px; }
+    .product-card { background: var(--white); display: flex; flex-direction: column; position: relative; }
     
-    /* سيكشن التعليقات المودرن */
-    .reviews-section { max-width: 800px; margin: 80px auto; padding: 0 20px; }
-    .review-card { background: var(--light-bg); padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-    .review-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
-    .review-stars { color: #ffb8b8; }
-    .review-text { font-size: 0.95rem; color: #4a5568; line-height: 1.5; }
+    .product-img { 
+      width: 100%; aspect-ratio: 1/1; background: var(--gray-light); margin-bottom: 16px; 
+      display: flex; align-items: center; justify-content: center; color: var(--gray-text); 
+      font-size: 0.85rem; font-weight: 500; border-radius: 8px; border: 1px solid var(--border);
+    }
+    .product-name { font-size: 1rem; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.2px; }
+    .product-price { font-size: 0.95rem; color: var(--black); font-weight: 500; margin-bottom: 16px; }
+    
+    /* المقاسات والكمية بستايل أبل المينيمال */
+    .product-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+    .size-selector { display: flex; gap: 6px; }
+    .size-btn { background: var(--white); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.8rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .size-btn.selected { background: var(--black); color: var(--white); border-color: var(--black); }
+    
+    .qty-container { display: flex; align-items: center; gap: 10px; }
+    .qty-label { font-size: 0.8rem; color: var(--gray-text); }
+    .qty-selector { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--white); }
+    .qty-btn { background: transparent; border: none; font-size: 1rem; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .qty-btn:hover { background: var(--gray-light); }
+    .qty-val { font-weight: 500; font-size: 0.85rem; min-width: 20px; text-align: center; }
 
-    /* الكارت والـ Sidebar */
-    .cart-sidebar { position: fixed; top: 0; right: -460px; width: 460px; height: 100vh; background: var(--white); box-shadow: -20px 0 50px rgba(0,0,0,0.15); z-index: 1000; padding: 40px; display: flex; flex-direction: column; transition: right 0.5s ease; }
+    .add-to-cart-btn { 
+      background: var(--black); color: var(--white); border: none; padding: 12px; 
+      font-size: 0.85rem; font-weight: 500; width: 100%; border-radius: 6px; cursor: pointer; transition: 0.2s;
+    }
+    .add-to-cart-btn:hover { background: var(--gray-dark); }
+    
+    /* كارت الـ Coming Soon المكتوم الشيك */
+    .product-card.coming-soon { opacity: 0.7; }
+    .coming-soon-badge { 
+      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.06); 
+      color: var(--black); font-size: 0.7rem; font-weight: 600; padding: 4px 10px; 
+      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5;
+    }
+    .notify-btn { background: transparent; color: var(--black); border: 1px solid var(--black); }
+    .notify-btn:hover { background: var(--black); color: var(--white); }
+    
+    /* سيكشن التعليقات الهادئ والنظيف */
+    .reviews-section { max-width: 600px; margin: 60px auto; padding: 0 20px; border-top: 1px solid var(--border); padding-top: 40px; }
+    .reviews-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.3px; text-align: center; }
+    .review-card { padding: 16px 0; border-bottom: 1px solid var(--gray-light); }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; font-weight: 500; }
+    .review-stars { color: var(--black); font-size: 0.75rem; letter-spacing: 1px; }
+    .review-text { font-size: 0.85rem; color: var(--gray-text); line-height: 1.6; }
+
+    /* الكارت اليمين النظيفة */
+    .cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: var(--white); border-left: 1px solid var(--border); z-index: 1000; padding: 30px; display: flex; flex-direction: column; transition: right 0.4s ease; }
     .cart-sidebar.open { right: 0; }
-    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .cart-header h2 { font-size: 1.25rem; font-weight: 600; }
     .cart-items { flex: 1; overflow-y: auto; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--light-bg); }
-    .cart-total { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; margin-top: 20px; display: flex; justify-content: space-between; }
-    .checkout-btn { background: var(--accent); color: var(--white); border: none; padding: 16px; font-size: 1rem; font-weight: 700; width: 100%; margin-top: 15px; border-radius: 8px; cursor: pointer; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light); }
+    .cart-item h4 { font-size: 0.9rem; font-weight: 500; }
+    .cart-item p { font-size: 0.85rem; color: var(--gray-text); }
+    .cart-total { font-size: 1.1rem; font-weight: 600; margin-top: 20px; display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
     
-    .modal { position: fixed; inset: 0; background: rgba(15,15,17,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; }
+    /* نافذة الـ Checkout النظيفة البيضاء */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: 0.2s; }
     .modal.open { opacity: 1; visibility: visible; }
-    .modal-content { background: var(--white); padding: 40px; width: 100%; max-width: 500px; border-radius: 24px; position: relative; }
-    .modal-close { position: absolute; top: 25px; right: 25px; cursor: pointer; }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray); margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 14px; background: var(--light-bg); border: 1px solid transparent; border-radius: 8px; }
+    .modal-content { background: var(--white); padding: 32px; width: 100%; max-width: 440px; border-radius: 12px; position: relative; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+    .modal h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.3px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--gray-text); margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; }
+    .form-group input:focus { outline: none; border-color: var(--black); }
     
-    .notif { position: fixed; bottom: 30px; right: 30px; background: var(--black); color: var(--white); padding: 16px 32px; font-size: 0.9rem; font-weight: 600; border-radius: 12px; z-index: 2000; transform: translateY(150px); transition: 0.4s; }
-    .notif.show { transform: translateY(0); }
-    footer { background: var(--black); color: var(--white); padding: 40px 20px; text-align: center; }
+    /* الإشعارات الهادئة السفلية */
+    .notif { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 100px); background: var(--black); color: var(--white); padding: 12px 24px; font-size: 0.85rem; font-weight: 500; border-radius: 6px; z-index: 2000; transition: transform 0.3s ease; text-align: center; min-width: 250px; }
+    .notif.show { transform: translate(-50%, 0); }
+    
+    footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.8rem; color: var(--gray-text); }
   </style>
 </head>
 <body>
@@ -83,20 +153,27 @@
   <nav>
     <a href="#" class="logo">MONO</a>
     <div class="cart-nav-btn" onclick="toggleCart(true)">
-      🛒 Cart <span class="cart-badge" id="cart-count">0</span>
+      Cart <span class="cart-badge" id="cart-count">0</span>
     </div>
   </nav>
 
   <div class="hero">
-    <h1>MONO <span>ESSENTIALS.</span></h1>
-    <p>Premium Streetwear Identity</p>
+    <h1>MONO ESSENTIALS</h1>
+    <p>Premium streetwear crafted with meticulous attention to detail, form, and lasting comfort.</p>
   </div>
 
-  <div class="section-title" data-aos="fade-up">The Collection</div>
+  <div class="section-title">Collection</div>
 
-  <div class="products-grid">
-    <div class="product-card" id="p1" data-aos="fade-up">
-      <div class="product-img" style="background-color: #d1d8e0;"></div>
+  <div class="category-tabs">
+    <button class="tab-btn active" onclick="switchCategory('all', this)">All</button>
+    <button class="tab-btn" onclick="switchCategory('tees', this)">Tees</button>
+    <button class="tab-btn" onclick="switchCategory('pants', this)">Pants</button>
+    <button class="tab-btn" onclick="switchCategory('accessories', this)">Accessories</button>
+  </div>
+
+  <div class="products-grid" id="products-wrapper">
+    <div class="product-card" data-cat="tees">
+      <div class="product-img">Basic Heavyweight Tee</div>
       <div class="product-name">Basic Heavyweight Tee</div>
       <div class="product-price">$45.00</div>
       
@@ -107,52 +184,96 @@
           <button class="size-btn" onclick="selectSize(this)">L</button>
           <button class="size-btn" onclick="selectSize(this)">XL</button>
         </div>
-        <div class="qty-selector">
-          <button class="qty-btn" onclick="updateQty('p1', -1)">-</button>
-          <span class="qty-val" id="p1-qty">1</span>
-          <button class="qty-btn" onclick="updateQty('p1', 1)">+</button>
+        <div class="qty-container">
+          <span class="qty-label">Quantity:</span>
+          <div class="qty-selector">
+            <button class="qty-btn" onclick="updateQty('p1', -1)">-</button>
+            <span class="qty-val" id="p1-qty">1</span>
+            <button class="qty-btn" onclick="updateQty('p1', 1)">+</button>
+          </div>
         </div>
       </div>
       
       <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 45.00, 'p1')">Add to Cart</button>
     </div>
+    
+    <div class="product-card" data-cat="tees">
+      <div class="product-img">Oversized Boxy Shirt</div>
+      <div class="product-name">Oversized Boxy Shirt</div>
+      <div class="product-price">$55.00</div>
+      
+      <div class="product-controls">
+        <div class="size-selector">
+          <button class="size-btn selected" onclick="selectSize(this)">S</button>
+          <button class="size-btn" onclick="selectSize(this)">M</button>
+          <button class="size-btn" onclick="selectSize(this)">L</button>
+          <button class="size-btn" onclick="selectSize(this)">XL</button>
+        </div>
+        <div class="qty-container">
+          <span class="qty-label">Quantity:</span>
+          <div class="qty-selector">
+            <button class="qty-btn" onclick="updateQty('p2', -1)">-</button>
+            <span class="qty-val" id="p2-qty">1</span>
+            <button class="qty-btn" onclick="updateQty('p2', 1)">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 55.00, 'p2')">Add to Cart</button>
+    </div>
+
+    <div class="product-card coming-soon" data-cat="pants">
+      <span class="coming-soon-badge">Coming Soon</span>
+      <div class="product-img">Relaxed Fit Sweatpants</div>
+      <div class="product-name">Relaxed Fit Sweatpants</div>
+      <div class="product-price" style="color: var(--gray-text);">$65.00</div>
+      <button class="add-to-cart-btn notify-btn" onclick="notifyMe('Relaxed Fit Sweatpants')">Notify When Drops</button>
+    </div>
+
+    <div class="product-card coming-soon" data-cat="accessories">
+      <span class="coming-soon-badge">Coming Soon</span>
+      <div class="product-img">MONO Canvas Tote Bag</div>
+      <div class="product-name">MONO Canvas Tote Bag</div>
+      <div class="product-price" style="color: var(--gray-text);">$30.00</div>
+      <button class="add-to-cart-btn notify-btn" onclick="notifyMe('MONO Canvas Tote Bag')">Notify When Drops</button>
+    </div>
   </div>
 
-  <div class="reviews-section" data-aos="fade-up">
-    <div class="section-title" style="margin: 0 0 30px; font-size: 1.8rem;">Customer Reviews</div>
+  <div class="reviews-section">
+    <div class="reviews-title">Customer Feedback</div>
     <div class="review-card">
       <div class="review-header">
         <span>Youssef M.</span>
-        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+        <span class="review-stars">★★★★★</span>
       </div>
-      <div class="review-text">التلبيس والخامة جبارة حقيقي! التيشرت تقيل جداً وبيبقاش مبهوق بعد الغسيل. مستني البناطيل تنزل.</div>
+      <div class="review-text">التلبيس والخامة جبارة حقيقي! التيشرت تقيل جداً ومبيكشش بعد الغسيل. مستني البناطيل تنزل.</div>
     </div>
     <div class="review-card">
       <div class="review-header">
         <span>Kareem A.</span>
-        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+        <span class="review-stars">★★★★★</span>
       </div>
-      <div class="review-text">The heavy cotton fabric is perfect. Clean minimal design. Highly recommended for daily streetwear look.</div>
+      <div class="review-text">The heavy cotton fabric is perfect. Clean minimal design. Highly recommended for a premium streetwear look.</div>
     </div>
   </div>
 
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
-      <h2>Your Cart</h2>
-      <div style="cursor:pointer;" onclick="toggleCart(false)">✕</div>
+      <h2>Shopping Cart</h2>
+      <div style="cursor:pointer; font-size: 1.1rem;" onclick="toggleCart(false)">✕</div>
     </div>
     <div class="cart-items" id="cart-items-container"></div>
     <div class="cart-total">
       <span>Total</span>
       <span>$<span id="cart-total-val">0.00</span></span>
     </div>
-    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
+    <button class="add-to-cart-btn" style="margin-top: 20px; padding: 14px;" onclick="openCheckout()">Proceed to Checkout</button>
   </div>
 
   <div class="modal" id="checkout-modal">
     <div class="modal-content">
       <div class="modal-close" onclick="closeCheckout()">✕</div>
-      <h3>Complete Shipping</h3>
+      <h3>Shipping Information</h3>
       <div class="form-group">
         <label>Full Name</label>
         <input type="text" id="co-name" placeholder="John Doe" />
@@ -169,7 +290,7 @@
         <label>Delivery Address</label>
         <input type="text" id="co-address" placeholder="Cairo, Egypt" />
       </div>
-      <button class="checkout-btn" id="placeOrderBtn" onclick="placeOrder()">Confirm Order</button>
+      <button class="add-to-cart-btn" id="placeOrderBtn" style="padding: 14px;" onclick="placeOrder()">Confirm Order</button>
     </div>
   </div>
 
@@ -180,8 +301,20 @@
   </footer>
 
   <script>
-    AOS.init({ once: true });
     let cart = [];
+
+    window.switchCategory = function(category, element) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+      
+      document.querySelectorAll('.product-card').forEach(card => {
+        if (category === 'all' || card.getAttribute('data-cat') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
 
     window.selectSize = function(btn) {
       const parent = btn.parentElement;
@@ -211,7 +344,11 @@
       
       renderCart();
       toggleCart(true);
-      showNotif(`⚡ Added ${qty}x ${cartName} to cart!`);
+      showNotif(`Added ${qty}x ${cartName} to cart`);
+    }
+
+    window.notifyMe = function(productName) {
+      showNotif(`Registered for ${productName} drop notification.`);
     }
 
     function renderCart() {
@@ -242,14 +379,27 @@
       const email = document.getElementById('co-email').value.trim();
       const phone = document.getElementById('co-phone').value.trim();
       const address = document.getElementById('co-address').value.trim();
+      if (!name || !email || !phone || !address) { showNotif('⚠️ Please fill all fields'); return; }
       
-      if (!name || !email || !phone || !address) { showNotif('⚠️ Please fill fields'); return; }
-      
-      showNotif(`✅ Order Saved under: ${email}`);
-      cart = []; renderCart(); closeCheckout();
+      const btn = document.getElementById('placeOrderBtn');
+      btn.textContent = 'Processing...'; btn.disabled = true;
+      let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      try {
+        const response = await fetch('/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, address, items: cart, total: total.toFixed(2) })
+        });
+        if (response.ok) {
+          showNotif(`✅ Order Confirmed under ${email}`);
+          cart = []; renderCart(); closeCheckout();
+        } else { showNotif(`❌ Error placing order`); }
+      } catch (error) { showNotif('❌ Server Error'); }
+      finally { btn.textContent = 'Confirm Order'; btn.disabled = false; }
     }
 
-    function showNotif(msg) { const n = document.getElementById('notif'); n.textContent = msg; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 4000); }
+    function showNotif(msg) { const n = document.getElementById('notif'); n.textContent = msg; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 3000); }
   </script>
 </body>
 </html>
