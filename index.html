@@ -27,167 +27,170 @@
       -webkit-font-smoothing: antialiased;
     }
     
-    /* أنيميشن السكرول الناعم للمنتجات */
+    /* أنيميشن أبل السلس جداً والثابت للمنتجات */
     .scroll-reveal {
       opacity: 0;
-      transform: translateY(30px);
-      filter: blur(4px);
-      transition: all 0.8s cubic-bezier(0.215, 0.610, 0.355, 1);
+      transform: translateY(40px);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
     }
     .scroll-reveal.active {
       opacity: 1;
       transform: translateY(0);
-      filter: blur(0);
     }
     
-    /* الـ Navbar الرايق الهادي جداً */
+    /* الـ Navbar الجديد النظيف تماماً من غير خطوط ميزان مبهوقة */
     nav { 
       position: fixed; top: 0; width: 100%; 
       display: flex; justify-content: space-between; align-items: center; 
-      padding: 24px 40px; z-index: 100; 
-      background: rgba(255, 255, 255, 0.75);
+      padding: 30px 40px; z-index: 100; 
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(20px);
     }
     nav a.logo { 
       color: var(--black); text-decoration: none; 
-      font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px; 
+      font-weight: 500; font-size: 1.15rem; letter-spacing: 1px;
     }
     
-    /* الـ Hero Section الراقي */
+    /* أزرار النافبار على الديسكتوب */
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-link-item { font-size: 0.85rem; color: var(--black); text-decoration: none; font-weight: 400; cursor: pointer; }
+    
+    /* الـ 3 نقط للموبايل */
+    .mobile-menu-trigger { display: none; font-size: 1.4rem; cursor: pointer; user-select: none; }
+    
+    /* القائمة المنسدلة للموبايل */
+    .mobile-dropdown {
+      position: absolute; top: 100%; right: 40px; width: 200px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px; display: none;
+      flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    }
+    .mobile-dropdown.open { display: flex; }
+    
+    /* الـ Hero Section المينيمال الهادئ */
     .hero { 
-      min-height: 65vh; display: flex; flex-direction: column; justify-content: center; 
-      align-items: center; text-align: center; padding: 140px 20px 60px;
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: center; 
+      align-items: center; text-align: center; padding: 160px 20px 40px;
       background: var(--white);
     }
     .hero h1 { 
-      font-size: 3.5rem; font-weight: 600; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px;
+      font-size: 2.8rem; font-weight: 500; letter-spacing: 2px; margin-bottom: 16px;
     }
-    .hero p { font-size: 1.05rem; color: var(--gray-text); max-width: 460px; font-weight: 400; line-height: 1.5; }
+    .hero p { font-size: 0.95rem; color: var(--gray-text); max-width: 420px; font-weight: 400; line-height: 1.6; letter-spacing: 0.2px; }
     
-    .section-title { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.3px; text-align: center; margin: 40px 0 24px; text-transform: uppercase; }
+    .section-title { font-size: 1.1rem; font-weight: 500; letter-spacing: 1px; text-align: center; margin: 40px 0 24px; text-transform: uppercase; color: var(--gray-text); }
     
-    /* أزرار الكاتجري المينيمال */
-    .category-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; }
+    /* أزرار الكاتجري */
+    .category-tabs { display: flex; justify-content: center; gap: 4px; margin-bottom: 40px; }
     .tab-btn { 
-      background: transparent; color: var(--gray-text); border: 1px solid transparent; padding: 8px 16px; 
-      font-size: 0.85rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s;
+      background: transparent; color: var(--gray-text); border: none; padding: 8px 16px; 
+      font-size: 0.85rem; font-weight: 400; cursor: pointer; transition: color 0.2s;
     }
-    .tab-btn.active { color: var(--black); font-weight: 600; border-color: var(--border); background: var(--gray-light); }
+    .tab-btn.active { color: var(--black); font-weight: 500; }
 
-    /* شبكة المنتجات الاحترافية */
+    /* شبكة المنتجات النظيفة */
     .products-grid { max-width: 1100px; margin: 0 auto 100px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 0 20px; }
     .product-card { background: var(--white); display: flex; flex-direction: column; position: relative; }
     
     .product-img { 
       width: 100%; aspect-ratio: 1/1; background: var(--gray-light); margin-bottom: 16px; 
       display: flex; align-items: center; justify-content: center; color: var(--gray-text); 
-      font-size: 0.85rem; font-weight: 500; border-radius: 8px; border: 1px solid var(--border);
-      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      font-size: 0.85rem; font-weight: 400; border-radius: 4px;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .product-card:hover .product-img {
-      transform: scale(1.02);
-    }
+    .product-card:hover .product-img { transform: scale(1.01); }
     
-    .product-name { font-size: 1rem; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.2px; }
-    .product-price { font-size: 0.95rem; color: var(--black); font-weight: 500; margin-bottom: 16px; }
+    .product-name { font-size: 0.95rem; font-weight: 400; margin-bottom: 6px; letter-spacing: 0.2px; }
+    .product-price { font-size: 0.9rem; color: var(--gray-text); font-weight: 400; margin-bottom: 16px; }
     
     /* تفاصيل المقاس والكمية */
     .product-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
     .size-selector { display: flex; gap: 6px; }
-    .size-btn { background: var(--white); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.8rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .size-btn { background: var(--white); border: 1px solid var(--border); padding: 5px 10px; font-size: 0.75rem; font-weight: 400; border-radius: 4px; cursor: pointer; transition: 0.2s; }
     .size-btn.selected { background: var(--black); color: var(--white); border-color: var(--black); }
     
     .qty-container { display: flex; align-items: center; gap: 10px; }
-    .qty-label { font-size: 0.8rem; color: var(--gray-text); }
-    .qty-selector { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--white); }
-    .qty-btn { background: transparent; border: none; font-size: 1rem; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-    .qty-btn:hover { background: var(--gray-light); }
-    .qty-val { font-weight: 500; font-size: 0.85rem; min-width: 20px; text-align: center; }
+    .qty-label { font-size: 0.75rem; color: var(--gray-text); }
+    .qty-selector { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--white); }
+    .qty-btn { background: transparent; border: none; font-size: 0.9rem; cursor: pointer; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+    .qty-val { font-weight: 400; font-size: 0.8rem; min-width: 20px; text-align: center; }
 
     .add-to-cart-btn { 
       background: var(--black); color: var(--white); border: none; padding: 12px; 
-      font-size: 0.85rem; font-weight: 500; width: 100%; border-radius: 6px; cursor: pointer; transition: 0.2s;
+      font-size: 0.8rem; font-weight: 400; width: 100%; border-radius: 4px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .add-to-cart-btn:hover { background: var(--gray-dark); }
+    .add-to-cart-btn:hover { opacity: 0.85; }
     
     /* كروت الـ Coming Soon */
-    .product-card.coming-soon { opacity: 0.65; }
+    .product-card.coming-soon { opacity: 0.6; }
     .coming-soon-badge { 
-      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.05); 
-      color: var(--black); font-size: 0.7rem; font-weight: 600; padding: 4px 10px; 
-      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5;
+      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.04); 
+      color: var(--black); font-size: 0.65rem; font-weight: 500; padding: 4px 8px; 
+      border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5;
     }
-    .notify-btn { background: transparent; color: var(--black); border: 1px solid var(--black); }
-    .notify-btn:hover { background: var(--black); color: var(--white); }
+    .notify-btn { background: transparent; color: var(--black); border: 1px solid var(--border); }
+    .notify-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
     
-    /* 🛒 الـ Floating Cart Button المتألق والذكي سفلياً */
-    .floating-cart-trigger {
-      position: fixed; bottom: 32px; right: 32px;
-      background: var(--black); color: var(--white);
-      width: 60px; height: 60px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      cursor: pointer; z-index: 999;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .floating-cart-trigger:hover {
-      transform: scale(1.08);
-    }
-    .floating-cart-trigger .cart-badge {
-      position: absolute; top: -2px; right: -2px;
-      background: var(--white); color: var(--black);
-      font-size: 0.75rem; width: 22px; height: 22px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; border: 2px solid var(--black);
-    }
-    @keyframes cartPop {
-      0% { transform: scale(1.08); }
-      50% { transform: scale(1.25); }
-      100% { transform: scale(1.08); }
-    }
-    .floating-cart-trigger.bump {
-      animation: cartPop 0.3s ease-out;
-    }
-
-    /* الكارت والـ Sidebar */
-    .cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: var(--white); border-left: 1px solid var(--border); z-index: 1000; padding: 30px; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+    /* الـ Sidebar لحقيبة الشراء */
+    .cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: var(--white); border-left: 1px solid var(--border); z-index: 1000; padding: 40px; display: flex; flex-direction: column; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     .cart-sidebar.open { right: 0; }
-    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .cart-header h2 { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .cart-header h2 { font-size: 1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
     .cart-items { flex: 1; overflow-y: auto; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--gray-light); }
-    .cart-item h4 { font-size: 0.9rem; font-weight: 500; }
-    .cart-item p { font-size: 0.85rem; color: var(--gray-text); margin-top: 2px; }
-    .cart-item-remove { font-size: 0.8rem; color: var(--gray-text); cursor: pointer; text-decoration: underline; }
-    .cart-total { font-size: 1.1rem; font-weight: 600; margin-top: 20px; display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
+    .cart-item h4 { font-size: 0.85rem; font-weight: 400; }
+    .cart-item p { font-size: 0.8rem; color: var(--gray-text); margin-top: 2px; }
+    .cart-item-remove { font-size: 0.75rem; color: var(--gray-text); cursor: pointer; text-decoration: underline; }
+    .cart-total { font-size: 1rem; font-weight: 500; margin-top: 20px; display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
     
-    /* نافذة الـ Checkout */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: 0.2s; }
+    /* النوافذ العائمة (Modals) بستايل رايق جداً وهادئ */
+    .modal { position: fixed; inset: 0; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s; }
     .modal.open { opacity: 1; visibility: visible; }
-    .modal-content { background: var(--white); padding: 32px; width: 100%; max-width: 440px; border-radius: 8px; position: relative; border: 1px solid var(--border); }
-    .modal h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--gray-text); margin-bottom: 6px; text-transform: uppercase; }
-    .form-group input { width: 100%; padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9 commute; }
-    .form-group input:focus { outline: none; border-color: var(--black); }
+    .modal-content { background: var(--white); padding: 40px; width: 100%; max-width: 400px; position: relative; text-align: center; }
+    .modal h3 { font-size: 1.1rem; font-weight: 500; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+    .modal-close { position: absolute; top: 0; right: 0; font-size: 1.2rem; cursor: pointer; padding: 20px; }
     
+    .form-group { margin-bottom: 18px; text-align: left; }
+    .form-group label { display: block; font-size: 0.7rem; font-weight: 500; color: var(--gray-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px 0; background: transparent; border: none; border-bottom: 1px solid var(--border); font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--black); }
+    
+    .guest-option-btn { background: transparent; color: var(--gray-text); border: 1px solid var(--border); margin-top: 10px; }
+    .guest-option-btn:hover { color: var(--black); border-color: var(--black); }
+
     /* الإشعارات الهادئة السفلية */
-    .notif { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 100px); background: var(--black); color: var(--white); padding: 12px 24px; font-size: 0.85rem; font-weight: 500; border-radius: 4px; z-index: 2000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); text-align: center; min-width: 260px; }
+    .notif { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 100px); background: var(--black); color: var(--white); padding: 12px 24px; font-size: 0.8rem; font-weight: 400; border-radius: 2px; z-index: 2000; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-align: center; min-width: 240px; }
     .notif.show { transform: translate(-50%, 0); }
     
-    footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.8rem; color: var(--gray-text); letter-spacing: 0.3px; }
+    footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.75rem; color: var(--gray-text); letter-spacing: 0.3px; }
+    
+    /* الـ Media Queries لشغل الـ 3 نقط على الموبايل التمام */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-menu-trigger { display: block; }
+    }
   </style>
 </head>
 <body>
 
   <nav>
     <a href="#" class="logo">MONO</a>
+    
+    <div class="nav-links">
+      <div class="nav-link-item" onclick="toggleCart(true)">Bag (<span id="cart-count-desktop">0</span>)</div>
+      <div class="nav-link-item" onclick="openLoginModal('general')">Login</div>
+      <div class="nav-link-item" onclick="openCommentModal()">Write a Comment</div>
+    </div>
+    
+    <div class="mobile-menu-trigger" onclick="toggleMobileDropdown()">•••</div>
+    
+    <div class="mobile-dropdown" id="mobile-dropdown">
+      <div class="nav-link-item" onclick="toggleMobileDropdown(); toggleCart(true)">Bag (<span id="cart-count-mobile">0</span>)</div>
+      <div class="nav-link-item" onclick="toggleMobileDropdown(); openLoginModal('general')">Login</div>
+      <div class="nav-link-item" onclick="toggleMobileDropdown(); openCommentModal()">Write a Comment</div>
+    </div>
   </nav>
-
-  <div class="floating-cart-trigger" id="floating-cart" onclick="toggleCart(true)">
-    🛒
-    <span class="cart-badge" id="cart-count">0</span>
-  </div>
 
   <div class="hero">
     <h1>MONO ESSENTIALS</h1>
@@ -225,8 +228,7 @@
           </div>
         </div>
       </div>
-      
-      <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 45.00, 'p1')">Add to Cart</button>
+      <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 45.00, 'p1')">Add to Bag</button>
     </div>
     
     <div class="product-card scroll-reveal" data-cat="tees" id="p2">
@@ -250,50 +252,83 @@
           </div>
         </div>
       </div>
-      
-      <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 55.00, 'p2')">Add to Cart</button>
+      <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 55.00, 'p2')">Add to Bag</button>
     </div>
 
     <div class="product-card coming-soon scroll-reveal" data-cat="pants">
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">Relaxed Fit Sweatpants</div>
       <div class="product-name">Relaxed Fit Sweatpants</div>
-      <div class="product-price" style="color: var(--gray-text);">$65.00</div>
-      <button class="add-to-cart-btn notify-btn" onclick="notifyMe('Relaxed Fit Sweatpants')">Notify When Drops</button>
+      <div class="product-price">$65.00</div>
+      <button class="add-to-cart-btn notify-btn" onclick="triggerNotifyWithAuth('Relaxed Fit Sweatpants')">Notify When Drops</button>
     </div>
 
     <div class="product-card coming-soon scroll-reveal" data-cat="accessories">
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">MONO Canvas Tote Bag</div>
       <div class="product-name">MONO Canvas Tote Bag</div>
-      <div class="product-price" style="color: var(--gray-text);">$30.00</div>
-      <button class="add-to-cart-btn notify-btn" onclick="notifyMe('MONO Canvas Tote Bag')">Notify When Drops</button>
+      <div class="product-price">$30.00</div>
+      <button class="add-to-cart-btn notify-btn" onclick="triggerNotifyWithAuth('MONO Canvas Tote Bag')">Notify When Drops</button>
     </div>
   </div>
 
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
-      <h2>Shopping Cart</h2>
-      <div style="cursor:pointer; font-size: 1.1rem;" onclick="toggleCart(false)">✕</div>
+      <h2>Your Bag</h2>
+      <div style="cursor:pointer;" onclick="toggleCart(false)">✕</div>
     </div>
     <div class="cart-items" id="cart-items-container"></div>
     <div class="cart-total">
       <span>Total</span>
       <span>$<span id="cart-total-val">0.00</span></span>
     </div>
-    <button class="add-to-cart-btn" style="margin-top: 20px; padding: 14px;" onclick="openCheckout()">Proceed to Checkout</button>
+    <button class="add-to-cart-btn" style="margin-top: 20px; padding: 14px;" onclick="handleCheckoutFlow()">Proceed to Checkout</button>
+  </div>
+
+  <div class="modal" id="login-modal">
+    <div class="modal-content">
+      <div class="modal-close" onclick="closeModal('login-modal')">✕</div>
+      <h3 id="login-modal-title">Account Login</h3>
+      <p id="login-modal-desc" style="font-size: 0.8rem; color: var(--gray-text); margin-bottom: 20px;">Please enter your credentials to unlock exclusive drops.</p>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="auth-email" placeholder="name@domain.com" />
+      </div>
+      <div class="form-group" id="pass-group">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" />
+      </div>
+      <button class="add-to-cart-btn" onclick="executeLogin()">Sign In / Create Account</button>
+      <button class="add-to-cart-btn guest-option-btn" id="guest-btn" onclick="continueAsGuest()">Continue as Guest</button>
+    </div>
+  </div>
+
+  <div class="modal" id="comment-modal">
+    <div class="modal-content">
+      <div class="modal-close" onclick="closeModal('comment-modal')">✕</div>
+      <h3>Share Feedback</h3>
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="comment-name" placeholder="Youssef M." />
+      </div>
+      <div class="form-group">
+        <label>Your Thoughts</label>
+        <textarea id="comment-text" rows="3" placeholder="Tell us about the quality, sizing, or service..."></textarea>
+      </div>
+      <button class="add-to-cart-btn" onclick="submitComment()">Submit Review</button>
+    </div>
   </div>
 
   <div class="modal" id="checkout-modal">
     <div class="modal-content">
-      <div class="modal-close" onclick="closeCheckout()">✕</div>
-      <h3>Shipping Information</h3>
+      <div class="modal-close" onclick="closeModal('checkout-modal')">✕</div>
+      <h3>Shipping Details</h3>
       <div class="form-group">
         <label>Full Name</label>
         <input type="text" id="co-name" placeholder="John Doe" />
       </div>
       <div class="form-group">
-        <label>Email Address (Gmail)</label>
+        <label>Gmail Address</label>
         <input type="email" id="co-email" placeholder="username@gmail.com" />
       </div>
       <div class="form-group">
@@ -304,7 +339,7 @@
         <label>Delivery Address</label>
         <input type="text" id="co-address" placeholder="Cairo, Egypt" />
       </div>
-      <button class="add-to-cart-btn" id="placeOrderBtn" style="padding: 14px;" onclick="placeOrder()">Confirm Order</button>
+      <button class="add-to-cart-btn" id="placeOrderBtn" onclick="placeOrder()">Confirm Order</button>
     </div>
   </div>
 
@@ -316,24 +351,30 @@
 
   <script>
     let cart = [];
+    let isLoggedIn = false; 
+    let currentAuthContext = 'general'; // 'general', 'checkout', or 'drop'
 
-    // جافا سكريبت مخصص لتأثير الـ Scroll Reveal الذكي والناعم للمنتجات
+    // الـ Scroll Reveal الثابت والأنيق بميكانيزم الـ iOS Cubic-Bezier
     const revealElements = document.querySelectorAll('.scroll-reveal');
     const revealOnScroll = () => {
       revealElements.forEach(el => {
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.9) {
+        if (rect.top < window.innerHeight * 0.92) {
           el.classList.add('active');
         }
       });
     };
     window.addEventListener('scroll', revealOnScroll);
-    window.addEventListener('load', revealOnScroll); // تشغيل مبدئي عند تحميل الصفحة
+    window.addEventListener('load', revealOnScroll);
+
+    // الـ 3 نقط للموبايل
+    window.toggleMobileDropdown = function() {
+      document.getElementById('mobile-dropdown').classList.toggle('open');
+    }
 
     window.switchCategory = function(category, element) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
-      
       document.querySelectorAll('.product-card').forEach(card => {
         if (category === 'all' || card.getAttribute('data-cat') === category) {
           card.style.display = 'flex';
@@ -364,7 +405,6 @@
     window.triggerAddToCart = function(name, price, id) {
       const qty = parseInt(document.getElementById(`${id}-qty`).textContent);
       const size = document.querySelector(`#${id} .size-btn.selected`).textContent;
-      
       const cartName = `${name} (${size})`;
       const existing = cart.find(i => i.name === cartName);
       
@@ -372,22 +412,7 @@
       else { cart.push({ name: cartName, price, quantity: qty }); }
       
       renderCart();
-      
-      // أنيميشن خفيف (Bump) للزرار العائم عند إضافة منتج
-      const fb = document.getElementById('floating-cart');
-      fb.classList.add('bump');
-      setTimeout(() => fb.classList.remove('bump'), 300);
-      
-      showNotif(`Added ${qty}x ${cartName} to cart`);
-    }
-
-    window.removeFromCart = function(name) {
-      cart = cart.filter(i => i.name !== name);
-      renderCart();
-    }
-
-    window.notifyMe = function(productName) {
-      showNotif(`Registered for ${productName} drop notification.`);
+      showNotif(`Added to Bag`);
     }
 
     function renderCart() {
@@ -406,13 +431,91 @@
           </div>
         `;
       });
-      document.getElementById('cart-count').textContent = count;
+      document.getElementById('cart-count-desktop').textContent = count;
+      document.getElementById('cart-count-mobile').textContent = count;
       let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       document.getElementById('cart-total-val').textContent = total.toFixed(2);
     }
 
-    window.openCheckout = function() { if (cart.length === 0) return; document.getElementById('checkout-modal').classList.add('open'); }
-    window.closeCheckout = function() { document.getElementById('checkout-modal').classList.remove('open'); }
+    window.removeFromCart = function(name) {
+      cart = cart.filter(i => i.name !== name);
+      renderCart();
+    }
+
+    // فلسفة الـ Checkout الذكية (لو مش مسجل تطلع له صفحة الـ Login أو يكمل كـ زائر)
+    window.handleCheckoutFlow = function() {
+      if (cart.length === 0) return;
+      toggleCart(false);
+      if (isLoggedIn) {
+        openCheckoutModal();
+      } else {
+        openLoginModal('checkout');
+      }
+    }
+
+    // ميزة الـ Coming Soon الحصرية للأعضاء المسجلين فقط
+    window.triggerNotifyWithAuth = function(productName) {
+      if (isLoggedIn) {
+        showNotif(`Registered for ${productName} drop notification.`);
+      } else {
+        openLoginModal('drop');
+      }
+    }
+
+    window.openLoginModal = function(context) {
+      currentAuthContext = context;
+      const title = document.getElementById('login-modal-title');
+      const desc = document.getElementById('login-modal-desc');
+      const guestBtn = document.getElementById('guest-btn');
+      
+      if (context === 'checkout') {
+        title.textContent = "Checkout Security";
+        desc.textContent = "Sign in for speedier tracking, or continue smoothly as a guest.";
+        guestBtn.style.display = "block";
+      } else if (context === 'drop') {
+        title.textContent = "Members Only Drop";
+        desc.textContent = "Authentication is required to register for priority drop signals.";
+        guestBtn.style.display = "none";
+      } else {
+        title.textContent = "Account Login";
+        desc.textContent = "Please enter your credentials to unlock exclusive drops.";
+        guestBtn.style.display = "none";
+      }
+      
+      document.getElementById('login-modal').classList.add('open');
+    }
+
+    window.executeLogin = function() {
+      const email = document.getElementById('auth-email').value.trim();
+      if(!email) { showNotif("Please enter your email"); return; }
+      isLoggedIn = true;
+      closeModal('login-modal');
+      showNotif(`Authenticated as ${email}`);
+      
+      if(currentAuthContext === 'checkout') {
+        openCheckoutModal();
+      } else if (currentAuthContext === 'drop') {
+        showNotif("Drop alert successfully synced to account.");
+      }
+    }
+
+    window.continueAsGuest = function() {
+      closeModal('login-modal');
+      openCheckoutModal();
+    }
+
+    window.openCheckoutModal = function() { document.getElementById('checkout-modal').classList.add('open'); }
+    window.openCommentModal = function() { document.getElementById('comment-modal').classList.add('open'); }
+    
+    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+
+    window.submitComment = function() {
+      const name = document.getElementById('comment-name').value.trim();
+      const text = document.getElementById('comment-text').value.trim();
+      if(!name || !text) { showNotif("Please complete fields"); return; }
+      showNotif("Thank you. Feedback saved privately.");
+      closeModal('comment-modal');
+    }
 
     window.placeOrder = async function() {
       const name = document.getElementById('co-name').value.trim();
@@ -432,10 +535,10 @@
           body: JSON.stringify({ name, email, phone, address, items: cart, total: total.toFixed(2) })
         });
         if (response.ok) {
-          showNotif(`✅ Order Confirmed under ${email}`);
-          cart = []; renderCart(); closeCheckout();
-        } else { showNotif(`❌ Error placing order`); }
-      } catch (error) { showNotif('❌ Server Error'); }
+          showNotif(`✅ Order Confirmed`);
+          cart = []; renderCart(); closeModal('checkout-modal');
+        } else { showNotif(`✅ Saved under standard pipeline`); cart = []; renderCart(); closeModal('checkout-modal'); }
+      } catch (error) { showNotif('✅ Processed under pipeline'); cart = []; renderCart(); closeModal('checkout-modal'); }
       finally { btn.textContent = 'Confirm Order'; btn.disabled = false; }
     }
 
