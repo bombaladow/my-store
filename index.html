@@ -18,6 +18,8 @@
       --border: #e5e5e7;
     }
     
+    html { scroll-behavior: smooth; }
+    
     body { 
       background: var(--white); 
       color: var(--black); 
@@ -25,45 +27,46 @@
       -webkit-font-smoothing: antialiased;
     }
     
-    /* الـ Navbar الرايق الأبيض بتاع أول ملف */
+    /* أنيميشن السكرول الناعم للمنتجات */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(4px);
+      transition: all 0.8s cubic-bezier(0.215, 0.610, 0.355, 1);
+    }
+    .scroll-reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    
+    /* الـ Navbar الرايق الهادي جداً */
     nav { 
       position: fixed; top: 0; width: 100%; 
       display: flex; justify-content: space-between; align-items: center; 
       padding: 24px 40px; z-index: 100; 
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
     }
     nav a.logo { 
       color: var(--black); text-decoration: none; 
       font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px; 
     }
     
-    .cart-nav-btn { 
-      color: var(--black); font-size: 0.9rem; font-weight: 500; 
-      cursor: pointer; position: relative; display: flex; align-items: center; gap: 6px;
-    }
-    .cart-badge { 
-      background: var(--black); color: var(--white); 
-      font-size: 0.7rem; width: 18px; height: 18px; 
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-weight: 600;
-    }
-    
-    /* الـ Hero Section المينيمال الهادي */
+    /* الـ Hero Section الراقي */
     .hero { 
-      min-height: 50vh; display: flex; flex-direction: column; justify-content: center; 
+      min-height: 65vh; display: flex; flex-direction: column; justify-content: center; 
       align-items: center; text-align: center; padding: 140px 20px 60px;
       background: var(--white);
     }
     .hero h1 { 
       font-size: 3.5rem; font-weight: 600; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px;
     }
-    .hero p { font-size: 1.1rem; color: var(--gray-text); max-width: 500px; font-weight: 400; }
+    .hero p { font-size: 1.05rem; color: var(--gray-text); max-width: 460px; font-weight: 400; line-height: 1.5; }
     
-    .section-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; text-align: center; margin: 40px 0 24px; }
+    .section-title { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.3px; text-align: center; margin: 40px 0 24px; text-transform: uppercase; }
     
-    /* أزرار الكاتجري المينيمال النظيفة */
+    /* أزرار الكاتجري المينيمال */
     .category-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; }
     .tab-btn { 
       background: transparent; color: var(--gray-text); border: 1px solid transparent; padding: 8px 16px; 
@@ -71,19 +74,24 @@
     }
     .tab-btn.active { color: var(--black); font-weight: 600; border-color: var(--border); background: var(--gray-light); }
 
-    /* شبكة المنتجات النظيفة جداً من أول ملف */
-    .products-grid { max-width: 1100px; margin: 0 auto 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 0 20px; }
+    /* شبكة المنتجات الاحترافية */
+    .products-grid { max-width: 1100px; margin: 0 auto 100px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 0 20px; }
     .product-card { background: var(--white); display: flex; flex-direction: column; position: relative; }
     
     .product-img { 
       width: 100%; aspect-ratio: 1/1; background: var(--gray-light); margin-bottom: 16px; 
       display: flex; align-items: center; justify-content: center; color: var(--gray-text); 
       font-size: 0.85rem; font-weight: 500; border-radius: 8px; border: 1px solid var(--border);
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     }
+    .product-card:hover .product-img {
+      transform: scale(1.02);
+    }
+    
     .product-name { font-size: 1rem; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.2px; }
     .product-price { font-size: 0.95rem; color: var(--black); font-weight: 500; margin-bottom: 16px; }
     
-    /* المقاسات والكمية بستايل أبل المينيمال */
+    /* تفاصيل المقاس والكمية */
     .product-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
     .size-selector { display: flex; gap: 6px; }
     .size-btn { background: var(--white); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.8rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
@@ -102,60 +110,84 @@
     }
     .add-to-cart-btn:hover { background: var(--gray-dark); }
     
-    /* كارت الـ Coming Soon المكتوم الشيك */
-    .product-card.coming-soon { opacity: 0.7; }
+    /* كروت الـ Coming Soon */
+    .product-card.coming-soon { opacity: 0.65; }
     .coming-soon-badge { 
-      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.06); 
+      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.05); 
       color: var(--black); font-size: 0.7rem; font-weight: 600; padding: 4px 10px; 
       border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5;
     }
     .notify-btn { background: transparent; color: var(--black); border: 1px solid var(--black); }
     .notify-btn:hover { background: var(--black); color: var(--white); }
     
-    /* سيكشن التعليقات الهادئ والنظيف */
-    .reviews-section { max-width: 600px; margin: 60px auto; padding: 0 20px; border-top: 1px solid var(--border); padding-top: 40px; }
-    .reviews-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.3px; text-align: center; }
-    .review-card { padding: 16px 0; border-bottom: 1px solid var(--gray-light); }
-    .review-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; font-weight: 500; }
-    .review-stars { color: var(--black); font-size: 0.75rem; letter-spacing: 1px; }
-    .review-text { font-size: 0.85rem; color: var(--gray-text); line-height: 1.6; }
+    /* 🛒 الـ Floating Cart Button المتألق والذكي سفلياً */
+    .floating-cart-trigger {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--black); color: var(--white);
+      width: 60px; height: 60px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      cursor: pointer; z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .floating-cart-trigger:hover {
+      transform: scale(1.08);
+    }
+    .floating-cart-trigger .cart-badge {
+      position: absolute; top: -2px; right: -2px;
+      background: var(--white); color: var(--black);
+      font-size: 0.75rem; width: 22px; height: 22px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; border: 2px solid var(--black);
+    }
+    @keyframes cartPop {
+      0% { transform: scale(1.08); }
+      50% { transform: scale(1.25); }
+      100% { transform: scale(1.08); }
+    }
+    .floating-cart-trigger.bump {
+      animation: cartPop 0.3s ease-out;
+    }
 
-    /* الكارت اليمين النظيفة */
-    .cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: var(--white); border-left: 1px solid var(--border); z-index: 1000; padding: 30px; display: flex; flex-direction: column; transition: right 0.4s ease; }
+    /* الكارت والـ Sidebar */
+    .cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: var(--white); border-left: 1px solid var(--border); z-index: 1000; padding: 30px; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
     .cart-sidebar.open { right: 0; }
     .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .cart-header h2 { font-size: 1.25rem; font-weight: 600; }
+    .cart-header h2 { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .cart-items { flex: 1; overflow-y: auto; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light); }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--gray-light); }
     .cart-item h4 { font-size: 0.9rem; font-weight: 500; }
-    .cart-item p { font-size: 0.85rem; color: var(--gray-text); }
+    .cart-item p { font-size: 0.85rem; color: var(--gray-text); margin-top: 2px; }
+    .cart-item-remove { font-size: 0.8rem; color: var(--gray-text); cursor: pointer; text-decoration: underline; }
     .cart-total { font-size: 1.1rem; font-weight: 600; margin-top: 20px; display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
     
-    /* نافذة الـ Checkout النظيفة البيضاء */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: 0.2s; }
+    /* نافذة الـ Checkout */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: 0.2s; }
     .modal.open { opacity: 1; visibility: visible; }
-    .modal-content { background: var(--white); padding: 32px; width: 100%; max-width: 440px; border-radius: 12px; position: relative; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-    .modal h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.3px; }
+    .modal-content { background: var(--white); padding: 32px; width: 100%; max-width: 440px; border-radius: 8px; position: relative; border: 1px solid var(--border); }
+    .modal h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--gray-text); margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--gray-text); margin-bottom: 6px; text-transform: uppercase; }
+    .form-group input { width: 100%; padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9 commute; }
     .form-group input:focus { outline: none; border-color: var(--black); }
     
     /* الإشعارات الهادئة السفلية */
-    .notif { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 100px); background: var(--black); color: var(--white); padding: 12px 24px; font-size: 0.85rem; font-weight: 500; border-radius: 6px; z-index: 2000; transition: transform 0.3s ease; text-align: center; min-width: 250px; }
+    .notif { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 100px); background: var(--black); color: var(--white); padding: 12px 24px; font-size: 0.85rem; font-weight: 500; border-radius: 4px; z-index: 2000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); text-align: center; min-width: 260px; }
     .notif.show { transform: translate(-50%, 0); }
     
-    footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.8rem; color: var(--gray-text); }
+    footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.8rem; color: var(--gray-text); letter-spacing: 0.3px; }
   </style>
 </head>
 <body>
 
   <nav>
     <a href="#" class="logo">MONO</a>
-    <div class="cart-nav-btn" onclick="toggleCart(true)">
-      Cart <span class="cart-badge" id="cart-count">0</span>
-    </div>
   </nav>
+
+  <div class="floating-cart-trigger" id="floating-cart" onclick="toggleCart(true)">
+    🛒
+    <span class="cart-badge" id="cart-count">0</span>
+  </div>
 
   <div class="hero">
     <h1>MONO ESSENTIALS</h1>
@@ -172,7 +204,7 @@
   </div>
 
   <div class="products-grid" id="products-wrapper">
-    <div class="product-card" data-cat="tees">
+    <div class="product-card scroll-reveal" data-cat="tees" id="p1">
       <div class="product-img">Basic Heavyweight Tee</div>
       <div class="product-name">Basic Heavyweight Tee</div>
       <div class="product-price">$45.00</div>
@@ -197,7 +229,7 @@
       <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 45.00, 'p1')">Add to Cart</button>
     </div>
     
-    <div class="product-card" data-cat="tees">
+    <div class="product-card scroll-reveal" data-cat="tees" id="p2">
       <div class="product-img">Oversized Boxy Shirt</div>
       <div class="product-name">Oversized Boxy Shirt</div>
       <div class="product-price">$55.00</div>
@@ -222,7 +254,7 @@
       <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 55.00, 'p2')">Add to Cart</button>
     </div>
 
-    <div class="product-card coming-soon" data-cat="pants">
+    <div class="product-card coming-soon scroll-reveal" data-cat="pants">
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">Relaxed Fit Sweatpants</div>
       <div class="product-name">Relaxed Fit Sweatpants</div>
@@ -230,30 +262,12 @@
       <button class="add-to-cart-btn notify-btn" onclick="notifyMe('Relaxed Fit Sweatpants')">Notify When Drops</button>
     </div>
 
-    <div class="product-card coming-soon" data-cat="accessories">
+    <div class="product-card coming-soon scroll-reveal" data-cat="accessories">
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">MONO Canvas Tote Bag</div>
       <div class="product-name">MONO Canvas Tote Bag</div>
       <div class="product-price" style="color: var(--gray-text);">$30.00</div>
       <button class="add-to-cart-btn notify-btn" onclick="notifyMe('MONO Canvas Tote Bag')">Notify When Drops</button>
-    </div>
-  </div>
-
-  <div class="reviews-section">
-    <div class="reviews-title">Customer Feedback</div>
-    <div class="review-card">
-      <div class="review-header">
-        <span>Youssef M.</span>
-        <span class="review-stars">★★★★★</span>
-      </div>
-      <div class="review-text">التلبيس والخامة جبارة حقيقي! التيشرت تقيل جداً ومبيكشش بعد الغسيل. مستني البناطيل تنزل.</div>
-    </div>
-    <div class="review-card">
-      <div class="review-header">
-        <span>Kareem A.</span>
-        <span class="review-stars">★★★★★</span>
-      </div>
-      <div class="review-text">The heavy cotton fabric is perfect. Clean minimal design. Highly recommended for a premium streetwear look.</div>
     </div>
   </div>
 
@@ -303,6 +317,19 @@
   <script>
     let cart = [];
 
+    // جافا سكريبت مخصص لتأثير الـ Scroll Reveal الذكي والناعم للمنتجات
+    const revealElements = document.querySelectorAll('.scroll-reveal');
+    const revealOnScroll = () => {
+      revealElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.9) {
+          el.classList.add('active');
+        }
+      });
+    };
+    window.addEventListener('scroll', revealOnScroll);
+    window.addEventListener('load', revealOnScroll); // تشغيل مبدئي عند تحميل الصفحة
+
     window.switchCategory = function(category, element) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
@@ -310,8 +337,10 @@
       document.querySelectorAll('.product-card').forEach(card => {
         if (category === 'all' || card.getAttribute('data-cat') === category) {
           card.style.display = 'flex';
+          setTimeout(() => card.classList.add('active'), 50);
         } else {
           card.style.display = 'none';
+          card.classList.remove('active');
         }
       });
     }
@@ -343,8 +372,18 @@
       else { cart.push({ name: cartName, price, quantity: qty }); }
       
       renderCart();
-      toggleCart(true);
+      
+      // أنيميشن خفيف (Bump) للزرار العائم عند إضافة منتج
+      const fb = document.getElementById('floating-cart');
+      fb.classList.add('bump');
+      setTimeout(() => fb.classList.remove('bump'), 300);
+      
       showNotif(`Added ${qty}x ${cartName} to cart`);
+    }
+
+    window.removeFromCart = function(name) {
+      cart = cart.filter(i => i.name !== name);
+      renderCart();
     }
 
     window.notifyMe = function(productName) {
@@ -363,6 +402,7 @@
               <h4>${item.name}</h4>
               <p>$${item.price.toFixed(2)} x ${item.quantity}</p>
             </div>
+            <div class="cart-item-remove" onclick="removeFromCart('${item.name}')">Remove</div>
           </div>
         `;
       });
