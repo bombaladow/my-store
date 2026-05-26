@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MONO - Premium Streetwear</title>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,7 +38,7 @@
       transform: translateY(0);
     }
     
-    /* الـ Navbar الجديد النظيف تماماً من غير خطوط ميزان مبهوقة */
+    /* الـ Navbar النظيف تماماً */
     nav { 
       position: fixed; top: 0; width: 100%; 
       display: flex; justify-content: space-between; align-items: center; 
@@ -144,7 +143,7 @@
     .cart-item-remove { font-size: 0.75rem; color: var(--gray-text); cursor: pointer; text-decoration: underline; }
     .cart-total { font-size: 1rem; font-weight: 500; margin-top: 20px; display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
     
-    /* النوافذ العائمة (Modals) بستايل رايق جداً وهادئ */
+    /* النوافذ العائمة (Modals) */
     .modal { position: fixed; inset: 0; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s; }
     .modal.open { opacity: 1; visibility: visible; }
     .modal-content { background: var(--white); padding: 40px; width: 100%; max-width: 400px; position: relative; text-align: center; }
@@ -165,7 +164,6 @@
     
     footer { background: var(--white); border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; font-size: 0.75rem; color: var(--gray-text); letter-spacing: 0.3px; }
     
-    /* الـ Media Queries لشغل الـ 3 نقط على الموبايل التمام */
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .mobile-menu-trigger { display: block; }
@@ -210,7 +208,7 @@
     <div class="product-card scroll-reveal" data-cat="tees" id="p1">
       <div class="product-img">Basic Heavyweight Tee</div>
       <div class="product-name">Basic Heavyweight Tee</div>
-      <div class="product-price">$45.00</div>
+      <div class="product-price">390 LE</div>
       
       <div class="product-controls">
         <div class="size-selector">
@@ -228,13 +226,13 @@
           </div>
         </div>
       </div>
-      <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 45.00, 'p1')">Add to Bag</button>
+      <button class="add-to-cart-btn" onclick="triggerAddToCart('Basic Heavyweight Tee', 390, 'p1')">Add to Bag</button>
     </div>
     
     <div class="product-card scroll-reveal" data-cat="tees" id="p2">
       <div class="product-img">Oversized Boxy Shirt</div>
       <div class="product-name">Oversized Boxy Shirt</div>
-      <div class="product-price">$55.00</div>
+      <div class="product-price">450 LE</div>
       
       <div class="product-controls">
         <div class="size-selector">
@@ -252,14 +250,14 @@
           </div>
         </div>
       </div>
-      <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 55.00, 'p2')">Add to Bag</button>
+      <button class="add-to-cart-btn" onclick="triggerAddToCart('Oversized Boxy Shirt', 450, 'p2')">Add to Bag</button>
     </div>
 
     <div class="product-card coming-soon scroll-reveal" data-cat="pants">
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">Relaxed Fit Sweatpants</div>
       <div class="product-name">Relaxed Fit Sweatpants</div>
-      <div class="product-price">$65.00</div>
+      <div class="product-price">550 LE</div>
       <button class="add-to-cart-btn notify-btn" onclick="triggerNotifyWithAuth('Relaxed Fit Sweatpants')">Notify When Drops</button>
     </div>
 
@@ -267,7 +265,7 @@
       <span class="coming-soon-badge">Coming Soon</span>
       <div class="product-img">MONO Canvas Tote Bag</div>
       <div class="product-name">MONO Canvas Tote Bag</div>
-      <div class="product-price">$30.00</div>
+      <div class="product-price">200 LE</div>
       <button class="add-to-cart-btn notify-btn" onclick="triggerNotifyWithAuth('MONO Canvas Tote Bag')">Notify When Drops</button>
     </div>
   </div>
@@ -280,7 +278,7 @@
     <div class="cart-items" id="cart-items-container"></div>
     <div class="cart-total">
       <span>Total</span>
-      <span>$<span id="cart-total-val">0.00</span></span>
+      <span><span id="cart-total-val">0</span> LE</span>
     </div>
     <button class="add-to-cart-btn" style="margin-top: 20px; padding: 14px;" onclick="handleCheckoutFlow()">Proceed to Checkout</button>
   </div>
@@ -294,9 +292,9 @@
         <label>Email Address</label>
         <input type="email" id="auth-email" placeholder="name@domain.com" />
       </div>
-      <div class="form-group" id="pass-group">
+      <div class="form-group">
         <label>Password</label>
-        <input type="password" id="auth-password" placeholder="••••••••" />
+        <input type="password" placeholder="••••••••" />
       </div>
       <button class="add-to-cart-btn" onclick="executeLogin()">Sign In / Create Account</button>
       <button class="add-to-cart-btn guest-option-btn" id="guest-btn" onclick="continueAsGuest()">Continue as Guest</button>
@@ -313,7 +311,7 @@
       </div>
       <div class="form-group">
         <label>Your Thoughts</label>
-        <textarea id="comment-text" rows="3" placeholder="Tell us about the quality, sizing, or service..."></textarea>
+        <textarea id="comment-text" rows="3" placeholder="Tell us about the quality..."></textarea>
       </div>
       <button class="add-to-cart-btn" onclick="submitComment()">Submit Review</button>
     </div>
@@ -325,7 +323,7 @@
       <h3>Shipping Details</h3>
       <div class="form-group">
         <label>Full Name</label>
-        <input type="text" id="co-name" placeholder="John Doe" />
+        <input type="text" id="co-name" placeholder="Mohamed Ali" />
       </div>
       <div class="form-group">
         <label>Gmail Address</label>
@@ -333,7 +331,7 @@
       </div>
       <div class="form-group">
         <label>Phone Number</label>
-        <input type="tel" id="co-phone" placeholder="0123456789" />
+        <input type="tel" id="co-phone" placeholder="01xxxxxxxxx" />
       </div>
       <div class="form-group">
         <label>Delivery Address</label>
@@ -350,27 +348,24 @@
   </footer>
 
   <script>
+    // ⚠️ حط لينك جوجل شيت بتاعك هنا بين العلامتين '' مكان الجملة اللي تحت دي:
+    const SHEET_API_URL = 'YOUR_WEB_APP_URL_HERE';
+
     let cart = [];
     let isLoggedIn = false; 
-    let currentAuthContext = 'general'; // 'general', 'checkout', or 'drop'
+    let currentAuthContext = 'general';
 
-    // الـ Scroll Reveal الثابت والأنيق بميكانيزم الـ iOS Cubic-Bezier
     const revealElements = document.querySelectorAll('.scroll-reveal');
     const revealOnScroll = () => {
       revealElements.forEach(el => {
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.92) {
-          el.classList.add('active');
-        }
+        if (rect.top < window.innerHeight * 0.92) { el.classList.add('active'); }
       });
     };
     window.addEventListener('scroll', revealOnScroll);
     window.addEventListener('load', revealOnScroll);
 
-    // الـ 3 نقط للموبايل
-    window.toggleMobileDropdown = function() {
-      document.getElementById('mobile-dropdown').classList.toggle('open');
-    }
+    window.toggleMobileDropdown = function() { document.getElementById('mobile-dropdown').classList.toggle('open'); }
 
     window.switchCategory = function(category, element) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -380,8 +375,7 @@
           card.style.display = 'flex';
           setTimeout(() => card.classList.add('active'), 50);
         } else {
-          card.style.display = 'none';
-          card.classList.remove('active');
+          card.style.display = 'none'; card.classList.remove('active');
         }
       });
     }
@@ -395,8 +389,7 @@
     window.updateQty = function(id, delta) {
       const el = document.getElementById(`${id}-qty`);
       let current = parseInt(el.textContent);
-      current += delta;
-      if (current < 1) current = 1;
+      current += delta; if (current < 1) current = 1;
       el.textContent = current;
     }
 
@@ -407,116 +400,61 @@
       const size = document.querySelector(`#${id} .size-btn.selected`).textContent;
       const cartName = `${name} (${size})`;
       const existing = cart.find(i => i.name === cartName);
-      
-      if (existing) { existing.quantity += qty; } 
-      else { cart.push({ name: cartName, price, quantity: qty }); }
-      
-      renderCart();
-      showNotif(`Added to Bag`);
+      if (existing) { existing.quantity += qty; } else { cart.push({ name: cartName, price, quantity: qty }); }
+      renderCart(); showNotif(`Added to Bag`);
     }
 
     function renderCart() {
       const container = document.getElementById('cart-items-container');
-      container.innerHTML = '';
-      let count = 0;
+      container.innerHTML = ''; let count = 0;
       cart.forEach(item => {
         count += item.quantity;
         container.innerHTML += `
           <div class="cart-item">
             <div>
               <h4>${item.name}</h4>
-              <p>$${item.price.toFixed(2)} x ${item.quantity}</p>
+              <p>${item.price} LE x ${item.quantity}</p>
             </div>
             <div class="cart-item-remove" onclick="removeFromCart('${item.name}')">Remove</div>
-          </div>
-        `;
+          </div>`;
       });
       document.getElementById('cart-count-desktop').textContent = count;
       document.getElementById('cart-count-mobile').textContent = count;
       let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      document.getElementById('cart-total-val').textContent = total.toFixed(2);
+      document.getElementById('cart-total-val').textContent = total;
     }
 
-    window.removeFromCart = function(name) {
-      cart = cart.filter(i => i.name !== name);
-      renderCart();
-    }
-
-    // فلسفة الـ Checkout الذكية (لو مش مسجل تطلع له صفحة الـ Login أو يكمل كـ زائر)
-    window.handleCheckoutFlow = function() {
-      if (cart.length === 0) return;
-      toggleCart(false);
-      if (isLoggedIn) {
-        openCheckoutModal();
-      } else {
-        openLoginModal('checkout');
-      }
-    }
-
-    // ميزة الـ Coming Soon الحصرية للأعضاء المسجلين فقط
-    window.triggerNotifyWithAuth = function(productName) {
-      if (isLoggedIn) {
-        showNotif(`Registered for ${productName} drop notification.`);
-      } else {
-        openLoginModal('drop');
-      }
-    }
+    window.removeFromCart = function(name) { cart = cart.filter(i => i.name !== name); renderCart(); }
+    window.handleCheckoutFlow = function() { if (cart.length === 0) return; toggleCart(false); if (isLoggedIn) { openCheckoutModal(); } else { openLoginModal('checkout'); } }
+    window.triggerNotifyWithAuth = function(productName) { if (isLoggedIn) { showNotif(`Registered for ${productName} drop.`); } else { openLoginModal('drop'); } }
 
     window.openLoginModal = function(context) {
       currentAuthContext = context;
       const title = document.getElementById('login-modal-title');
       const desc = document.getElementById('login-modal-desc');
       const guestBtn = document.getElementById('guest-btn');
-      
       if (context === 'checkout') {
-        title.textContent = "Checkout Security";
-        desc.textContent = "Sign in for speedier tracking, or continue smoothly as a guest.";
-        guestBtn.style.display = "block";
-      } else if (context === 'drop') {
-        title.textContent = "Members Only Drop";
-        desc.textContent = "Authentication is required to register for priority drop signals.";
-        guestBtn.style.display = "none";
+        title.textContent = "Checkout Security"; desc.textContent = "Sign in for speedier tracking, or continue smoothly as a guest."; guestBtn.style.display = "block";
       } else {
-        title.textContent = "Account Login";
-        desc.textContent = "Please enter your credentials to unlock exclusive drops.";
-        guestBtn.style.display = "none";
+        title.textContent = "Account Login"; desc.textContent = "Authentication is required to unlock member privileges."; guestBtn.style.display = "none";
       }
-      
       document.getElementById('login-modal').classList.add('open');
     }
 
     window.executeLogin = function() {
       const email = document.getElementById('auth-email').value.trim();
       if(!email) { showNotif("Please enter your email"); return; }
-      isLoggedIn = true;
-      closeModal('login-modal');
-      showNotif(`Authenticated as ${email}`);
-      
-      if(currentAuthContext === 'checkout') {
-        openCheckoutModal();
-      } else if (currentAuthContext === 'drop') {
-        showNotif("Drop alert successfully synced to account.");
-      }
+      isLoggedIn = true; closeModal('login-modal'); showNotif(`Authenticated as ${email}`);
+      if(currentAuthContext === 'checkout') openCheckoutModal();
     }
 
-    window.continueAsGuest = function() {
-      closeModal('login-modal');
-      openCheckoutModal();
-    }
-
+    window.continueAsGuest = function() { closeModal('login-modal'); openCheckoutModal(); }
     window.openCheckoutModal = function() { document.getElementById('checkout-modal').classList.add('open'); }
     window.openCommentModal = function() { document.getElementById('comment-modal').classList.add('open'); }
-    
     window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+    window.submitComment = function() { showNotif("Thank you. Feedback saved privately."); closeModal('comment-modal'); }
 
-    window.submitComment = function() {
-      const name = document.getElementById('comment-name').value.trim();
-      const text = document.getElementById('comment-text').value.trim();
-      if(!name || !text) { showNotif("Please complete fields"); return; }
-      showNotif("Thank you. Feedback saved privately.");
-      closeModal('comment-modal');
-    }
-
+    // إرسال الأوردر الحقيقي لجوجل شيت أوتوماتيكياً
     window.placeOrder = async function() {
       const name = document.getElementById('co-name').value.trim();
       const email = document.getElementById('co-email').value.trim();
@@ -529,17 +467,20 @@
       let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
       try {
-        const response = await fetch('/api/order', {
+        const response = await fetch(SHEET_API_URL, {
           method: 'POST',
+          mode: 'no-cors', // لتفادي مشاكل الحماية بين المواقع
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, address, items: cart, total: total.toFixed(2) })
+          body: JSON.stringify({ name, email, phone, address, items: cart, total: total })
         });
-        if (response.ok) {
-          showNotif(`✅ Order Confirmed`);
-          cart = []; renderCart(); closeModal('checkout-modal');
-        } else { showNotif(`✅ Saved under standard pipeline`); cart = []; renderCart(); closeModal('checkout-modal'); }
-      } catch (error) { showNotif('✅ Processed under pipeline'); cart = []; renderCart(); closeModal('checkout-modal'); }
-      finally { btn.textContent = 'Confirm Order'; btn.disabled = false; }
+        
+        showNotif(`✅ Order Confirmed!`);
+        cart = []; renderCart(); closeModal('checkout-modal');
+      } catch (error) { 
+        showNotif('❌ Connection Error'); 
+      } finally { 
+        btn.textContent = 'Confirm Order'; btn.disabled = false; 
+      }
     }
 
     function showNotif(msg) { const n = document.getElementById('notif'); n.textContent = msg; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 3000); }
