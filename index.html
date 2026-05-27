@@ -407,8 +407,18 @@
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
 
-  <script>
-    // ── SUPABASE ──
+ <script>
+    // ── 1. LOADER (تم نقله للأعلى ليعمل فوراً وبشكل مضمون) ──
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if (loader) {
+          loader.classList.add('hidden');
+        }
+      }, 1200);
+    });
+
+    // ── 2. SUPABASE ──
     const supabase = window.supabase.createClient(
       'https://zxvzpwdueqbgwetylmng.supabase.co',
       'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV'
@@ -429,7 +439,9 @@
     });
     function updateAuthUI() {
       const btn = document.getElementById('authBtn');
-      btn.textContent = currentUser ? (currentUser.user_metadata?.name?.split(' ')[0] || 'Account') : 'Sign In';
+      if(btn) {
+        btn.textContent = currentUser ? (currentUser.user_metadata?.name?.split(' ')[0] || 'Account') : 'Sign In';
+      }
     }
     function handleAuth() {
       if (currentUser) { supabase.auth.signOut(); showNotif('Signed out'); }
@@ -441,7 +453,7 @@
     }
     function continueAsGuest() { closeAuthModal(); openCheckout(); }
 
-    // ── PRODUCTS ──
+    // ── 3. PRODUCTS ──
     const products = [
       { id:1, name:'Classic White Tee', sub:'Relaxed Fit', price:45, img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', badge:'Bestseller' },
       { id:2, name:'Oversized Black Tee', sub:'Boxy Fit', price:48, img:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80', badge:null },
@@ -452,76 +464,71 @@
     ];
 
     const grid = document.getElementById('productsGrid');
-    products.forEach(p => {
-      grid.innerHTML += `
-        <div class="product-card reveal">
-          <div class="product-img-wrap">
-            <img src="${p.img}" alt="${p.name}" loading="lazy"/>
-            <div class="product-overlay"><button class="quick-add" onclick="openModal(${p.id})">Quick Add</button></div>
-          </div>
-          ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-          <div class="product-info">
-            <div><div class="product-name">${p.name}</div><div class="product-sub">${p.sub}</div></div>
-            <div class="product-price">$${p.price}</div>
-          </div>
-        </div>`;
-    });
-
-    // ── LOADER ──
-    document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    const loader = document.getElementById('loader');
-    if (loader) {
-      loader.classList.add('hidden');
+    if (grid) {
+      products.forEach(p => {
+        grid.innerHTML += `
+          <div class="product-card reveal">
+            <div class="product-img-wrap">
+              <img src="${p.img}" alt="${p.name}" loading="lazy"/>
+              <div class="product-overlay"><button class="quick-add" onclick="openModal(${p.id})">Quick Add</button></div>
+            </div>
+            ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+            <div class="product-info">
+              <div><div class="product-name">${p.name}</div><div class="product-sub">${p.sub}</div></div>
+              <div class="product-price">$${p.price}</div>
+            </div>
+          </div>`;
+      });
     }
-  }, 1200);
-});
 
-    // ── CURSOR ──
+    // ── 4. CURSOR ──
     const cursor = document.getElementById('cursor');
     const ring = document.getElementById('cursorRing');
     document.addEventListener('mousemove', e => {
-      cursor.style.transform = `translate(${e.clientX-4}px,${e.clientY-4}px)`;
-      ring.style.transform = `translate(${e.clientX-20}px,${e.clientY-20}px)`;
+      if(cursor) cursor.style.transform = `translate(${e.clientX-5}px,${e.clientY-5}px)`;
+      if(ring) ring.style.transform = `translate(${e.clientX-18}px,${e.clientY-18}px)`;
     });
 
-    // ── SCROLL ──
+    // ── 5. SCROLL ──
     let lastScroll = 0;
     const siteHeader = document.getElementById('siteHeader');
     window.addEventListener('scroll', () => {
       const cur = window.scrollY;
-      siteHeader.style.transform = (cur > lastScroll && cur > 100) ? 'translateY(-100%)' : 'translateY(0)';
+      if(siteHeader) siteHeader.style.transform = (cur > lastScroll && cur > 100) ? 'translateY(-100%)' : 'translateY(0)';
       lastScroll = cur;
-      document.getElementById('backToTop').classList.toggle('show', cur > 400);
-      if (document.getElementById('mainNav').classList.contains('open') && cur > 50) closeMenu();
+      const btt = document.getElementById('backToTop');
+      if(btt) btt.classList.toggle('show', cur > 400);
+      if (document.getElementById('mainNav')?.classList.contains('open') && cur > 50) closeMenu();
     });
 
-    // ── REVEAL ──
+    // ── 6. REVEAL ──
     const observer = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.05 });
+    }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // ── MENU ──
+    // ── 7. MENU ──
     function toggleMenu() {
-      const isOpen = document.getElementById('mainNav').classList.contains('open');
-      document.getElementById('hamburger').classList.toggle('open');
-      document.getElementById('mainNav').classList.toggle('open');
+      const nav = document.getElementById('mainNav');
+      if(!nav) return;
+      const isOpen = nav.classList.contains('open');
+      document.getElementById('hamburger')?.classList.toggle('open');
+      nav.classList.toggle('open');
       if (!isOpen) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function closeMenu() {
-      document.getElementById('hamburger').classList.remove('open');
-      document.getElementById('mainNav').classList.remove('open');
+      document.getElementById('hamburger')?.classList.remove('open');
+      document.getElementById('mainNav')?.classList.remove('open');
     }
 
-    // ── CART ──
+    // ── 8. CART ──
     let cart = JSON.parse(localStorage.getItem('mono-cart') || '[]');
     let currentProduct = null;
     let selectedSize = null;
 
     function toggleCart() {
-      document.getElementById('cartSidebar').classList.toggle('open');
-      document.getElementById('cartOverlay').classList.toggle('open');
+      document.getElementById('cartSidebar')?.classList.toggle('open');
+      document.getElementById('cartOverlay')?.classList.toggle('open');
     }
 
     function openModal(id) {
@@ -530,9 +537,9 @@
       document.getElementById('modalName').textContent = currentProduct.name;
       document.getElementById('modalPrice').textContent = `$${currentProduct.price}`;
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-      document.getElementById('modalOverlay').classList.add('open');
+      document.getElementById('modalOverlay')?.classList.add('open');
     }
-    function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+    function closeModal() { document.getElementById('modalOverlay')?.classList.remove('open'); }
 
     function selectSize(btn) {
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
@@ -545,7 +552,7 @@
       if (!currentUser) {
         closeModal();
         authContext = 'general';
-        document.getElementById('authOverlay').classList.add('open');
+        document.getElementById('authOverlay')?.classList.add('open');
         return;
       }
       const existing = cart.find(i => i.id === currentProduct.id && i.size === selectedSize);
@@ -562,12 +569,16 @@
 
     function renderCart() {
       const container = document.getElementById('cartItems');
+      if(!container) return;
       const count = cart.reduce((a, i) => a + i.qty, 0);
       const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
       const countEl = document.getElementById('cartCount');
-      countEl.textContent = count;
-      countEl.classList.toggle('show', count > 0);
-      document.getElementById('cartTotal').textContent = `$${total}`;
+      if(countEl) {
+        countEl.textContent = count;
+        countEl.classList.toggle('show', count > 0);
+      }
+      const totalEl = document.getElementById('cartTotal');
+      if(totalEl) totalEl.textContent = `$${total}`;
       localStorage.setItem('mono-cart', JSON.stringify(cart));
       if (!cart.length) {
         container.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">◻</div><p>Your bag is empty</p></div>`;
@@ -584,26 +595,31 @@
         </div>`).join('');
     }
 
-    // ── CHECKOUT ──
+    // ── 9. CHECKOUT ──
     function openCheckout() {
       if (!cart.length) { showNotif('Your bag is empty'); return; }
       if (!currentUser) {
         authContext = 'checkout';
-        document.getElementById('cartSidebar').classList.remove('open');
-        document.getElementById('cartOverlay').classList.remove('open');
-        document.getElementById('authOverlay').classList.add('open');
+        document.getElementById('cartSidebar')?.classList.remove('open');
+        document.getElementById('cartOverlay')?.classList.remove('open');
+        document.getElementById('authOverlay')?.classList.add('open');
         return;
       }
       const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
       const count = cart.reduce((a, i) => a + i.qty, 0);
-      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} · $${total}`;
-      if (currentUser?.email) document.getElementById('co-email').value = currentUser.email;
-      if (currentUser?.user_metadata?.name) document.getElementById('co-name').value = currentUser.user_metadata.name;
-      document.getElementById('cartSidebar').classList.remove('open');
-      document.getElementById('cartOverlay').classList.remove('open');
-      document.getElementById('checkoutOverlay').classList.add('open');
+      const chkTotal = document.getElementById('checkoutTotal');
+      if(chkTotal) chkTotal.textContent = `${count} item${count > 1 ? 's' : ''} · $${total}`;
+      
+      const coEmail = document.getElementById('co-email');
+      const coName = document.getElementById('co-name');
+      if (currentUser?.email && coEmail) coEmail.value = currentUser.email;
+      if (currentUser?.user_metadata?.name && coName) coName.value = currentUser.user_metadata.name;
+      
+      document.getElementById('cartSidebar')?.classList.remove('open');
+      document.getElementById('cartOverlay')?.classList.remove('open');
+      document.getElementById('checkoutOverlay')?.classList.add('open');
     }
-    function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
+    function closeCheckout() { document.getElementById('checkoutOverlay')?.classList.remove('open'); }
 
     async function submitOrder() {
       const name    = document.getElementById('co-name').value.trim();
@@ -612,7 +628,7 @@
       const address = document.getElementById('co-address').value.trim();
       if (!name || !email || !phone || !address) { showNotif('Please fill in all fields'); return; }
       const btn = document.getElementById('placeOrderBtn');
-      btn.textContent = 'Placing order...'; btn.disabled = true;
+      if(btn) { btn.textContent = 'Placing order...'; btn.disabled = true; }
       try {
         const res = await fetch('/api/order', {
           method: 'POST',
@@ -622,16 +638,20 @@
         const data = await res.json();
         if (data.success) {
           cart = []; renderCart(); closeCheckout();
-          ['co-name','co-phone','co-address'].forEach(id => document.getElementById(id).value = '');
+          ['co-name','co-phone','co-address'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = '';
+          });
           showNotif(`✓ Order ${data.orderNumber} confirmed!`);
         } else { showNotif('Something went wrong'); }
       } catch { showNotif('Something went wrong'); }
-      btn.textContent = 'Place Order →'; btn.disabled = false;
+      if(btn) { btn.textContent = 'Place Order →'; btn.disabled = false; }
     }
 
-    // ── NEWSLETTER ──
+    // ── 10. NEWSLETTER ──
     async function subscribeNewsletter() {
       const input = document.querySelector('.newsletter-input');
+      if(!input) return;
       const email = input.value.trim();
       if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
       showNotif('Subscribing...');
@@ -646,6 +666,7 @@
 
     function showNotif(msg) {
       const n = document.getElementById('notif');
+      if(!n) return;
       n.textContent = msg; n.classList.add('show');
       setTimeout(() => n.classList.remove('show'), 2500);
     }
