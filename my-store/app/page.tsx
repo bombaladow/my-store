@@ -2,15 +2,17 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import type { User } from '@supabase/supabase-js';
+import { createClient, type User } from '@supabase/supabase-js';
+
+type ProductTone = 'white' | 'black';
 
 type Product = {
   id: number;
   name: string;
-  sub: string;
+  fit: string;
   price: number;
   img: string;
+  tone: ProductTone;
   badge?: string;
 };
 
@@ -19,21 +21,75 @@ type CartItem = Product & {
   qty: number;
 };
 
+type CollectionFilter = 'all' | ProductTone;
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zxvzpwdueqbgwetylmng.supabase.co',
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV'
 );
 
 const products: Product[] = [
-  { id: 1, name: 'Classic White Tee', sub: 'Relaxed Fit', price: 45, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80', badge: 'Bestseller' },
-  { id: 2, name: 'Oversized Black Tee', sub: 'Boxy Fit', price: 48, img: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=900&q=80' },
-  { id: 3, name: 'Slim White Tee', sub: 'Slim Fit', price: 42, img: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=900&q=80', badge: 'New' },
-  { id: 4, name: 'Vintage Black Tee', sub: 'Relaxed Fit', price: 50, img: 'https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=900&q=80' },
-  { id: 5, name: 'Essential White Tee', sub: 'Regular Fit', price: 40, img: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=900&q=80' },
-  { id: 6, name: 'Premium Black Tee', sub: 'Slim Fit', price: 55, img: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=900&q=80', badge: 'Limited' },
+  {
+    id: 1,
+    name: 'MONO White Tee 01',
+    fit: 'Relaxed fit',
+    price: 42,
+    img: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=900&q=80',
+    tone: 'white',
+    badge: 'Core',
+  },
+  {
+    id: 2,
+    name: 'MONO Black Tee 01',
+    fit: 'Boxy fit',
+    price: 44,
+    img: 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=900&q=80',
+    tone: 'black',
+    badge: 'Core',
+  },
+  {
+    id: 3,
+    name: 'MONO White Tee 02',
+    fit: 'Sharp regular fit',
+    price: 46,
+    img: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=900&q=80',
+    tone: 'white',
+    badge: 'New',
+  },
+  {
+    id: 4,
+    name: 'MONO Black Tee 02',
+    fit: 'Oversized fit',
+    price: 48,
+    img: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=900&q=80',
+    tone: 'black',
+  },
+  {
+    id: 5,
+    name: 'MONO White Long Sleeve',
+    fit: 'Clean layering piece',
+    price: 52,
+    img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=900&q=80',
+    tone: 'white',
+  },
+  {
+    id: 6,
+    name: 'MONO Black Long Sleeve',
+    fit: 'Heavyweight base layer',
+    price: 54,
+    img: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=900&q=80',
+    tone: 'black',
+    badge: 'Limited',
+  },
 ];
 
 const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+const collectionFilters: Array<{ label: string; value: CollectionFilter }> = [
+  { label: 'All', value: 'all' },
+  { label: 'White', value: 'white' },
+  { label: 'Black', value: 'black' },
+];
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -50,25 +106,39 @@ export default function Home() {
   const [checkoutForm, setCheckoutForm] = useState({ name: '', email: '', phone: '', address: '' });
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
+  const [collectionFilter, setCollectionFilter] = useState<CollectionFilter>('all');
 
   const cartCount = cart.reduce((total, item) => total + item.qty, 0);
   const cartTotal = cart.reduce((total, item) => total + item.price * item.qty, 0);
 
+  const visibleProducts = useMemo(
+    () => products.filter((product) => collectionFilter === 'all' || product.tone === collectionFilter),
+    [collectionFilter]
+  );
+
   useEffect(() => {
     window.setTimeout(() => {
-      const savedCart = window.localStorage.getItem('mono-cart');
-      if (savedCart) setCart(JSON.parse(savedCart));
+      try {
+        const savedCart = window.localStorage.getItem('mono-cart');
+        if (savedCart) setCart(JSON.parse(savedCart));
+      } catch {
+        window.localStorage.removeItem('mono-cart');
+      }
       setCartLoaded(true);
     }, 0);
 
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       setLoading(false);
     };
 
     getSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -88,11 +158,12 @@ export default function Home() {
 
   const userLabel = useMemo(() => {
     if (loading) return 'Loading';
-    if (!user) return 'Sign In';
+    if (!user) return 'Account';
     return user.user_metadata?.full_name?.split(' ')[0] || user.email || 'Account';
   }, [loading, user]);
 
   const handleAuth = async () => {
+    setMenuOpen(false);
     if (user) {
       await supabase.auth.signOut();
       setNotice('Signed out');
@@ -133,7 +204,7 @@ export default function Home() {
       return [...current, { ...selectedProduct, size: selectedSize, qty: 1 }];
     });
 
-    setNotice(`${selectedProduct.name} - ${selectedSize} added`);
+    setNotice(`${selectedProduct.name} / ${selectedSize} added`);
     setSelectedProduct(null);
   };
 
@@ -217,68 +288,120 @@ export default function Home() {
   return (
     <main className="mono-page">
       <header className="site-header">
-        <a className="logo" href="#">MONO</a>
-        <button className={`hamburger ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen((open) => !open)} aria-label="Menu">
-          <span />
-          <span />
-          <span />
-        </button>
+        <a className="logo" href="#">
+          MONO
+        </a>
+
         <nav className={menuOpen ? 'open' : ''}>
-          <a href="#products" onClick={() => setMenuOpen(false)}>Shop</a>
-          <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
-          <a href="#newsletter" onClick={() => setMenuOpen(false)}>Newsletter</a>
-          <button className="nav-btn" onClick={handleAuth}>{userLabel}</button>
-          <button className="nav-btn" onClick={() => setCartOpen(true)}>
-            Bag <span className={`cart-count ${cartCount ? 'show' : ''}`}>{cartCount}</span>
+          <a href="#collection" onClick={() => setMenuOpen(false)}>
+            Shop
+          </a>
+          <a href="#story" onClick={() => setMenuOpen(false)}>
+            Story
+          </a>
+          <a href="#newsletter" onClick={() => setMenuOpen(false)}>
+            Newsletter
+          </a>
+          <button className="nav-btn mobile-account" onClick={handleAuth}>
+            {userLabel}
           </button>
         </nav>
+
+        <div className="header-actions">
+          <button className="nav-btn desktop-account" onClick={handleAuth}>
+            {userLabel}
+          </button>
+          <button className="nav-btn bag-btn" onClick={() => setCartOpen(true)}>
+            Bag <span className={`cart-count ${cartCount ? 'show' : ''}`}>{cartCount}</span>
+          </button>
+          <button
+            className={`hamburger ${menuOpen ? 'open' : ''}`}
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label="Menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </header>
 
       <section className="hero">
-        <div className="hero-left">
-          <div className="hero-tag">SS 2026 - Pure Cotton</div>
-          <h1 className="hero-title">Less is<br /><em>everything.</em></h1>
-          <a href="#products" className="hero-cta">Shop the Collection</a>
-        </div>
-        <div className="hero-right">
-          <div className="hero-right-inner">
-            <div className="hero-thumb">
-              <Image src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&q=80" alt="MONO white tee" fill sizes="(max-width: 768px) 50vw, 25vw" />
-            </div>
-            <div className="hero-thumb">
-              <Image src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=700&q=80" alt="MONO black tee" fill sizes="(max-width: 768px) 50vw, 25vw" />
-            </div>
+        <Image
+          src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1600&q=80"
+          alt="MONO black and white essentials"
+          fill
+          priority
+          sizes="100vw"
+          className="hero-bg"
+        />
+        <div className="hero-scrim" />
+        <div className="hero-content">
+          <div className="hero-kicker">MONO / SS 2026 / Black and White Essentials</div>
+          <h1 className="hero-title">
+            The tee,
+            <br />
+            perfected.
+          </h1>
+          <p className="hero-copy">
+            A tighter wardrobe starts here: white, black, and the cleanest cuts we could build around them.
+          </p>
+          <div className="hero-actions">
+            <a href="#collection" className="hero-primary">
+              Shop collection
+            </a>
+            <a href="#story" className="hero-secondary">
+              Our story
+            </a>
+          </div>
+          <div className="hero-pills">
+            <span>Pure cotton</span>
+            <span>Black / White only</span>
+            <span>Fast checkout</span>
           </div>
         </div>
       </section>
 
-      <div className="marquee-wrap">
-        <div className="marquee-track">
-          {Array.from({ length: 2 }).map((_, index) => (
-            <span key={index}>100% Egyptian Cotton <b>·</b> Minimal Design <b>·</b> Made to Last <b>·</b> Black & White Essentials <b>·</b> SS 2026 <b>·</b></span>
+      <section className="collection-shell" id="collection">
+        <div className="section-head">
+          <div>
+            <div className="section-label">The collection</div>
+            <h2 className="section-title">
+              Black. White. <em>Nothing extra.</em>
+            </h2>
+          </div>
+          <p className="section-copy">
+            Start with the essentials, then build outward. Every piece is simple, wearable, and designed to sit
+            together cleanly.
+          </p>
+        </div>
+
+        <div className="filter-row" role="tablist" aria-label="Collection filters">
+          {collectionFilters.map((filter) => (
+            <button
+              key={filter.value}
+              className={`filter-chip ${collectionFilter === filter.value ? 'active' : ''}`}
+              onClick={() => setCollectionFilter(filter.value)}
+            >
+              {filter.label}
+            </button>
           ))}
         </div>
-      </div>
 
-      <section id="products">
-        <div className="section-header">
-          <h2 className="section-title">The <em>Collection</em></h2>
-          <span className="section-sub">6 Pieces - SS 2026</span>
-        </div>
         <div className="products-grid">
-          {products.map((product) => (
+          {visibleProducts.map((product) => (
             <article className="product-card" key={product.id}>
-              <div className="product-img-wrap">
-                <Image src={product.img} alt={product.name} fill sizes="(max-width: 768px) 100vw, 33vw" />
-                <div className="product-overlay">
-                  <button className="quick-add" onClick={() => openProduct(product)}>Quick Add</button>
-                </div>
+              <div className="product-image">
+                <Image src={product.img} alt={product.name} fill sizes="(max-width: 900px) 100vw, 33vw" />
+                <button className="quick-add" onClick={() => openProduct(product)}>
+                  Quick add
+                </button>
+                {product.badge && <span className="product-badge">{product.badge}</span>}
               </div>
-              {product.badge && <div className="product-badge">{product.badge}</div>}
               <div className="product-info">
                 <div>
                   <div className="product-name">{product.name}</div>
-                  <div className="product-sub">{product.sub}</div>
+                  <div className="product-fit">{product.fit}</div>
                 </div>
                 <div className="product-price">${product.price}</div>
               </div>
@@ -287,78 +410,170 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="feature-strip">
-        <div className="feature-item"><div className="feature-icon">○</div><div className="feature-title">Pure Cotton</div><div className="feature-desc">100% Egyptian combed cotton. Breathable, durable, and gets better with every wash.</div></div>
-        <div className="feature-item"><div className="feature-icon">◆</div><div className="feature-title">Free Returns</div><div className="feature-desc">Not in love? Return within 30 days, no questions asked.</div></div>
-        <div className="feature-item"><div className="feature-icon">◎</div><div className="feature-title">Worldwide Shipping</div><div className="feature-desc">Free shipping on orders over $80. Delivered in 3-5 business days.</div></div>
-      </div>
-
-      <section className="editorial" id="about">
-        <div className="editorial-img">
-          <Image src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1200&q=80" alt="MONO cotton essentials" fill sizes="(max-width: 768px) 100vw, 50vw" />
+      <section className="value-strip">
+        <div className="value-item">
+          <div className="value-label">Fabric</div>
+          <p>Soft, heavyweight cotton with a clean hand feel and an easy daily fit.</p>
         </div>
-        <div className="editorial-content">
-          <div className="editorial-label">Our Philosophy</div>
-          <h2 className="editorial-title">Designed for<br /><em>everyday</em><br />living.</h2>
-          <p className="editorial-text">MONO was born from a simple obsession: the perfect white tee and the perfect black tee. We source fine cotton and cut every piece to live in your wardrobe for years, not seasons.</p>
-          <a href="#products" className="btn-outline">Shop Now</a>
+        <div className="value-item">
+          <div className="value-label">Palette</div>
+          <p>We begin with white and black so every drop can layer together naturally.</p>
+        </div>
+        <div className="value-item">
+          <div className="value-label">Checkout</div>
+          <p>A fast, simple flow with size selection, bag editing, and one clear order step.</p>
+        </div>
+      </section>
+
+      <section className="story" id="story">
+        <Image
+          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&q=80"
+          alt="MONO editorial"
+          fill
+          sizes="100vw"
+          className="story-bg"
+        />
+        <div className="story-scrim" />
+        <div className="story-copy">
+          <div className="section-label">Brand direction</div>
+          <h2 className="section-title">
+            Built like a fashion house.
+            <br />
+            <em>Easy</em> like an everyday tee.
+          </h2>
+          <p>
+            MONO is meant to feel elevated without being fussy. That means quiet typography, generous space, and a
+            shopping flow that gets out of the way.
+          </p>
+          <a href="#collection" className="hero-primary">
+            Explore the edit
+          </a>
         </div>
       </section>
 
       <section className="newsletter" id="newsletter">
-        <h2 className="newsletter-title">Stay in the <em>loop.</em></h2>
-        <p className="newsletter-sub">New drops, restocks, and rare offers straight to your inbox.</p>
+        <div className="section-label">Newsletter</div>
+        <h2 className="newsletter-title">New drops. Restocks. Rare offers.</h2>
+        <p className="newsletter-copy">Join for MONO updates and early access to new essentials.</p>
         <div className="newsletter-form">
-          <input className="newsletter-input" type="email" placeholder="your@email.com" value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} />
-          <button className="newsletter-submit" onClick={subscribeNewsletter}>Subscribe</button>
+          <input
+            className="newsletter-input"
+            type="email"
+            placeholder="your@email.com"
+            value={newsletterEmail}
+            onChange={(event) => setNewsletterEmail(event.target.value)}
+          />
+          <button className="newsletter-submit" onClick={subscribeNewsletter}>
+            Subscribe
+          </button>
         </div>
       </section>
 
-      <footer>
-        <div className="footer-brand"><a href="#" className="logo-dark">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
-        <div className="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
-        <div className="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
-        <div className="footer-col"><h4>Follow</h4><a href="#">Instagram</a><a href="#">Pinterest</a><a href="#">TikTok</a></div>
+      <footer className="site-footer">
+        <div className="footer-brand">
+          <a href="#" className="logo-dark">
+            MONO
+          </a>
+          <p>Black and white essentials made for a quieter wardrobe.</p>
+        </div>
+        <div className="footer-col">
+          <h4>Shop</h4>
+          <a href="#collection">White tees</a>
+          <a href="#collection">Black tees</a>
+          <a href="#collection">Long sleeves</a>
+        </div>
+        <div className="footer-col">
+          <h4>Help</h4>
+          <a href="#">Sizing</a>
+          <a href="#">Shipping</a>
+          <a href="#">Returns</a>
+        </div>
+        <div className="footer-col">
+          <h4>Follow</h4>
+          <a href="#">Instagram</a>
+          <a href="#">Pinterest</a>
+          <a href="#">TikTok</a>
+        </div>
       </footer>
-      <div className="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
+
+      <div className="footer-bottom">
+        <p>&copy; 2026 MONO. All rights reserved.</p>
+        <p>Designed for simplicity.</p>
+      </div>
 
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} />
       <aside className={`cart-sidebar ${cartOpen ? 'open' : ''}`}>
         <div className="cart-head">
           <div className="cart-head-title">Your Bag</div>
-          <button className="close-btn" onClick={() => setCartOpen(false)}>×</button>
+          <button className="close-btn" onClick={() => setCartOpen(false)}>
+            &times;
+          </button>
         </div>
+
         <div className="cart-items">
           {!cart.length ? (
-            <div className="cart-empty"><div className="cart-empty-icon">◇</div><p>Your bag is empty</p></div>
-          ) : cart.map((item) => (
-            <div className="cart-item" key={`${item.id}-${item.size}`}>
-              <Image className="cart-item-img" src={item.img} alt={item.name} width={80} height={100} />
-              <div><div className="cart-item-name">{item.name}</div><div className="cart-item-size">Size: {item.size} · Qty: {item.qty}</div></div>
-              <div className="cart-item-actions">
-                <span className="cart-item-price">${item.price * item.qty}</span>
-                <button className="remove-item" onClick={() => removeFromCart(item.id, item.size)}>×</button>
-              </div>
+            <div className="cart-empty">
+              <div className="cart-empty-icon">[]</div>
+              <p>Your bag is empty</p>
             </div>
-          ))}
+          ) : (
+            cart.map((item) => (
+              <div className="cart-item" key={`${item.id}-${item.size}`}>
+                <Image className="cart-item-img" src={item.img} alt={item.name} width={80} height={100} />
+                <div>
+                  <div className="cart-item-name">{item.name}</div>
+                  <div className="cart-item-size">
+                    Size: {item.size} / Qty: {item.qty}
+                  </div>
+                </div>
+                <div className="cart-item-actions">
+                  <span className="cart-item-price">${item.price * item.qty}</span>
+                  <button className="remove-item" onClick={() => removeFromCart(item.id, item.size)}>
+                    &times;
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
+
         <div className="cart-foot">
-          <div className="cart-total"><span className="cart-total-label">Total</span><span className="cart-total-price">${cartTotal}</span></div>
-          <button className="checkout-btn" onClick={beginCheckout}>Checkout</button>
+          <div className="cart-total">
+            <span className="cart-total-label">Total</span>
+            <span className="cart-total-price">${cartTotal}</span>
+          </div>
+          <button className="checkout-btn" onClick={beginCheckout}>
+            Checkout
+          </button>
         </div>
       </aside>
 
       {selectedProduct && (
         <div className="modal-overlay open">
           <div className="modal">
-            <button className="modal-close" onClick={() => setSelectedProduct(null)}>×</button>
-            <div className="modal-title">{selectedProduct.name}</div>
-            <div className="modal-sub">${selectedProduct.price}</div>
-            <div className="modal-label">Select Size</div>
-            <div className="size-grid">
-              {sizes.map((size) => <button key={size} className={`size-btn ${selectedSize === size ? 'selected' : ''}`} onClick={() => setSelectedSize(size)}>{size}</button>)}
+            <button className="modal-close" onClick={() => setSelectedProduct(null)}>
+              &times;
+            </button>
+            <div className="modal-media">
+              <Image src={selectedProduct.img} alt={selectedProduct.name} fill sizes="(max-width: 900px) 90vw, 420px" />
             </div>
-            <button className="modal-btn" onClick={confirmAdd}>Add to Bag</button>
+            <div className="modal-title">{selectedProduct.name}</div>
+            <div className="modal-sub">{selectedProduct.fit} / ${selectedProduct.price}</div>
+            <div className="modal-label">Select size</div>
+            <div className="size-grid">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  className={`size-btn ${selectedSize === size ? 'selected' : ''}`}
+                  onClick={() => setSelectedSize(size)}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            <button className="modal-btn" onClick={confirmAdd}>
+              Add to bag
+            </button>
           </div>
         </div>
       )}
@@ -366,12 +581,18 @@ export default function Home() {
       {authOpen && (
         <div className="modal-overlay open">
           <div className="modal">
-            <button className="modal-close" onClick={() => setAuthOpen(false)}>×</button>
+            <button className="modal-close" onClick={() => setAuthOpen(false)}>
+              &times;
+            </button>
             <div className="modal-title">Welcome to MONO</div>
-            <div className="modal-sub">Sign in to shop and track your orders.</div>
-            <button className="google-btn" onClick={signInWithGoogle}>Continue with Google</button>
+            <div className="modal-sub">Sign in to track orders and keep your bag synced.</div>
+            <button className="google-btn" onClick={signInWithGoogle}>
+              Continue with Google
+            </button>
             <div className="divider">or continue as guest</div>
-            <button className="modal-btn outline" onClick={() => setAuthOpen(false)}>Guest Checkout</button>
+            <button className="modal-btn outline" onClick={() => setAuthOpen(false)}>
+              Guest checkout
+            </button>
           </div>
         </div>
       )}
@@ -379,18 +600,45 @@ export default function Home() {
       {checkoutOpen && (
         <div className="modal-overlay open">
           <div className="modal wide">
-            <button className="modal-close" onClick={() => setCheckoutOpen(false)}>×</button>
-            <div className="modal-title">Complete Your Order</div>
-            <div className="modal-sub">{cartCount} item{cartCount === 1 ? '' : 's'} · ${cartTotal}</div>
-            <div className="modal-label">Full Name</div>
-            <input className="modal-input" value={checkoutForm.name} onChange={(event) => setCheckoutForm({ ...checkoutForm, name: event.target.value })} placeholder="Ahmed Mohamed Ali" />
+            <button className="modal-close" onClick={() => setCheckoutOpen(false)}>
+              &times;
+            </button>
+            <div className="modal-title">Complete your order</div>
+            <div className="modal-sub">
+              {cartCount} item{cartCount === 1 ? '' : 's'} / ${cartTotal}
+            </div>
+            <div className="modal-label">Full name</div>
+            <input
+              className="modal-input"
+              value={checkoutForm.name}
+              onChange={(event) => setCheckoutForm({ ...checkoutForm, name: event.target.value })}
+              placeholder="Ahmed Mohamed Ali"
+            />
             <div className="modal-label">Email</div>
-            <input className="modal-input" type="email" value={checkoutForm.email} onChange={(event) => setCheckoutForm({ ...checkoutForm, email: event.target.value })} placeholder="ahmed@email.com" />
-            <div className="modal-label">Phone Number</div>
-            <input className="modal-input" value={checkoutForm.phone} onChange={(event) => setCheckoutForm({ ...checkoutForm, phone: event.target.value })} placeholder="+20 1XX XXX XXXX" />
-            <div className="modal-label">Delivery Address</div>
-            <input className="modal-input" value={checkoutForm.address} onChange={(event) => setCheckoutForm({ ...checkoutForm, address: event.target.value })} placeholder="Street, City, Country" />
-            <button className="modal-btn" disabled={submittingOrder} onClick={submitOrder}>{submittingOrder ? 'Placing order...' : 'Place Order'}</button>
+            <input
+              className="modal-input"
+              type="email"
+              value={checkoutForm.email}
+              onChange={(event) => setCheckoutForm({ ...checkoutForm, email: event.target.value })}
+              placeholder="ahmed@email.com"
+            />
+            <div className="modal-label">Phone number</div>
+            <input
+              className="modal-input"
+              value={checkoutForm.phone}
+              onChange={(event) => setCheckoutForm({ ...checkoutForm, phone: event.target.value })}
+              placeholder="+20 1XX XXX XXXX"
+            />
+            <div className="modal-label">Delivery address</div>
+            <input
+              className="modal-input"
+              value={checkoutForm.address}
+              onChange={(event) => setCheckoutForm({ ...checkoutForm, address: event.target.value })}
+              placeholder="Street, City, Country"
+            />
+            <button className="modal-btn" disabled={submittingOrder} onClick={submitOrder}>
+              {submittingOrder ? 'Placing order...' : 'Place order'}
+            </button>
           </div>
         </div>
       )}

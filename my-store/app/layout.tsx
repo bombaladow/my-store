@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MONO Essentials",
-  description: "Premium streetwear essentials by MONO.",
+  title: "MONO | Black & White Essentials",
+  description: "Minimal cotton tees and essentials by MONO.",
 };
 
 export default function RootLayout({
