@@ -1,48 +1,41 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+import { NextResponse } from 'next/server';
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const subject = String(req.body?.subject || '').trim();
-  const message = String(req.body?.message || '').trim();
-  const password = String(req.body?.password || '');
+export async function POST(request: Request) {
+  const { subject: rawSubject, message: rawMessage, password: rawPassword } = await request.json();
+  const subject = String(rawSubject || '').trim();
+  const message = String(rawMessage || '').trim();
+  const password = String(rawPassword || '');
   const adminPassword = process.env.ADMIN_PASSWORD || 'mono2026';
 
   if (password !== adminPassword) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   if (!subject || !message) {
-    return res.status(400).json({ error: 'Missing subject or message' });
+    return NextResponse.json({ error: 'Missing subject or message' }, { status: 400 });
   }
 
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY || !process.env.RESEND_KEY) {
-    return res.status(500).json({ error: 'Missing server configuration' });
+    return NextResponse.json({ error: 'Missing server configuration' }, { status: 500 });
   }
 
   try {
-    const subscribersRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/subscribers?select=email`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_KEY,
-          Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
-        },
-      }
-    );
+    const subscribersRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers?select=email`, {
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
+      },
+    });
 
     if (!subscribersRes.ok) {
-      return res.status(500).json({ error: 'Database error' });
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
     const subscribers = await subscribersRes.json();
-    const emails = subscribers.map((subscriber) => subscriber.email).filter(Boolean);
+    const emails = subscribers.map((subscriber: { email?: string }) => subscriber.email).filter(Boolean);
 
-    if (emails.length === 0) {
-      return res.status(200).json({ success: true, sent: 0 });
+    if (!emails.length) {
+      return NextResponse.json({ success: true, sent: 0 });
     }
 
     const emailRes = await fetch('https://api.resend.com/emails', {
@@ -60,17 +53,17 @@ export default async function handler(req, res) {
     });
 
     if (!emailRes.ok) {
-      return res.status(500).json({ error: 'Email send failed' });
+      return NextResponse.json({ error: 'Email send failed' }, { status: 500 });
     }
 
-    return res.status(200).json({ success: true, sent: emails.length });
+    return NextResponse.json({ success: true, sent: emails.length });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
-function updateTemplate({ subject, message }) {
+function updateTemplate({ subject, message }: { subject: string; message: string }) {
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
@@ -86,7 +79,7 @@ function updateTemplate({ subject, message }) {
 </html>`;
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: string) {
   return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')

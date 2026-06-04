@@ -239,6 +239,9 @@
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
   const ADMIN_PASSWORD = 'mono2026'; // غيّره لما تحط ADMIN_PASSWORD في Vercel
+  const API_BASE = window.location.origin && window.location.origin.startsWith('http')
+    ? window.location.origin
+    : 'http://127.0.0.1:3002';
 
   let allSubscribers = [];
 
@@ -369,7 +372,7 @@
     btn.textContent = 'Sending...';
 
     try {
-      const res = await fetch('/api/send-update', {
+      const res = await fetch(`${API_BASE}/api/send-update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

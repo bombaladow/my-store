@@ -1,19 +1,15 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+import { NextResponse } from 'next/server';
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const email = String(req.body?.email || '').trim().toLowerCase();
+export async function POST(request: Request) {
+  const { email: rawEmail } = await request.json();
+  const email = String(rawEmail || '').trim().toLowerCase();
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid email' });
+    return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-    return res.status(500).json({ error: 'Missing Supabase configuration' });
+    return NextResponse.json({ error: 'Missing Supabase configuration' }, { status: 500 });
   }
 
   try {
@@ -28,12 +24,12 @@ export default async function handler(req, res) {
     );
 
     if (!existingRes.ok) {
-      return res.status(500).json({ error: 'Database error' });
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
     const existing = await existingRes.json();
     if (existing.length > 0) {
-      return res.status(200).json({ success: false, message: 'already_subscribed' });
+      return NextResponse.json({ success: false, message: 'already_subscribed' });
     }
 
     const insertRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
@@ -48,12 +44,12 @@ export default async function handler(req, res) {
     });
 
     if (!insertRes.ok) {
-      return res.status(500).json({ error: 'Database error' });
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    return res.status(200).json({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
