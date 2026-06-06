@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MONO — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--black:#0a0a0a;--white:#f9f9f7;--gray:#888;--light:#e8e8e5;--green:#2d6a4f;--red:#c1121f}
+    body{background:var(--white);color:var(--black);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
+
+    /* ── LOGIN ── */
+    .login-screen{
+      position:fixed;inset:0;background:var(--black);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:999;transition:opacity .6s ease,visibility .6s ease;
+    }
+    .login-screen.hidden{opacity:0;visibility:hidden}
+    .login-logo{font-family:'Cormorant Garamond',serif;font-size:3rem;letter-spacing:.4em;color:var(--white);margin-bottom:8px}
+    .login-sub{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:56px}
+    .login-input{
+      background:none;border:none;border-bottom:1px solid rgba(255,255,255,.3);
+      color:var(--white);padding:12px 0;width:280px;font-family:'Montserrat',sans-serif;
+      font-size:.8rem;letter-spacing:.08em;outline:none;text-align:center;
+      transition:border-color .3s;
+    }
+    .login-input::placeholder{color:var(--gray)}
+    .login-input:focus{border-color:var(--white)}
+    .login-btn{
+      margin-top:32px;background:none;border:1px solid rgba(255,255,255,.3);
+      color:var(--white);padding:13px 48px;font-family:'Montserrat',sans-serif;
+      font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;
+      transition:all .3s;
+    }
+    .login-btn:hover{background:var(--white);color:var(--black)}
+    .login-error{font-size:.65rem;color:#e63946;margin-top:16px;letter-spacing:.08em;opacity:0;transition:opacity .3s}
+    .login-error.show{opacity:1}
+
+    /* ── LAYOUT ── */
+    .dashboard{display:none}
+    .dashboard.visible{display:block}
+
+    /* ── HEADER ── */
+    .dash-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:24px 48px;border-bottom:1px solid var(--light);
+      position:sticky;top:0;background:var(--white);z-index:10;
+    }
+    .dash-logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;letter-spacing:.3em}
+    .dash-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+    .logout-btn{
+      background:none;border:1px solid var(--light);padding:8px 20px;
+      font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.12em;
+      text-transform:uppercase;cursor:pointer;transition:all .3s;
+    }
+    .logout-btn:hover{background:var(--black);color:var(--white);border-color:var(--black)}
+
+    /* ── STATS ── */
+    .stats-row{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:1px;background:var(--light);margin:0;
+    }
+    .stat-card{
+      background:var(--white);padding:48px;
+      transition:background .4s;
+    }
+    .stat-card:hover{background:#fafaf8}
+    .stat-num{
+      font-family:'Cormorant Garamond',serif;
+      font-size:3.5rem;font-weight:300;line-height:1;margin-bottom:8px;
+    }
+    .stat-title{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+
+    /* ── SECTIONS ── */
+    .section{padding:48px}
+    .section+.section{border-top:1px solid var(--light)}
+    .section-title{
+      font-family:'Cormorant Garamond',serif;
+      font-size:1.8rem;font-weight:300;margin-bottom:32px;
+    }
+    .section-title em{font-style:italic}
+
+    /* ── SUBSCRIBERS TABLE ── */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead tr{border-bottom:1px solid var(--black)}
+    th{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;
+       padding:12px 16px;text-align:left;font-weight:500}
+    tbody tr{border-bottom:1px solid var(--light);transition:background .2s}
+    tbody tr:hover{background:#fafaf8}
+    td{font-size:.75rem;padding:14px 16px;color:#333;letter-spacing:.03em}
+    td.date{color:var(--gray);font-size:.65rem}
+    .empty-row{text-align:center;padding:48px;color:var(--gray);font-size:.7rem;letter-spacing:.1em}
+
+    .search-bar{
+      width:100%;border:none;border-bottom:1px solid var(--light);
+      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.75rem;
+      outline:none;margin-bottom:24px;background:none;letter-spacing:.05em;
+      transition:border-color .3s;
+    }
+    .search-bar:focus{border-color:var(--black)}
+
+    /* ── SEND UPDATE ── */
+    .form-group{margin-bottom:24px}
+    .form-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:10px}
+    .form-input{
+      width:100%;border:none;border-bottom:1px solid var(--light);
+      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.8rem;
+      outline:none;background:none;transition:border-color .3s;
+    }
+    .form-input:focus{border-color:var(--black)}
+    textarea.form-input{resize:vertical;min-height:120px;border:1px solid var(--light);padding:16px;border-radius:0}
+    textarea.form-input:focus{border-color:var(--black)}
+    .send-btn{
+      background:var(--black);color:var(--white);border:none;
+      padding:16px 48px;font-family:'Montserrat',sans-serif;
+      font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+      cursor:pointer;transition:background .3s,transform .2s;
+    }
+    .send-btn:hover{background:#222;transform:translateY(-1px)}
+    .send-btn:disabled{background:var(--gray);cursor:not-allowed;transform:none}
+
+    /* ── TOAST ── */
+    .toast{
+      position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);
+      padding:14px 32px;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
+      z-index:999;transition:transform .5s cubic-bezier(.25,.46,.45,.94);pointer-events:none;
+    }
+    .toast.success{background:var(--black);color:var(--white)}
+    .toast.error{background:var(--red);color:var(--white)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ── PREVIEW ── */
+    .preview-box{
+      border:1px solid var(--light);padding:32px;
+      font-size:.75rem;line-height:1.8;color:#444;
+      min-height:80px;white-space:pre-line;
+      transition:border-color .3s;
+    }
+    .preview-label{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
+
+    @media(max-width:768px){
+      .stats-row{grid-template-columns:1fr}
+      .dash-header{padding:20px 24px}
+      .section{padding:32px 24px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">MONO</div>
+  <div class="login-sub">Admin Dashboard</div>
+  <input class="login-input" type="password" id="passInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()"/>
+  <button class="login-btn" onclick="login()">Enter →</button>
+  <div class="login-error" id="loginError">Incorrect password</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── DASHBOARD ── -->
+<div class="dashboard" id="dashboard">
+
+  <div class="dash-header">
+    <div>
+      <div class="dash-logo">MONO</div>
+      <div class="dash-label">Admin Dashboard</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">—</div>
+      <div class="stat-title">Total Subscribers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statToday">—</div>
+      <div class="stat-title">Joined Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statWeek">—</div>
+      <div class="stat-title">Joined This Week</div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIBERS -->
+  <div class="section">
+    <div class="section-title">All <em>Subscribers</em></div>
+    <input class="search-bar" id="searchBar" placeholder="Search by email..." oninput="filterTable()"/>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Date Joined</th>
+          </tr>
+        </thead>
+        <tbody id="subscriberTable">
+          <tr><td colspan="3" class="empty-row">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SEND UPDATE -->
+  <div class="section">
+    <div class="section-title">Send <em>Update</em></div>
+
+    <div class="form-group">
+      <label class="form-label">Subject</label>
+      <input class="form-input" id="emailSubject" type="text" placeholder="New Drop — The Black Edition" oninput="updatePreview()"/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-input" id="emailMessage" placeholder="Write your message here..." oninput="updatePreview()"></textarea>
+    </div>
+
+    <div class="form-group">
+      <div class="preview-label">Email Preview</div>
+      <div class="preview-box" id="emailPreview">Your message will appear here...</div>
+    </div>
+
+    <button class="send-btn" id="sendBtn" onclick="sendUpdate()">
+      Send to All Subscribers →
+    </button>
+  </div>
+
+</div>
+
+<script>
+  // ── CONFIG ──
+  const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
+  const ADMIN_PASSWORD = 'mono2026'; // غيّره لما تحط ADMIN_PASSWORD في Vercel
+
+  let allSubscribers = [];
+
+  // ── LOGIN ──
+  function login() {
+    const pass = document.getElementById('passInput').value;
+    if (pass === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('visible');
+      loadSubscribers();
+    } else {
+      document.getElementById('loginError').classList.add('show');
+      document.getElementById('passInput').value = '';
+    }
+  }
+
+  function logout() {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('passInput').value = '';
+  }
+
+  // ── LOAD SUBSCRIBERS ──
+  async function loadSubscribers() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+      allSubscribers = await res.json();
+      renderStats();
+      renderTable(allSubscribers);
+    } catch (e) {
+      showToast('Failed to load data', 'error');
+    }
+  }
+
+  // ── STATS ──
+  function renderStats() {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const total = allSubscribers.length;
+    const today = allSubscribers.filter(s => s.created_at?.startsWith(todayStr)).length;
+    const week  = allSubscribers.filter(s => s.created_at >= weekAgo).length;
+
+    animateNum('statTotal', total);
+    animateNum('statToday', today);
+    animateNum('statWeek', week);
+  }
+
+  function animateNum(id, target) {
+    let count = 0;
+    const el = document.getElementById(id);
+    const step = Math.ceil(target / 30);
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = count;
+      if (count >= target) clearInterval(timer);
+    }, 40);
+  }
+
+  // ── TABLE ──
+  function renderTable(data) {
+    const tbody = document.getElementById('subscriberTable');
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty-row">No subscribers yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map((s, i) => `
+      <tr>
+        <td style="color:var(--gray)">${i + 1}</td>
+        <td>${s.email}</td>
+        <td class="date">${formatDate(s.created_at)}</td>
+      </tr>`).join('');
+  }
+
+  function filterTable() {
+    const q = document.getElementById('searchBar').value.toLowerCase();
+    renderTable(allSubscribers.filter(s => s.email.toLowerCase().includes(q)));
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ── PREVIEW ──
+  function updatePreview() {
+    const subject = document.getElementById('emailSubject').value;
+    const message = document.getElementById('emailMessage').value;
+    const preview = document.getElementById('emailPreview');
+    if (subject || message) {
+      preview.textContent = `${subject ? subject + '\n\n' : ''}${message}`;
+    } else {
+      preview.textContent = 'Your message will appear here...';
+    }
+  }
+
+  // ── SEND UPDATE ──
+  async function sendUpdate() {
+    const subject = document.getElementById('emailSubject').value.trim();
+    const message = document.getElementById('emailMessage').value.trim();
+    const btn = document.getElementById('sendBtn');
+
+    if (!subject || !message) {
+      showToast('Please fill in subject and message', 'error');
+      return;
+    }
+    if (!allSubscribers.length) {
+      showToast('No subscribers to send to', 'error');
+      return;
+    }
+
+    const confirm = window.confirm(
+      `Send to ${allSubscribers.length} subscribers?\n\nSubject: "${subject}"`
+    );
+    if (!confirm) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/api/send-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject,
+          message,
+          password: ADMIN_PASSWORD
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✓ Sent to ${data.sent} subscribers`, 'success');
+        document.getElementById('emailSubject').value = '';
+        document.getElementById('emailMessage').value = '';
+        updatePreview();
+      } else {
+        showToast('Failed to send', 'error');
+      }
+    } catch (e) {
+      showToast('Something went wrong', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send to All Subscribers →';
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
