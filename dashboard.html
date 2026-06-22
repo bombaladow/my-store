@@ -149,6 +149,7 @@
 </head>
 <body>
 
+<!-- ── LOGIN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">MONO</div>
   <div class="login-sub">Admin Dashboard</div>
@@ -157,8 +158,10 @@
   <div class="login-error" id="loginError">Incorrect password</div>
 </div>
 
+<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
@@ -169,6 +172,7 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
+  <!-- STATS -->
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-num" id="statTotal">—</div>
@@ -184,6 +188,7 @@
     </div>
   </div>
 
+  <!-- SUBSCRIBERS -->
   <div class="section">
     <div class="section-title">All <em>Subscribers</em></div>
     <input class="search-bar" id="searchBar" placeholder="Search by email..." oninput="filterTable()"/>
@@ -203,46 +208,7 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Products <em>Management</em></div>
-
-    <div class="form-group">
-      <label class="form-label">Product Name</label>
-      <input class="form-input" id="pName" type="text">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <input class="form-input" id="pSub" type="text">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Price</label>
-      <input class="form-input" id="pPrice" type="number">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Stock</label>
-      <input class="form-input" id="pStock" type="number">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Badge</label>
-      <input class="form-input" id="pBadge" type="text" placeholder="New / Bestseller">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Product Image</label>
-      <input type="file" id="pImage">
-    </div>
-
-    <button class="send-btn" onclick="addProduct()">
-      Add Product →
-    </button>
-
-    <div id="productsList" style="margin-top:40px"></div>
-  </div>
-
+  <!-- SEND UPDATE -->
   <div class="section">
     <div class="section-title">Send <em>Update</em></div>
 
@@ -275,7 +241,6 @@
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
   
-  // تهيئة العميل بعد تحميل المكتبة بنجاح
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const ADMIN_PASSWORD = 'mono2026';
 
