@@ -41,20 +41,36 @@
     .dashboard{display:none}
     .dashboard.visible{display:block}
 
-    /* ── HEADER ── */
+    /* ── HEADER & TABS ── */
     .dash-header{
       display:flex;align-items:center;justify-content:space-between;
       padding:24px 48px;border-bottom:1px solid var(--light);
       position:sticky;top:0;background:var(--white);z-index:10;
     }
     .dash-logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;letter-spacing:.3em}
-    .dash-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+    
+    .dash-tabs{display:flex;gap:24px;margin-left:48px}
+    .tab-btn{
+      background:none;border:none;font-family:'Montserrat',sans-serif;
+      font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
+      padding:8px 0;cursor:pointer;color:var(--gray);position:relative;
+      transition:color .3s;
+    }
+    .tab-btn.active{color:var(--black);font-weight:500}
+    .tab-btn.active::after{
+      content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--black);
+    }
+
     .logout-btn{
       background:none;border:1px solid var(--light);padding:8px 20px;
-      font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.12em;
+      font-family:'Montserrat',sans-serif;font-size sabotage:.6rem;letter-spacing:.12em;
       text-transform:uppercase;cursor:pointer;transition:all .3s;
     }
     .logout-btn:hover{background:var(--black);color:var(--white);border-color:var(--black)}
+
+    /* ── TABS VIEWS ── */
+    .tab-view{display:none}
+    .tab-view.active{display:block}
 
     /* ── STATS ── */
     .stats-row{
@@ -81,7 +97,7 @@
     }
     .section-title em{font-style:italic}
 
-    /* ── SUBSCRIBERS TABLE ── */
+    /* ── TABLES ── */
     .table-wrap{overflow-x:auto}
     table{width:100%;border-collapse:collapse}
     thead tr{border-bottom:1px solid var(--black)}
@@ -90,8 +106,28 @@
     tbody tr{border-bottom:1px solid var(--light);transition:background .2s}
     tbody tr:hover{background:#fafaf8}
     td{font-size:.75rem;padding:14px 16px;color:#333;letter-spacing:.03em}
-    td.date{color:var(--gray);font-size:.65rem}
-    .empty-row{text-align:center;padding:48px;color:var(--gray);font-size:.7rem;letter-spacing:.1em}
+    td input{
+      background:none;border:none;border-bottom:1px solid transparent;
+      font-family:'Montserrat',sans-serif;font-size:.75rem;padding:4px;width:100%;
+      transition:border-color .3s;
+    }
+    td input:focus{outline:none;border-color:var(--black)}
+    
+    /* BADGES */
+    .badge{
+      font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
+      padding:4px 8px;display:inline-block;font-weight:500;
+    }
+    .badge.in-stock{background:#e2f0d9;color:var(--green)}
+    .badge.sold-out{background:#fce4d6;color:var(--red)}
+
+    /* INLINE ACTION BUTTON */
+    .save-inline-btn{
+      background:var(--black);color:var(--white);border:none;
+      padding:6px 12px;font-size:.55rem;letter-spacing:.1em;
+      text-transform:uppercase;cursor:pointer;transition:opacity .2s;
+    }
+    .save-inline-btn:hover{opacity:.8}
 
     .search-bar{
       width:100%;border:none;border-bottom:1px solid var(--light);
@@ -100,26 +136,6 @@
       transition:border-color .3s;
     }
     .search-bar:focus{border-color:var(--black)}
-
-    /* ── SEND UPDATE ── */
-    .form-group{margin-bottom:24px}
-    .form-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:10px}
-    .form-input{
-      width:100%;border:none;border-bottom:1px solid var(--light);
-      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.8rem;
-      outline:none;background:none;transition:border-color .3s;
-    }
-    .form-input:focus{border-color:var(--black)}
-    textarea.form-input{resize:vertical;min-height:120px;border:1px solid var(--light);padding:16px;border-radius:0}
-    textarea.form-input:focus{border-color:var(--black)}
-    .send-btn{
-      background:var(--black);color:var(--white);border:none;
-      padding:16px 48px;font-family:'Montserrat',sans-serif;
-      font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
-      cursor:pointer;transition:background .3s,transform .2s;
-    }
-    .send-btn:hover{background:#222;transform:translateY(-1px)}
-    .send-btn:disabled{background:var(--gray);cursor:not-allowed;transform:none}
 
     /* ── TOAST ── */
     .toast{
@@ -132,17 +148,21 @@
     .toast.show{transform:translateX(-50%) translateY(0)}
 
     /* ── PREVIEW ── */
-    .preview-box{
-      border:1px solid var(--light);padding:32px;
-      font-size:.75rem;line-height:1.8;color:#444;
-      min-height:80px;white-space:pre-line;
-      transition:border-color .3s;
+    .form-group{margin-bottom:24px}
+    .form-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:10px}
+    .form-input{
+      width:100%;border:none;border-bottom:1px solid var(--light);
+      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.8rem;
+      outline:none;background:none;transition:border-color .3s;
     }
-    .preview-label{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
+    .form-input:focus{border-color:var(--black)}
+    textarea.form-input{resize:vertical;min-height:120px;border:1px solid var(--light);padding:16px}
+    .preview-box{border:1px solid var(--light);padding:32px;font-size:.75rem;white-space:pre-line}
 
     @media(max-width:768px){
+      .dash-header{flex-direction:column;gap:16px;padding:20px}
+      .dash-tabs{margin-left:0;margin-top:8px}
       .stats-row{grid-template-columns:1fr}
-      .dash-header{padding:20px 24px}
       .section{padding:32px 24px}
     }
   </style>
@@ -162,267 +182,235 @@
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
-    <div>
+    <div style="display:flex;align-items:center;">
       <div class="dash-logo">MONO</div>
-      <div class="dash-label">Admin Dashboard</div>
+      <div class="dash-tabs">
+        <button class="tab-btn active" onclick="switchTab('subscribersView', this)">Subscribers</button>
+        <button class="tab-btn" onclick="switchTab('productsView', this)">Clothing & Inventory</button>
+      </div>
     </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-num" id="statTotal">—</div>
-      <div class="stat-title">Total Subscribers</div>
+  <div id="subscribersView" class="tab-view active">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-title">Total Subscribers</div></div>
+      <div class="stat-card"><div class="stat-num" id="statToday">—</div><div class="stat-title">Joined Today</div></div>
+      <div class="stat-card"><div class="stat-num" id="statWeek">—</div><div class="stat-title">Joined This Week</div></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statToday">—</div>
-      <div class="stat-title">Joined Today</div>
+    <div class="section">
+      <div class="section-title">All <em>Subscribers</em></div>
+      <input class="search-bar" id="searchBar" placeholder="Search by email..." oninput="filterTable()"/>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Email</th><th>Date Joined</th></tr></thead>
+          <tbody id="subscriberTable"><tr><td colspan="3" style="text-align:center;padding:32px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statWeek">—</div>
-      <div class="stat-title">Joined This Week</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">All <em>Subscribers</em></div>
-    <input class="search-bar" id="searchBar" placeholder="Search by email..." oninput="filterTable()"/>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Email</th>
-            <th>Date Joined</th>
-          </tr>
-        </thead>
-        <tbody id="subscriberTable">
-          <tr><td colspan="3" class="empty-row">Loading...</td></tr>
-        </tbody>
-      </table>
+    <div class="section">
+      <div class="section-title">Send <em>Newsletter Update</em></div>
+      <div class="form-group"><label class="form-label">Subject</label><input class="form-input" id="emailSubject" type="text" oninput="updatePreview()"/></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="emailMessage" oninput="updatePreview()"></textarea></div>
+      <div class="form-group"><div class="preview-box" id="emailPreview">Your message preview...</div></div>
+      <button class="save-inline-btn" style="padding:16px 32px" onclick="sendUpdate()">Send To All Subscribers →</button>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Send <em>Update</em></div>
-
-    <div class="form-group">
-      <label class="form-label">Subject</label>
-      <input class="form-input" id="emailSubject" type="text" placeholder="New Drop — The Black Edition" oninput="updatePreview()"/>
+  <div id="productsView" class="tab-view">
+    <div class="section">
+      <div class="section-title">Manage <em>Clothing & Inventory</em></div>
+      <p style="font-size:0.75rem; color:var(--gray); margin-bottom:24px;">💡 التعديل هنا مربوط مباشرة بجدول الـ Supabase الخاص بك. بمجرد تعديل الاسم، السعر، أو العدد والضغط على Save يتم تحديث قاعدة البيانات وحالة الـ Sold Out تلقائياً.</p>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model Name (الموديل)</th>
+              <th>Price (السعر EGP)</th>
+              <th>Stock Qty (العدد المتاح)</th>
+              <th>Status (الحالة)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTable">
+            <tr><td colspan="5" style="text-align:center;padding:32px;">Loading products...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Message</label>
-      <textarea class="form-input" id="emailMessage" placeholder="Write your message here..." oninput="updatePreview()"></textarea>
-    </div>
-
-    <div class="form-group">
-      <div class="preview-label">Email Preview</div>
-      <div class="preview-box" id="emailPreview">Your message will appear here...</div>
-    </div>
-
-    <button class="send-btn" id="sendBtn" onclick="sendUpdate()">
-      Send to All Subscribers →
-    </button>
   </div>
 
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // ── CONFIG & GLOBALS ──
-  const ADMIN_PASSWORD = 'mono2026';
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
-  
-  // 💡 قمنا بتغيير الاسم هنا إلى db لمنع التعارض تماماً مع المتصفح
-  let db = null; 
-  let allSubscribers = [];
+  const ADMIN_PASSWORD = 'mono2026';
 
-  // ── LOGIN FUNCTION ──
+  let db = null;
+  let allSubscribers = [];
+  let allProducts = [];
+
+  // ── LOGIN ──
   function login() {
     const pass = document.getElementById('passInput').value;
     if (pass === ADMIN_PASSWORD) {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('dashboard').classList.add('visible');
-      
-      // تهيئة الاتصال بعد نجاح الدخول
-      initSupabase();
+      initAndLoad();
     } else {
       document.getElementById('loginError').classList.add('show');
-      document.getElementById('passInput').value = '';
     }
   }
 
   function logout() {
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('dashboard').classList.remove('visible');
-    document.getElementById('passInput').value = '';
   }
 
-  // ── INITIALIZE SUPABASE ──
-  function initSupabase() {
+  // ── TABS SWITCHER ──
+  function switchTab(viewId, btnEl) {
+    document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    btnEl.classList.add('active');
+  }
+
+  // ── INIT & FETCH ──
+  async function initAndLoad() {
     try {
       if (window.supabase) {
-        // نربط الكائن الخارجي بالمتغير db الخاص بنا
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        loadSubscribers();
-      } else {
-        showToast('Supabase library not loaded. Working in offline mode.', 'error');
-        renderTable([]);
+        await Promise.all([loadSubscribers(), loadProducts()]);
       }
-    } catch(e) {
-      console.error("Initialization error:", e);
-    }
-  }
-
-  // ── LOAD DATA ──
-  async function loadSubscribers() {
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`,
-        {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
-        }
-      );
-      allSubscribers = await res.json();
-      renderStats();
-      renderTable(allSubscribers);
     } catch (e) {
-      showToast('Failed to load data from server', 'error');
+      showToast('Offline mode active', 'error');
     }
   }
 
-  // ── STATS ──
-  function renderStats() {
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
-    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-    const total = allSubscribers.length;
-    const today = allSubscribers.filter(s => s.created_at?.startsWith(todayStr)).length;
-    const week  = allSubscribers.filter(s => s.created_at >= weekAgo).length;
-
-    animateNum('statTotal', total);
-    animateNum('statToday', today);
-    animateNum('statWeek', week);
+  async function loadSubscribers() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    allSubscribers = await res.json();
+    renderStats();
+    renderSubscribersTable(allSubscribers);
   }
 
-  function animateNum(id, target) {
-    let count = 0;
-    const el = document.getElementById(id);
-    if(!el) return;
-    const step = Math.ceil(target / 30) || 1;
-    const timer = setInterval(() => {
-      count = Math.min(count + step, target);
-      el.textContent = count;
-      if (count >= target) clearInterval(timer);
-    }, 40);
+  async function loadProducts() {
+    // جلب البيانات من جدول المنتجات المحدث الخاص بك مرتبة حسب الـ id
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    allProducts = await res.json();
+    renderProductsTable(allProducts);
   }
 
-  // ── TABLE ──
-  function renderTable(data) {
-    const tbody = document.getElementById('subscriberTable');
-    if(!tbody) return;
-    if (!data || !data.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="empty-row">No subscribers found</td></tr>`;
+  // ── RENDER PRODUCTS ──
+  function renderProductsTable(products) {
+    const tbody = document.getElementById('productsTable');
+    if (!products || !products.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
       return;
     }
+
+    tbody.innerHTML = products.map(p => {
+      // 💡 هنا تم ربط الحساب بالأعمدة الجديدة (name و stock)
+      // إذا كان المخزون 0 أو أقل، تظهر شارة Sold Out حمراء، وإلا تظهر Available خضراء
+      const isSoldOut = p.stock <= 0;
+      const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
+      const badgeText = isSoldOut ? 'Sold Out' : 'Available';
+
+      return `
+        <tr id="row-${p.id}">
+          <td><input type="text" id="name-${p.id}" value="${p.name || ''}" /></td>
+          <td><input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:100px;"/></td>
+          <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:80px;" oninput="checkStatusLive(${p.id})"/></td>
+          <td><span id="badge-${p.id}" class="${badgeClass}">${badgeText}</span></td>
+          <td><button class="save-inline-btn" onclick="updateProductInDB(${p.id})">Save</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // تحديث حالة الـ Badge في الواجهة فورياً أثناء تغيير الأرقام (تفاعل حي)
+  function checkStatusLive(id) {
+    const stockVal = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+    const badge = document.getElementById(`badge-${id}`);
+    if (stockVal <= 0) {
+      badge.className = 'badge sold-out';
+      badge.textContent = 'Sold Out';
+    } else {
+      badge.className = 'badge in-stock';
+      badge.textContent = 'Available';
+    }
+  }
+
+  // ── UPDATE PRODUCT ACTION ──
+  async function updateProductInDB(id) {
+    const name = document.getElementById(`name-${id}`).value.trim();
+    const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
+    const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+
+    // تحديد الـ badge المناسب ليتم حفظه تلقائياً في قاعدة البيانات أيضاً بناءً على العدد
+    const badge = stock <= 0 ? 'Sold Out' : 'Available';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ name, price, stock, badge })
+      });
+
+      if (res.ok) {
+        showToast('✓ Product info updated successfully', 'success');
+        loadProducts(); // إعادة جلب المنتجات للتأكيد
+      } else {
+        showToast('Failed to update server data', 'error');
+      }
+    } catch (e) {
+      showToast('Network error updating product', 'error');
+    }
+  }
+
+  // ── RENDER SUBSCRIBERS ──
+  function renderSubscribersTable(data) {
+    const tbody = document.getElementById('subscriberTable');
     tbody.innerHTML = data.map((s, i) => `
-      <tr>
-        <td style="color:var(--gray)">${i + 1}</td>
-        <td>${s.email}</td>
-        <td class="date">${formatDate(s.created_at)}</td>
-      </tr>`).join('');
+      <tr><td>${i + 1}</td><td>${s.email}</td><td>${new Date(s.created_at).toLocaleDateString('en-GB')}</td></tr>
+    `).join('');
+  }
+
+  function renderStats() {
+    document.getElementById('statTotal').textContent = allSubscribers.length;
+    document.getElementById('statToday').textContent = allSubscribers.filter(s => s.created_at?.startsWith(new Date().toISOString().slice(0,10))).length;
+    document.getElementById('statWeek').textContent = allSubscribers.filter(s => s.created_at >= new Date(Date.now() - 7*24*60*60*1000).toISOString()).length;
   }
 
   function filterTable() {
     const q = document.getElementById('searchBar').value.toLowerCase();
-    renderTable(allSubscribers.filter(s => s.email.toLowerCase().includes(q)));
+    renderSubscribersTable(allSubscribers.filter(s => s.email.toLowerCase().includes(q)));
   }
 
-  function formatDate(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  // ── PREVIEW ──
   function updatePreview() {
-    const subject = document.getElementById('emailSubject').value;
-    const message = document.getElementById('emailMessage').value;
-    const preview = document.getElementById('emailPreview');
-    if(!preview) return;
-    if (subject || message) {
-      preview.textContent = `${subject ? subject + '\n\n' : ''}${message}`;
-    } else {
-      preview.textContent = 'Your message will appear here...';
-    }
+    const s = document.getElementById('emailSubject').value;
+    const m = document.getElementById('emailMessage').value;
+    document.getElementById('emailPreview').textContent = s || m ? `${s}\n\n${m}` : 'Your message preview...';
   }
 
-  // ── SEND UPDATE ──
-  async function sendUpdate() {
-    const subject = document.getElementById('emailSubject').value.trim();
-    const message = document.getElementById('emailMessage').value.trim();
-    const btn = document.getElementById('sendBtn');
-
-    if (!subject || !message) {
-      showToast('Please fill in subject and message', 'error');
-      return;
-    }
-    if (!allSubscribers.length) {
-      showToast('No subscribers to send to', 'error');
-      return;
-    }
-
-    const confirm = window.confirm(
-      `Send to ${allSubscribers.length} subscribers?\n\nSubject: "${subject}"`
-    );
-    if (!confirm) return;
-
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-
-    try {
-      const res = await fetch('/api/send-update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject,
-          message,
-          password: ADMIN_PASSWORD
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`✓ Sent to ${data.sent} subscribers`, 'success');
-        document.getElementById('emailSubject').value = '';
-        document.getElementById('emailMessage').value = '';
-        updatePreview();
-      } else {
-        showToast('Failed to send', 'error');
-      }
-    } catch (e) {
-      showToast('Something went wrong', 'error');
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Send to All Subscribers →';
-  }
-
-  // ── TOAST ──
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    if(!t) return;
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
+    t.textContent = msg; t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
-
-  function addProduct(){
-    alert('Products panel connected successfully');
-  }
 </script>
+</body>
+</html>
