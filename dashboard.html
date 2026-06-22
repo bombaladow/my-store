@@ -479,6 +479,7 @@
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
+      // 1. محاولة رفع الصورة للـ Storage
       const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/PRODUCT/${filePath}`, {
         method: 'POST',
         headers: {
@@ -489,12 +490,16 @@
         body: imageFile
       });
 
-      if (!uploadRes.ok) throw new Error('Image upload failed');
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json().catch(() => ({}));
+        throw new Error(`Storage Error: ${errData.message || uploadRes.statusText}`);
+      }
 
       const image_path = `${SUPABASE_URL}/storage/v1/object/public/PRODUCT/${filePath}`;
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
+      // 2. محاولة الحفظ في جدول الـ products
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
         headers: {
@@ -514,11 +519,12 @@
         document.getElementById('newProdImage').value = '';
         loadProducts();
       } else {
-        showToast('Failed to insert product record', 'error');
+        const errData = await insertRes.json().catch(() => ({}));
+        throw new Error(`Database Error: ${errData.message || insertRes.statusText}`);
       }
     } catch (error) {
       console.error(error);
-      showToast('An error occurred during addition', 'error');
+      showToast(error.message, 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Upload Image & Add Product →';
