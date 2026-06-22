@@ -63,7 +63,7 @@
 
     .logout-btn{
       background:none;border:1px solid var(--light);padding:8px 20px;
-      font-family:'Montserrat',sans-serif;font-size sabotage:.6rem;letter-spacing:.12em;
+      font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.12em;
       text-transform:uppercase;cursor:pointer;transition:all .3s;
     }
     .logout-btn:hover{background:var(--black);color:var(--white);border-color:var(--black)}
@@ -121,6 +121,9 @@
     .badge.in-stock{background:#e2f0d9;color:var(--green)}
     .badge.sold-out{background:#fce4d6;color:var(--red)}
 
+    /* IMAGES */
+    .prod-img{width:40px;height:40px;object-fit:cover;border-radius:2px;background:#eee}
+
     /* INLINE ACTION BUTTON */
     .save-inline-btn{
       background:var(--black);color:var(--white);border:none;
@@ -128,6 +131,7 @@
       text-transform:uppercase;cursor:pointer;transition:opacity .2s;
     }
     .save-inline-btn:hover{opacity:.8}
+    .save-inline-btn:disabled{background:var(--gray);cursor:not-allowed}
 
     .search-bar{
       width:100%;border:none;border-bottom:1px solid var(--light);
@@ -147,7 +151,7 @@
     .toast.error{background:var(--red);color:var(--white)}
     .toast.show{transform:translateX(-50%) translateY(0)}
 
-    /* ── PREVIEW ── */
+    /* ── FORMS ── */
     .form-group{margin-bottom:24px}
     .form-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:10px}
     .form-input{
@@ -159,16 +163,25 @@
     textarea.form-input{resize:vertical;min-height:120px;border:1px solid var(--light);padding:16px}
     .preview-box{border:1px solid var(--light);padding:32px;font-size:.75rem;white-space:pre-line}
 
+    /* GRID FOR PRODUCT FORM */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 24px;
+    }
+
     @media(max-width:768px){
       .dash-header{flex-direction:column;gap:16px;padding:20px}
       .dash-tabs{margin-left:0;margin-top:8px}
       .stats-row{grid-template-columns:1fr}
       .section{padding:32px 24px}
+      .form-grid {grid-template-columns: 1fr}
     }
   </style>
 </head>
 <body>
 
+<!-- ── LOGIN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">MONO</div>
   <div class="login-sub">Admin Dashboard</div>
@@ -177,8 +190,10 @@
   <div class="login-error" id="loginError">Incorrect password</div>
 </div>
 
+<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
@@ -192,6 +207,7 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
+  <!-- VIEW 1: SUBSCRIBERS -->
   <div id="subscribersView" class="tab-view active">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-title">Total Subscribers</div></div>
@@ -217,28 +233,66 @@
     </div>
   </div>
 
+  <!-- VIEW 2: PRODUCTS & INVENTORY -->
   <div id="productsView" class="tab-view">
+    
+    <!-- قِسم عرض وتعديل المنتجات الحالية -->
     <div class="section">
       <div class="section-title">Manage <em>Clothing & Inventory</em></div>
-      <p style="font-size:0.75rem; color:var(--gray); margin-bottom:24px;">💡 التعديل هنا مربوط مباشرة بجدول الـ Supabase الخاص بك. بمجرد تعديل الاسم، السعر، أو العدد والضغط على Save يتم تحديث قاعدة البيانات وحالة الـ Sold Out تلقائياً.</p>
-      
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th>Image</th>
               <th>Model Name (الموديل)</th>
-              <th>Price (السعر EGP)</th>
-              <th>Stock Qty (العدد المتاح)</th>
+              <th>Price (EGP)</th>
+              <th>Stock (العدد)</th>
               <th>Status (الحالة)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="productsTable">
-            <tr><td colspan="5" style="text-align:center;padding:32px;">Loading products...</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:32px;">Loading products...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- قِسم إضافة منتج جديد ورفع الصورة (الجديد 🔥) -->
+    <div class="section" style="background: #fafaf8;">
+      <div class="section-title">Add New <em>Clothing Item</em></div>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Model Name (اسم الموديل)*</label>
+          <input type="text" id="newProdName" class="form-input" placeholder="e.g. MONO Heavyweight Tee"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (السعر ج.م)*</label>
+          <input type="number" id="newProdPrice" class="form-input" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity (الكمية المتاحة)*</label>
+          <input type="number" id="newProdStock" class="form-input" placeholder="0"/>
+        </div>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
+        <div class="form-group">
+          <label class="form-label">Sub-title / Category (الوصف الفرعي)</label>
+          <input type="text" id="newProdSub" class="form-input" placeholder="e.g. Streetwear Edition"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Image (صورة المنتج)*</label>
+          <input type="file" id="newProdImage" class="form-input" accept="image/*" style="border:none; padding: 6px 0;"/>
+        </div>
+      </div>
+
+      <button id="addProductBtn" class="save-inline-btn" style="padding:16px 32px; margin-top: 16px;" onclick="addNewProductWithImage()">
+        Upload Image & Add Product →
+      </button>
+    </div>
+
   </div>
 
 </div>
@@ -301,8 +355,7 @@
   }
 
   async function loadProducts() {
-    // جلب البيانات من جدول المنتجات المحدث الخاص بك مرتبة حسب الـ id
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.desc`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     allProducts = await res.json();
@@ -313,22 +366,24 @@
   function renderProductsTable(products) {
     const tbody = document.getElementById('productsTable');
     if (!products || !products.length) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = products.map(p => {
-      // 💡 هنا تم ربط الحساب بالأعمدة الجديدة (name و stock)
-      // إذا كان المخزون 0 أو أقل، تظهر شارة Sold Out حمراء، وإلا تظهر Available خضراء
       const isSoldOut = p.stock <= 0;
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
+      
+      // تجهيز رابط الصورة المخزن أو وضع صورة افتراضية فارغة إذا لم ترفع
+      const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/40';
 
       return `
         <tr id="row-${p.id}">
+          <td><img src="${displayImg}" class="prod-img" alt="product"/></td>
           <td><input type="text" id="name-${p.id}" value="${p.name || ''}" /></td>
-          <td><input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:100px;"/></td>
-          <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:80px;" oninput="checkStatusLive(${p.id})"/></td>
+          <td><input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:90px;"/></td>
+          <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:70px;" oninput="checkStatusLive(${p.id})"/></td>
           <td><span id="badge-${p.id}" class="${badgeClass}">${badgeText}</span></td>
           <td><button class="save-inline-btn" onclick="updateProductInDB(${p.id})">Save</button></td>
         </tr>
@@ -336,7 +391,6 @@
     }).join('');
   }
 
-  // تحديث حالة الـ Badge في الواجهة فورياً أثناء تغيير الأرقام (تفاعل حي)
   function checkStatusLive(id) {
     const stockVal = parseInt(document.getElementById(`stock-${id}`).value) || 0;
     const badge = document.getElementById(`badge-${id}`);
@@ -349,13 +403,11 @@
     }
   }
 
-  // ── UPDATE PRODUCT ACTION ──
+  // ── UPDATE INLINE PRODUCT ──
   async function updateProductInDB(id) {
     const name = document.getElementById(`name-${id}`).value.trim();
     const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
     const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
-
-    // تحديد الـ badge المناسب ليتم حفظه تلقائياً في قاعدة البيانات أيضاً بناءً على العدد
     const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
     try {
@@ -364,24 +416,112 @@
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name, price, stock, badge })
       });
 
       if (res.ok) {
-        showToast('✓ Product info updated successfully', 'success');
-        loadProducts(); // إعادة جلب المنتجات للتأكيد
+        showToast('✓ Updated successfully', 'success');
+        loadProducts();
       } else {
-        showToast('Failed to update server data', 'error');
+        showToast('Failed to update data', 'error');
       }
     } catch (e) {
-      showToast('Network error updating product', 'error');
+      showToast('Network error', 'error');
     }
   }
 
-  // ── RENDER SUBSCRIBERS ──
+  // ── ADD NEW PRODUCT WITH IMAGE UPLOAD (🔥 دالة الرفع الجديدة) ──
+  async function addNewProductWithImage() {
+    const name = document.getElementById('newProdName').value.trim();
+    const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+    const stock = parseInt(document.getElementById('newProdStock').value) || 0;
+    const sub = document.getElementById('newProdSub').value.trim();
+    const imageFile = document.getElementById('newProdImage').files[0];
+    const btn = document.getElementById('addProductBtn');
+
+    // التأكد من ملء الحقول المطلوبة
+    if (!name || !price || !imageFile) {
+      showToast('Please enter Name, Price and choose an Image!', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Uploading Image...';
+
+    try {
+      // 1. توليد اسم عشوائي وفريد للصورة لمنع تداخل الأسماء في الاستورج
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // 2. رفع الملف إلى باكت 'products' في Supabase Storage عبر Fetch API
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/products/${filePath}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': imageFile.type
+        },
+        body: imageFile
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error('Image upload failed');
+      }
+
+      // 3. الحصول على رابط الصورة المباشر والـ Public بعد الرفع بنجاح
+      const image_path = `${SUPABASE_URL}/storage/v1/object/public/products/${filePath}`;
+
+      // 4. إدخال المنتج الجديد في جدول الـ products المحدث بتاعك
+      btn.textContent = 'Saving Product to Database...';
+      const badge = stock <= 0 ? 'Sold Out' : 'Available';
+
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          price,
+          stock,
+          sub,
+          image_path,
+          badge,
+          active: true
+        })
+      });
+
+      if (insertRes.ok) {
+        showToast('✓ Product added successfully!', 'success');
+        
+        // تفريغ الحقول بعد النجاح
+        document.getElementById('newProdName').value = '';
+        document.getElementById('newProdPrice').value = '';
+        document.getElementById('newProdStock').value = '';
+        document.getElementById('newProdSub').value = '';
+        document.getElementById('newProdImage').value = '';
+        
+        // إعادة تحميل الجدول لرؤية المنتج الجديد فوراً في الأعلى
+        loadProducts();
+      } else {
+        showToast('Failed to insert product record', 'error');
+      }
+
+    } catch (error) {
+      console.error(error);
+      showToast('An error occurred during addition', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Upload Image & Add Product →';
+    }
+  }
+
+  // ── SUBSCRIBERS RENDER ──
   function renderSubscribersTable(data) {
     const tbody = document.getElementById('subscriberTable');
     tbody.innerHTML = data.map((s, i) => `
