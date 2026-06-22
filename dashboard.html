@@ -258,7 +258,7 @@
       </div>
     </div>
 
-    <!-- قِسم إضافة منتج جديد ورفع الصورة (الجديد 🔥) -->
+    <!-- قِسم إضافة منتج جديد ورفع الصورة -->
     <div class="section" style="background: #fafaf8;">
       <div class="section-title">Add New <em>Clothing Item</em></div>
       
@@ -346,20 +346,30 @@
   }
 
   async function loadSubscribers() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    allSubscribers = await res.json();
-    renderStats();
-    renderSubscribersTable(allSubscribers);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error('Fetch failed');
+      allSubscribers = await res.json();
+      renderStats();
+      renderSubscribersTable(allSubscribers);
+    } catch (e) {
+      showToast('Offline mode active', 'error');
+    }
   }
 
   async function loadProducts() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.desc`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    allProducts = await res.json();
-    renderProductsTable(allProducts);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error('Fetch failed');
+      allProducts = await res.json();
+      renderProductsTable(allProducts);
+    } catch (e) {
+      showToast('Offline mode active', 'error');
+    }
   }
 
   // ── RENDER PRODUCTS ──
@@ -375,7 +385,6 @@
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
       
-      // تجهيز رابط الصورة المخزن أو وضع صورة افتراضية فارغة إذا لم ترفع
       const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/40';
 
       return `
@@ -432,7 +441,7 @@
     }
   }
 
-  // ── ADD NEW PRODUCT WITH IMAGE UPLOAD (🔥 دالة الرفع الجديدة) ──
+  // ── ADD NEW PRODUCT WITH IMAGE UPLOAD ──
   async function addNewProductWithImage() {
     const name = document.getElementById('newProdName').value.trim();
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
@@ -441,7 +450,6 @@
     const imageFile = document.getElementById('newProdImage').files[0];
     const btn = document.getElementById('addProductBtn');
 
-    // التأكد من ملء الحقول المطلوبة
     if (!name || !price || !imageFile) {
       showToast('Please enter Name, Price and choose an Image!', 'error');
       return;
@@ -451,13 +459,12 @@
     btn.textContent = 'Uploading Image...';
 
     try {
-      // 1. توليد اسم عشوائي وفريد للصورة لمنع تداخل الأسماء في الاستورج
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // 2. رفع الملف إلى باكت 'products' في Supabase Storage عبر Fetch API
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/products/${filePath}`, {
+      // تعديل هنا: الرفع على باكت PRODUCT الكابيتال
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/PRODUCT/${filePath}`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -471,10 +478,9 @@
         throw new Error('Image upload failed');
       }
 
-      // 3. الحصول على رابط الصورة المباشر والـ Public بعد الرفع بنجاح
-      const image_path = `${SUPABASE_URL}/storage/v1/object/public/products/${filePath}`;
+      // تعديل هنا: جلب الرابط المباشر من باكت PRODUCT الكابيتال
+      const image_path = `${SUPABASE_URL}/storage/v1/object/public/PRODUCT/${filePath}`;
 
-      // 4. إدخال المنتج الجديد في جدول الـ products المحدث بتاعك
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
@@ -499,14 +505,12 @@
       if (insertRes.ok) {
         showToast('✓ Product added successfully!', 'success');
         
-        // تفريغ الحقول بعد النجاح
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdStock').value = '';
         document.getElementById('newProdSub').value = '';
         document.getElementById('newProdImage').value = '';
         
-        // إعادة تحميل الجدول لرؤية المنتج الجديد فوراً في الأعلى
         loadProducts();
       } else {
         showToast('Failed to insert product record', 'error');
