@@ -208,6 +208,45 @@
     </div>
   </div>
 
+<div class="section">
+  <div class="section-title">Products <em>Management</em></div>
+
+  <div class="form-group">
+    <label class="form-label">Product Name</label>
+    <input class="form-input" id="pName" type="text">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Description</label>
+    <input class="form-input" id="pSub" type="text">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Price</label>
+    <input class="form-input" id="pPrice" type="number">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Stock</label>
+    <input class="form-input" id="pStock" type="number">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Badge</label>
+    <input class="form-input" id="pBadge" type="text" placeholder="New / Bestseller">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Product Image</label>
+    <input type="file" id="pImage">
+  </div>
+
+  <button class="send-btn" onclick="addProduct()">
+    Add Product →
+  </button>
+
+  <div id="productsList" style="margin-top:40px"></div>
+</div>
   <!-- SEND UPDATE -->
   <div class="section">
     <div class="section-title">Send <em>Update</em></div>
@@ -238,6 +277,10 @@
   // ── CONFIG ──
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
+  const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
   const ADMIN_PASSWORD = 'mono2026'; // غيّره لما تحط ADMIN_PASSWORD في Vercel
 
   let allSubscribers = [];
@@ -402,6 +445,10 @@
     t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  async function addProduct(){
+  alert('Products panel connected successfully');
+}
 </script>
 </body>
 </html>
