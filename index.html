@@ -10,10 +10,7 @@
     :root { --black: #0a0a0a; --white: #f9f9f7; --gray: #888; --light-gray: #e8e8e5; --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     html { scroll-behavior: smooth; }
     body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; cursor: none; }
-    .cursor { width: 10px; height: 10px; background: var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; }
-    .cursor-ring { width: 36px; height: 36px; border: 1px solid var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); opacity: 0.5; }
-    @media (max-width: 768px) { body { cursor: auto; } .cursor, .cursor-ring { display: none; } }
-    .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+        .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
     .loader.hidden { opacity: 0; visibility: hidden; }
     .loader-text { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--white); letter-spacing: 0.4em; animation: loaderPulse 1.5s ease-in-out infinite; }
     @keyframes loaderPulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
@@ -155,6 +152,12 @@
     .checkout-input { width: 100%; border: none; border-bottom: 1px solid var(--light-gray); padding: 10px 0; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; outline: none; background: none; transition: border-color 0.3s; }
     .checkout-input:focus { border-color: var(--black); }
     .checkout-input::placeholder { color: var(--gray); }
+    .checkout-choice { display: grid; gap: 12px; margin: 28px 0; }
+    .choice-btn { width: 100%; padding: 15px 18px; border: 1px solid var(--light-gray); background: none; color: var(--black); cursor: none; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; transition: all 0.3s ease; }
+    .choice-btn:hover { border-color: var(--black); background: var(--black); color: var(--white); }
+    .choice-panel { display: none; margin-top: 20px; }
+    .choice-panel.open { display: block; }
+    .choice-note { font-size: 0.68rem; color: var(--gray); line-height: 1.8; margin-top: 18px; }
     .newsletter { background: var(--black); color: var(--white); padding: 100px 60px; text-align: center; }
     .newsletter-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; margin-bottom: 16px; }
     .newsletter-sub { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.1em; margin-bottom: 48px; }
@@ -272,6 +275,26 @@
     </div>
   </div>
 
+  <!-- CUSTOMER CHOICE MODAL -->
+  <div class="modal-overlay" id="customerChoiceOverlay">
+    <div class="modal" style="width:500px;max-width:90vw">
+      <button class="modal-close" onclick="closeCustomerChoice()">x</button>
+      <div class="modal-product-name" style="margin-bottom:4px">How would you like to continue?</div>
+      <div class="modal-product-price">Choose an option before checkout</div>
+      <div class="checkout-choice">
+        <button class="choice-btn" onclick="showCustomerEmail('gmail')">Continue with Gmail</button>
+        <button class="choice-btn" onclick="showCustomerEmail('email')">Enter Email</button>
+        <button class="choice-btn" onclick="continueAsGuest()">Continue as Guest</button>
+      </div>
+      <div class="choice-panel" id="customerEmailPanel">
+        <div class="modal-label" id="customerEmailLabel">Email</div>
+        <input id="customer-email" class="checkout-input" type="email" placeholder="you@email.com"/>
+        <button class="modal-add-btn" style="margin-top:22px" onclick="continueWithCustomerEmail()">Continue</button>
+      </div>
+      <p class="choice-note">Guest checkout keeps the order form simple. Email helps us send order confirmation and delivery updates.</p>
+    </div>
+  </div>
+
   <!-- CHECKOUT MODAL -->
   <div class="modal-overlay" id="checkoutOverlay">
     <div class="modal" style="width:520px;max-width:90vw">
@@ -303,7 +326,7 @@
   <section class="hero">
     <div class="hero-left">
       <div class="hero-tag">SS 2026 — Pure Cotton</div>
-      <h1 class="hero-title">Less is<br><em>everything.</em></h1>
+      <h1 class="hero-title">You Don't Need More<br><em>You Need Mono.</em></h1>
       <a href="#products" class="hero-cta">Shop the Collection</a>
     </div>
     <div class="hero-right">
@@ -426,6 +449,8 @@
     let cart = [];
     let currentProduct = null;
     let selectedSize = null;
+    let customerChoice = 'guest';
+    let customerEmailMode = 'email';
 
     function toggleCart() {
       document.getElementById('cartSidebar').classList.toggle('open');
@@ -487,6 +512,8 @@
 
     function openCheckout() {
       if (!cart.length) { showNotif('Your bag is empty'); return; }
+      document.getElementById('customerChoiceOverlay').classList.add('open');
+      return;
       const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
       const count = cart.reduce((a, i) => a + i.qty, 0);
       document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} · $${total}`;
@@ -496,12 +523,57 @@
     }
     function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
 
+    function closeCustomerChoice() {
+      document.getElementById('customerChoiceOverlay').classList.remove('open');
+      document.getElementById('customerEmailPanel').classList.remove('open');
+      document.getElementById('customer-email').value = '';
+    }
+
+    function showCustomerEmail(mode) {
+      customerEmailMode = mode;
+      customerChoice = mode;
+      const label = document.getElementById('customerEmailLabel');
+      const input = document.getElementById('customer-email');
+      label.textContent = mode === 'gmail' ? 'Gmail Address' : 'Email Address';
+      input.placeholder = mode === 'gmail' ? 'you@gmail.com' : 'you@email.com';
+      document.getElementById('customerEmailPanel').classList.add('open');
+      input.focus();
+    }
+
+    function continueWithCustomerEmail() {
+      const email = document.getElementById('customer-email').value.trim();
+      if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
+      if (customerEmailMode === 'gmail' && !email.toLowerCase().endsWith('@gmail.com')) {
+        showNotif('Please enter a Gmail address');
+        return;
+      }
+      document.getElementById('co-email').value = email;
+      showCheckoutForm();
+    }
+
+    function continueAsGuest() {
+      customerChoice = 'guest';
+      document.getElementById('co-email').value = '';
+      showCheckoutForm();
+    }
+
+    function showCheckoutForm() {
+      const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
+      const count = cart.reduce((a, i) => a + i.qty, 0);
+      document.getElementById('co-email').placeholder = customerChoice === 'guest' ? 'Optional for guest checkout' : 'ahmed@email.com';
+      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} - $${total}`;
+      document.getElementById('cartSidebar').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('open');
+      closeCustomerChoice();
+      document.getElementById('checkoutOverlay').classList.add('open');
+    }
+
     async function submitOrder() {
       const name    = document.getElementById('co-name').value.trim();
       const email   = document.getElementById('co-email').value.trim();
       const phone   = document.getElementById('co-phone').value.trim();
       const address = document.getElementById('co-address').value.trim();
-      if (!name || !email || !phone || !address) { showNotif('Please fill in all fields'); return; }
+      if (!name || !phone || !address || (customerChoice !== 'guest' && !email)) { showNotif('Please fill in all fields'); return; }
       const btn = document.getElementById('placeOrderBtn');
       btn.textContent = 'Placing order...';
       btn.disabled = true;
