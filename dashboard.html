@@ -149,7 +149,6 @@
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">MONO</div>
   <div class="login-sub">Admin Dashboard</div>
@@ -158,10 +157,8 @@
   <div class="login-error" id="loginError">Incorrect password</div>
 </div>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
-<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
@@ -172,7 +169,6 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <!-- STATS -->
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-num" id="statTotal">—</div>
@@ -188,7 +184,6 @@
     </div>
   </div>
 
-  <!-- SUBSCRIBERS -->
   <div class="section">
     <div class="section-title">All <em>Subscribers</em></div>
     <input class="search-bar" id="searchBar" placeholder="Search by email..." oninput="filterTable()"/>
@@ -208,7 +203,6 @@
     </div>
   </div>
 
-  <!-- SEND UPDATE -->
   <div class="section">
     <div class="section-title">Send <em>Update</em></div>
 
@@ -233,26 +227,27 @@
   </div>
 
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // ── CONFIG ──
+  // ── CONFIG & GLOBALS ──
+  const ADMIN_PASSWORD = 'mono2026';
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
   
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const ADMIN_PASSWORD = 'mono2026';
-
+  // 💡 قمنا بتغيير الاسم هنا إلى db لمنع التعارض تماماً مع المتصفح
+  let db = null; 
   let allSubscribers = [];
 
-  // ── LOGIN ──
+  // ── LOGIN FUNCTION ──
   function login() {
     const pass = document.getElementById('passInput').value;
     if (pass === ADMIN_PASSWORD) {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('dashboard').classList.add('visible');
-      loadSubscribers();
+      
+      // تهيئة الاتصال بعد نجاح الدخول
+      initSupabase();
     } else {
       document.getElementById('loginError').classList.add('show');
       document.getElementById('passInput').value = '';
@@ -265,7 +260,23 @@
     document.getElementById('passInput').value = '';
   }
 
-  // ── LOAD SUBSCRIBERS ──
+  // ── INITIALIZE SUPABASE ──
+  function initSupabase() {
+    try {
+      if (window.supabase) {
+        // نربط الكائن الخارجي بالمتغير db الخاص بنا
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        loadSubscribers();
+      } else {
+        showToast('Supabase library not loaded. Working in offline mode.', 'error');
+        renderTable([]);
+      }
+    } catch(e) {
+      console.error("Initialization error:", e);
+    }
+  }
+
+  // ── LOAD DATA ──
   async function loadSubscribers() {
     try {
       const res = await fetch(
@@ -281,7 +292,7 @@
       renderStats();
       renderTable(allSubscribers);
     } catch (e) {
-      showToast('Failed to load data', 'error');
+      showToast('Failed to load data from server', 'error');
     }
   }
 
@@ -303,7 +314,8 @@
   function animateNum(id, target) {
     let count = 0;
     const el = document.getElementById(id);
-    const step = Math.ceil(target / 30);
+    if(!el) return;
+    const step = Math.ceil(target / 30) || 1;
     const timer = setInterval(() => {
       count = Math.min(count + step, target);
       el.textContent = count;
@@ -314,8 +326,9 @@
   // ── TABLE ──
   function renderTable(data) {
     const tbody = document.getElementById('subscriberTable');
-    if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="empty-row">No subscribers yet</td></tr>`;
+    if(!tbody) return;
+    if (!data || !data.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty-row">No subscribers found</td></tr>`;
       return;
     }
     tbody.innerHTML = data.map((s, i) => `
@@ -342,6 +355,7 @@
     const subject = document.getElementById('emailSubject').value;
     const message = document.getElementById('emailMessage').value;
     const preview = document.getElementById('emailPreview');
+    if(!preview) return;
     if (subject || message) {
       preview.textContent = `${subject ? subject + '\n\n' : ''}${message}`;
     } else {
@@ -402,6 +416,7 @@
   // ── TOAST ──
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
+    if(!t) return;
     t.textContent = msg;
     t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
@@ -411,5 +426,3 @@
     alert('Products panel connected successfully');
   }
 </script>
-</body>
-</html>
