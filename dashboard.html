@@ -6,181 +6,208 @@
   <title>MONO — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{--black:#0a0a0a;--white:#f9f9f7;--gray:#888;--light:#e8e8e5;--green:#2d6a4f;--red:#c1121f}
-    body{background:var(--white);color:var(--black);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0a0a0a;
+      --white: #f9f9f7;
+      --gray: #888;
+      --light: #e8e8e5;
+      --green: #2d6a4f;
+      --red: #c1121f;
+    }
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
 
-    /* ── LOGIN ── */
-    .login-screen{\r
-      position:fixed;inset:0;background:var(--black);\r
-      display:flex;flex-direction:column;align-items:center;justify-content:center;\r
-      z-index:999;transition:opacity .6s ease,visibility .6s ease;\r
+    /* ── LOGIN SCREEN ── */
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: opacity .6s ease, visibility .6s ease;
     }
-    .login-screen.hidden{opacity:0;visibility:hidden}
-    .login-logo{font-family:'Cormorant Garamond',serif;font-size:3rem;letter-spacing:.4em;color:var(--white);margin-bottom:8px}
-    .login-sub{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:56px}
-    .login-input{\r
-      background:none;border:none;border-bottom:1px solid rgba(255,255,255,.3);\r
-      color:var(--white);padding:12px 0;width:280px;font-family:'Montserrat',sans-serif;\r
-      font-size:.8rem;letter-spacing:.08em;outline:none;text-align:center;\r
-      transition:border-color .3s;\r
+    .login-screen.hidden { opacity: 0; visibility: hidden; }
+    .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 3rem; letter-spacing: .4em; color: var(--white); margin-bottom: 8px; }
+    .login-sub { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gray); margin-bottom: 56px; }
+    .login-input {
+      background: none;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,.3);
+      color: var(--white);
+      padding: 12px 0;
+      width: 280px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .8rem;
+      letter-spacing: .08em;
+      outline: none;
+      text-align: center;
+      transition: border-color .3s;
     }
-    .login-input::placeholder{color:var(--gray)}
-    .login-input:focus{border-color:var(--white)}
-    .login-btn{\r
-      margin-top:32px;background:none;border:1px solid rgba(255,255,255,.3);\r
-      color:var(--white);padding:13px 48px;font-family:'Montserrat',sans-serif;\r
-      font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;\r
-      transition:all .3s;\r
+    .login-input::placeholder { color: var(--gray); }
+    .login-input:focus { border-color: var(--white); }
+    .login-btn {
+      margin-top: 32px;
+      background: none;
+      border: 1px solid rgba(255,255,255,.3);
+      color: var(--white);
+      padding: 13px 48px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .65rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .3s;
     }
-    .login-btn:hover{background:var(--white);color:var(--black)}
-    .login-error{font-size:.65rem;color:#e63946;margin-top:16px;letter-spacing:.08em;opacity:0;transition:opacity .3s}
-    .login-error.show{opacity:1}
+    .login-btn:hover { background: var(--white); color: var(--black); }
+    .login-error { font-size: .65rem; color: #e63946; margin-top: 16px; letter-spacing: .08em; opacity: 0; transition: opacity .3s; }
+    .login-error.show { opacity: 1; }
 
     /* ── LAYOUT ── */
-    .dashboard{display:none}
-    .dashboard.visible{display:block}
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
 
     /* ── HEADER & TABS ── */
-    .dash-header{\r
-      display:flex;align-items:center;justify-content:space-between;\r
-      padding:24px 48px;border-bottom:1px solid var(--light);\r
-      position:sticky;top:0;background:var(--white);z-index:10;\r
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      border-bottom: 1px solid var(--light);
+      position: sticky;
+      top: 0;
+      background: var(--white);
+      z-index: 10;
     }
-    .dash-logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;letter-spacing:.3em}
-    
-    .dash-tabs{display:flex;gap:24px;margin-left:48px}
-    .tab-btn{\r
-      background:none;border:none;font-family:'Montserrat',sans-serif;\r
-      font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;\r
-      padding:8px 0;cursor:pointer;color:var(--gray);position:relative;\r
-      transition:color .3s;\r
+    .dash-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; letter-spacing: .3em; }
+    .dash-tabs { display: flex; gap: 24px; margin-left: 48px; }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      padding: 8px 0;
+      cursor: pointer;
+      color: var(--gray);
+      position: relative;
+      transition: color .3s;
     }
-    .tab-btn.active{color:var(--black);font-weight:500}
-    .tab-btn.active::after{\r
-      content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--black);\r
+    .tab-btn.active { color: var(--black); font-weight: 500; }
+    .tab-btn.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--black);
     }
-
-    .logout-btn{\r
-      background:none;border:1px solid var(--light);padding:8px 20px;\r
-      font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.12em;\r
-      text-transform:uppercase;cursor:pointer;transition:all .3s;\r
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--light);
+      padding: 8px 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .3s;
     }
-    .logout-btn:hover{background:var(--black);color:var(--white);border-color:var(--black)}
+    .logout-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
 
     /* ── TABS VIEWS ── */
-    .tab-view{display:none}
-    .tab-view.active{display:block}
+    .tab-view { display: none; }
+    .tab-view.active { display: block; }
 
     /* ── STATS ── */
-    .stats-row{\r
-      display:grid;grid-template-columns:repeat(3,1fr);\r
-      gap:1px;background:var(--light);margin:0;\r
-    }
-    .stat-card{\r
-      background:var(--white);padding:48px;\r
-      transition:background .4s;\r
-    }
-    .stat-card:hover{background:#fafaf8}
-    .stat-num{\r
-      font-family:'Cormorant Garamond',serif;\r
-      font-size:3.5rem;font-weight:300;line-height:1;margin-bottom:8px;\r
-    }
-    .stat-title{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--light); margin: 0; }
+    .stat-card { background: var(--white); padding: 48px; transition: background .4s; }
+    .stat-card:hover { background: #fafaf8; }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; font-weight: 300; line-height: 1; margin-bottom: 8px; }
+    .stat-title { font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gray); }
 
     /* ── SECTIONS ── */
-    .section{padding:48px}
-    .section+.section{border-top:1px solid var(--light)}
-    .section-title{\r
-      font-family:'Cormorant Garamond',serif;\r
-      font-size:1.8rem;font-weight:300;margin-bottom:32px;\r
-    }
-    .section-title em{font-style:italic}
+    .section { padding: 48px; }
+    .section + .section { border-top: 1px solid var(--light); }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 32px; }
+    .section-title em { font-style: italic; }
 
     /* ── TABLES ── */
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse}
-    thead tr{border-bottom:1px solid var(--black)}
-    th{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;\r
-       padding:12px 16px;text-align:left;font-weight:500}
-    tbody tr{border-bottom:1px solid var(--light);transition:background .2s}
-    tbody tr:hover{background:#fafaf8}
-    td{font-size:.75rem;padding:14px 16px;color:#333;letter-spacing:.03em}
-    td input{\r
-      background:none;border:none;border-bottom:1px solid transparent;\r
-      font-family:'Montserrat',sans-serif;font-size:.75rem;padding:4px;width:100%;\r
-      transition:border-color .3s;\r
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { border-bottom: 1px solid var(--black); }
+    th { font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; padding: 12px 16px; text-align: left; font-weight: 500; }
+    tbody tr { border-bottom: 1px solid var(--light); transition: background .2s; }
+    tbody tr:hover { background: #fafaf8; }
+    td { font-size: .75rem; padding: 14px 16px; color: #333; letter-spacing: .03em; }
+    td input {
+      background: none; border: none; border-bottom: 1px solid transparent;
+      font-family: 'Montserrat', sans-serif; font-size: .75rem; padding: 4px; width: 100%;
+      transition: border-color .3s;
     }
-    td input:focus{outline:none;border-color:var(--black)}
+    td input:focus { outline: none; border-color: var(--black); }
     
-    /* BADGES */
-    .badge{\r
-      font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;\r
-      padding:4px 8px;display:inline-block;font-weight:500;\r
-    }
-    .badge.in-stock{background:#e2f0d9;color:var(--green)}
-    .badge.sold-out{background:#fce4d6;color:var(--red)}
+    .badge { font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; display: inline-block; font-weight: 500; }
+    .badge.contained, .badge.in-stock { background: #e2f0d9; color: var(--green); }
+    .badge.sold-out { background: #fce4d6; color: var(--red); }
+    .prod-img { width: 40px; height: 40px; object-fit: cover; border-radius: 2px; background: #eee; }
 
-    /* IMAGES */
-    .prod-img{width:40px;height:40px;object-fit:cover;border-radius:2px;background:#eee}
-
-    /* INLINE ACTION BUTTON */
-    .save-inline-btn{\r
-      background:var(--black);color:var(--white);border:none;\r
-      padding:6px 12px;font-size:.55rem;letter-spacing:.1em;\r
-      text-transform:uppercase;cursor:pointer;transition:opacity .2s;\r
+    .save-inline-btn {
+      background: var(--black); color: var(--white); border: none;
+      padding: 6px 12px; font-size: .55rem; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer; transition: opacity .2s;
     }
-    .save-inline-btn:hover{opacity:.8}
-    .save-inline-btn:disabled{background:var(--gray);cursor:not-allowed}
+    .save-inline-btn:hover { opacity: .8; }
+    .save-inline-btn:disabled { background: var(--gray); cursor: not-allowed; }
 
-    .search-bar{\r
-      width:100%;border:none;border-bottom:1px solid var(--light);\r
-      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.75rem;\r
-      outline:none;margin-bottom:24px;background:none;letter-spacing:.05em;\r
-      transition:border-color .3s;\r
+    .search-bar {
+      width: 100%; border: none; border-bottom: 1px solid var(--light);
+      padding: 12px 0; font-family: 'Montserrat', sans-serif; font-size: .75rem;
+      outline: none; margin-bottom: 24px; background: none; letter-spacing: .05em;
+      transition: border-color .3s;
     }
-    .search-bar:focus{border-color:var(--black)}
+    .search-bar:focus { border-color: var(--black); }
 
     /* ── TOAST ── */
-    .toast{\r
-      position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);\r
-      padding:14px 32px;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;\r
-      z-index:999;transition:transform .5s cubic-bezier(.25,.46,.45,.94);pointer-events:none;\r
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+      padding: 14px 32px; font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+      z-index: 999; transition: transform .5s cubic-bezier(.25,.46,.45,.94); pointer-events: none;
     }
-    .toast.success{background:var(--black);color:var(--white)}
-    .toast.error{background:var(--red);color:var(--white)}
-    .toast.show{transform:translateX(-50%) translateY(0)}
+    .toast.success { background: var(--black); color: var(--white); }
+    .toast.error { background: var(--red); color: var(--white); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
 
     /* ── FORMS ── */
-    .form-group{margin-bottom:24px}
-    .form-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:10px}
-    .form-input{\r
-      width:100%;border:none;border-bottom:1px solid var(--light);\r
-      padding:12px 0;font-family:'Montserrat',sans-serif;font-size:.8rem;\r
-      outline:none;background:none;transition:border-color .3s;\r
+    .form-group { margin-bottom: 24px; }
+    .form-label { font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 10px; }
+    .form-input {
+      width: 100%; border: none; border-bottom: 1px solid var(--light);
+      padding: 12px 0; font-family: 'Montserrat', sans-serif; font-size: .8rem;
+      outline: none; background: none; transition: border-color .3s;
     }
-    .form-input:focus{border-color:var(--black)}
-    textarea.form-input{resize:vertical;min-height:120px;border:1px solid var(--light);padding:16px}
-    .preview-box{border:1px solid var(--light);padding:32px;font-size:.75rem;white-space:pre-line}
+    .form-input:focus { border-color: var(--black); }
+    textarea.form-input { resize: vertical; min-height: 120px; border: 1px solid var(--light); padding: 16px; }
+    .preview-box { border: 1px solid var(--light); padding: 32px; font-size: .75rem; white-space: pre-line; }
 
-    /* GRID FOR PRODUCT FORM */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 24px;
-    }
+    .form-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; }
 
     @media(max-width:768px){
-      .dash-header{flex-direction:column;gap:16px;padding:20px}
-      .dash-tabs{margin-left:0;margin-top:8px}
-      .stats-row{grid-template-columns:1fr}
-      .section{padding:32px 24px}
-      .form-grid {grid-template-columns: 1fr}
+      .dash-header { flex-direction: column; gap: 16px; padding: 20px; }
+      .dash-tabs { margin-left: 0; margin-top: 8px; }
+      .stats-row { grid-template-columns: 1fr; }
+      .section { padding: 32px 24px; }
+      .form-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+<!-- ── LOGIN SCREEN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">MONO</div>
   <div class="login-sub">Admin Dashboard</div>
@@ -189,12 +216,14 @@
   <div class="login-error" id="loginError">Incorrect password</div>
 </div>
 
+<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
-    <div style="display:flex;align-items:center;">
+    <div style="display:flex; align-items:center;">
       <div class="dash-logo">MONO</div>
       <div class="dash-tabs">
         <button class="tab-btn active" onclick="switchTab('subscribersView', this)">Subscribers</button>
@@ -204,6 +233,7 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
+  <!-- VIEW 1: SUBSCRIBERS -->
   <div id="subscribersView" class="tab-view active">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-title">Total Subscribers</div></div>
@@ -229,8 +259,8 @@
     </div>
   </div>
 
+  <!-- VIEW 2: PRODUCTS & INVENTORY -->
   <div id="productsView" class="tab-view">
-    
     <div class="section">
       <div class="section-title">Manage <em>Clothing & Inventory</em></div>
       <div class="table-wrap">
@@ -254,7 +284,6 @@
 
     <div class="section" style="background: #fafaf8;">
       <div class="section-title">Add New <em>Clothing Item</em></div>
-      
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Model Name (اسم الموديل)*</label>
@@ -285,13 +314,11 @@
         Upload Image & Add Product →
       </button>
     </div>
-
   </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
@@ -301,7 +328,6 @@
   let allSubscribers = [];
   let allProducts = [];
 
-  // ── LOGIN ──
   function login() {
     const pass = document.getElementById('passInput').value;
     if (pass === ADMIN_PASSWORD) {
@@ -318,7 +344,6 @@
     document.getElementById('dashboard').classList.remove('visible');
   }
 
-  // ── TABS SWITCHER ──
   function switchTab(viewId, btnEl) {
     document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -326,12 +351,10 @@
     btnEl.classList.add('active');
   }
 
-  // ── INIT & FETCH ──
   async function initAndLoad() {
     try {
       if (window.supabase) {
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        // التحميل بشكل منفصل حتى لا يتعطل البرنامج كاملاً إذا فشل أحدهما
         loadProducts();
         loadSubscribers();
       }
@@ -345,14 +368,13 @@
       const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers?select=*&order=created_at.desc`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
-      if (!res.ok) throw new Error('Subscribers table not found or API error');
+      if (!res.ok) throw new Error('Subscribers table not found');
       allSubscribers = await res.json();
       renderStats();
       renderSubscribersTable(allSubscribers);
     } catch (e) {
       console.error(e);
-      const tbody = document.getElementById('subscriberTable');
-      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--red);">Subscribers table not found in Supabase yet.</td></tr>`;
+      document.getElementById('subscriberTable').innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--red);">Subscribers table not found in Supabase yet.</td></tr>`;
     }
   }
 
@@ -370,7 +392,6 @@
     }
   }
 
-  // ── RENDER PRODUCTS ──
   function renderProductsTable(products) {
     const tbody = document.getElementById('productsTable');
     if (!products || !products.length) {
@@ -382,7 +403,6 @@
       const isSoldOut = p.stock <= 0;
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
-      
       const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/40';
 
       return `
@@ -410,7 +430,6 @@
     }
   }
 
-  // ── UPDATE INLINE PRODUCT ──
   async function updateProductInDB(id) {
     const name = document.getElementById(`name-${id}`).value.trim();
     const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
@@ -439,7 +458,6 @@
     }
   }
 
-  // ── ADD NEW PRODUCT WITH IMAGE UPLOAD ──
   async function addNewProductWithImage() {
     const name = document.getElementById('newProdName').value.trim();
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
@@ -471,12 +489,9 @@
         body: imageFile
       });
 
-      if (!uploadRes.ok) {
-        throw new Error('Image upload failed');
-      }
+      if (!uploadRes.ok) throw new Error('Image upload failed');
 
       const image_path = `${SUPABASE_URL}/storage/v1/object/public/PRODUCT/${filePath}`;
-
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
@@ -487,31 +502,20 @@
           'Authorization': `Bearer ${SUPABASE_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name,
-          price,
-          stock,
-          sub,
-          image_path,
-          badge,
-          active: true
-        })
+        body: JSON.stringify({ name, price, stock, sub, image_path, badge, active: true })
       });
 
       if (insertRes.ok) {
         showToast('✓ Product added successfully!', 'success');
-        
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdStock').value = '';
         document.getElementById('newProdSub').value = '';
         document.getElementById('newProdImage').value = '';
-        
         loadProducts();
       } else {
         showToast('Failed to insert product record', 'error');
       }
-
     } catch (error) {
       console.error(error);
       showToast('An error occurred during addition', 'error');
@@ -521,7 +525,6 @@
     }
   }
 
-  // ── SUBSCRIBERS RENDER ──
   function renderSubscribersTable(data) {
     const tbody = document.getElementById('subscriberTable');
     tbody.innerHTML = data.map((s, i) => `
