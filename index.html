@@ -10,21 +10,21 @@
     :root { --black: #0a0a0a; --white: #f9f9f7; --gray: #888; --light-gray: #e8e8e5; --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     html { scroll-behavior: smooth; }
     body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; cursor: none; }
-        .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+    .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
     .loader.hidden { opacity: 0; visibility: hidden; }
     .loader-text { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--white); letter-spacing: 0.4em; animation: loaderPulse 1.5s ease-in-out infinite; }
     @keyframes loaderPulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     header { 
-  position: fixed; 
-  top: 0; left: 0; right: 0; 
-  z-index: 200;
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 24px 48px; 
-  mix-blend-mode: difference; 
-  transition: transform 0.4s ease; 
-}
+      position: fixed; 
+      top: 0; left: 0; right: 0; 
+      z-index: 200;
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 24px 48px; 
+      mix-blend-mode: difference; 
+      transition: transform 0.4s ease; 
+    }
     .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 0.3em; color: var(--white); text-decoration: none; }
     nav { display: flex; gap: 36px; align-items: center; }
     nav a { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none; position: relative; }
@@ -32,15 +32,15 @@
     nav a:hover::after { width: 100%; }
     .cart-btn { background: none; border: none; color: var(--white); cursor: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; font-weight: 300; position: relative; }
     .cart-count { 
-  position: absolute; top: -8px; right: -12px; 
-  background: var(--white); color: var(--black); 
-  border-radius: 50%; width: 16px; height: 16px; 
-  font-size: 0.55rem; display: flex; align-items: center; justify-content: center; 
-  font-weight: 500; 
-  transform: scale(0); 
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 2;
-}
+      position: absolute; top: -8px; right: -12px; 
+      background: var(--white); color: var(--black); 
+      border-radius: 50%; width: 16px; height: 16px; 
+      font-size: 0.55rem; display: flex; align-items: center; justify-content: center; 
+      font-weight: 500; 
+      transform: scale(0); 
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2;
+    }
     .cart-count.show { transform: scale(1); }
     .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; z-index: 200; padding: 4px; }
     .hamburger span { display: block; width: 24px; height: 1px; background: var(--white); transition: all 0.4s ease; }
@@ -83,11 +83,13 @@
     .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: none; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; }
     .product-card:hover .quick-add { transform: translateY(0); }
     .quick-add:hover { background: var(--black); color: var(--white); }
+    .quick-add:disabled { background: #ccc; color: #fff; cursor: not-allowed; opacity: 0.6; }
     .product-info { padding: 20px 24px 28px; display: flex; justify-content: space-between; align-items: flex-start; }
     .product-name { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; }
     .product-sub { font-size: 0.65rem; color: var(--gray); margin-top: 4px; }
     .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
-    .product-badge { position: absolute; top: 20px; left: 20px; background: var(--black); color: var(--white); font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 10px; }
+    .product-badge { position: absolute; top: 20px; left: 20px; background: var(--black); color: var(--white); font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 10px; z-index: 2; }
+    .product-badge.soldout-badge { background: #c1121f; }
     .feature-strip { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray); margin: 80px 0; }
     .feature-item { padding: 48px 60px; border-right: 1px solid var(--light-gray); transition: background 0.4s ease; }
     .feature-item:last-child { border-right: none; }
@@ -173,7 +175,7 @@
     .footer-col a { display: block; font-size: 0.7rem; color: var(--gray); text-decoration: none; margin-bottom: 10px; transition: color 0.3s; }
     .footer-col a:hover { color: var(--black); }
     .footer-bottom { padding: 24px 60px; border-top: 1px solid var(--light-gray); display: flex; justify-content: space-between; }
-    .footer-bottom p { font-size: 0.6rem; color: var(--gray); }
+    .footer-bottom p { font-size: 0.65rem; color: var(--gray); }
     .notif { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; z-index: 800; transition: transform 0.5s ease; pointer-events: none; }
     .notif.show { transform: translateX(-50%) translateY(0); }
     .back-to-top { position: fixed; bottom: 32px; right: 32px; width: 44px; height: 44px; background: var(--black); color: var(--white); border: none; font-size: 1.1rem; cursor: pointer; z-index: 400; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.4s ease; }
@@ -181,29 +183,27 @@
     .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
     @media (max-width: 768px) {
-  #mainNav .cart-btn {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  #mainNav .cart-count {
-    position: absolute;
-    top: -8px;
-    right: -16px;
-    margin: 0;
-  }
-}
-#mainNav a, #mainNav .cart-btn { 
-  font-size: 1rem; 
-  letter-spacing: 0.2em; 
-  color: var(--white) !important;
-  position: relative;
-  z-index: 1;
-}
+      #mainNav .cart-btn {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      #mainNav .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -16px;
+        margin: 0;
+      }
+      #mainNav a, #mainNav .cart-btn { 
+        font-size: 1rem; 
+        letter-spacing: 0.2em; 
+        color: var(--white) !important;
+        position: relative;
+        z-index: 1;
+      }
       #mainNav.open { transform: translateX(0); }
-      #mainNav a, #mainNav .cart-btn { font-size: 1rem; letter-spacing: 0.2em; color: var(--white) !important; }
       .hero { grid-template-columns: 1fr; }
       .hero-right { display: none; }
       .products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -250,13 +250,12 @@
     <div class="cart-foot">
       <div class="cart-total">
         <span class="cart-total-label">Total</span>
-        <span class="cart-total-price" id="cartTotal">$0</span>
+        <span class="cart-total-price" id="cartTotal">0 EGP</span>
       </div>
       <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
     </div>
   </div>
 
-  <!-- SIZE MODAL -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -271,11 +270,10 @@
         <button class="size-btn" onclick="selectSize(this)">XL</button>
         <button class="size-btn" onclick="selectSize(this)">XXL</button>
       </div>
-      <button class="modal-add-btn" onclick="confirmAdd()">Add to Bag</button>
+      <button class="modal-add-btn" id="modalAddBtn" onclick="confirmAdd()">Add to Bag</button>
     </div>
   </div>
 
-  <!-- CUSTOMER CHOICE MODAL -->
   <div class="modal-overlay" id="customerChoiceOverlay">
     <div class="modal" style="width:500px;max-width:90vw">
       <button class="modal-close" onclick="closeCustomerChoice()">x</button>
@@ -295,7 +293,6 @@
     </div>
   </div>
 
-  <!-- CHECKOUT MODAL -->
   <div class="modal-overlay" id="checkoutOverlay">
     <div class="modal" style="width:520px;max-width:90vw">
       <button class="modal-close" onclick="closeCheckout()">✕</button>
@@ -326,7 +323,7 @@
   <section class="hero">
     <div class="hero-left">
       <div class="hero-tag">SS 2026 — Pure Cotton</div>
-      <h1 class="hero-title">Define Your Style<br><em>Define Mono.</em></h1>
+      <h1 class="hero-title">define your style<br><em>Define Mono.</em></h1>
       <a href="#products" class="hero-cta">Shop the Collection</a>
     </div>
     <div class="hero-right">
@@ -347,9 +344,11 @@
   <section id="products">
     <div class="section-header reveal">
       <h2 class="section-title">The <em>Collection</em></h2>
-      <span class="section-sub">6 Pieces — SS 2026</span>
+      <span class="section-sub" id="collectionSubCount">Loading Pieces...</span>
     </div>
-    <div class="products-grid" id="productsGrid"></div>
+    <div class="products-grid" id="productsGrid">
+      <p style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase;">Loading Collection from Server...</p>
+    </div>
   </section>
 
   <div class="feature-strip">
@@ -385,30 +384,79 @@
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
 
-  <script>
-    const products = [
-      { id:1, name:'Classic White Tee', sub:'Relaxed Fit', price:45, img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', badge:'Bestseller' },
-      { id:2, name:'Oversized Black Tee', sub:'Boxy Fit', price:48, img:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80', badge:null },
-      { id:3, name:'Slim White Tee', sub:'Slim Fit', price:42, img:'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=600&q=80', badge:'New' },
-      { id:4, name:'Vintage Black Tee', sub:'Relaxed Fit', price:50, img:'https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&q=80', badge:null },
-      { id:5, name:'Essential White Tee', sub:'Regular Fit', price:40, img:'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80', badge:null },
-      { id:6, name:'Premium Black Tee', sub:'Slim Fit', price:55, img:'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80', badge:'Limited' },
-    ];
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    const grid = document.getElementById('productsGrid');
-    products.forEach(p => {
-      grid.innerHTML += `
-        <div class="product-card reveal">
-          <div class="product-img-wrap">
-            <img src="${p.img}" alt="${p.name}" loading="lazy"/>
-            <div class="product-overlay"><button class="quick-add" onclick="openModal(${p.id})">Quick Add</button></div>
-          </div>
-          ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-          <div class="product-info">
-            <div><div class="product-name">${p.name}</div><div class="product-sub">${p.sub}</div></div>
-            <div class="product-price">$${p.price}</div>
-          </div>
-        </div>`;
+  <script>
+    // ── SUPABASE CREDENTIALS ──
+    const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
+    
+    let db = null;
+    let products = []; // سيتم ملؤها ديناميكياً من الداتابيز
+
+    // ── LOAD PRODUCTS DYNAMICALLY FROM SUPABASE ──
+    async function fetchLiveProducts() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=id.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        products = await res.json();
+        renderLiveProductsGrid();
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        document.getElementById('productsGrid').innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#c1121f;">Error loading catalog. Please refresh.</p>';
+      }
+    }
+
+    function renderLiveProductsGrid() {
+      const grid = document.getElementById('productsGrid');
+      document.getElementById('collectionSubCount').textContent = `${products.length} Pieces — SS 2026`;
+      
+      if (!products || !products.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray);">Our new drop is coming soon.</p>';
+        return;
+      }
+
+      grid.innerHTML = products.map(p => {
+        const isSoldOut = p.stock <= 0;
+        const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/600x800';
+        
+        // إعداد البادج الفرعي (لو Sold Out نكتبها بلون أحمر، غير كده نعرض الـ badge المكتوب في الداتابيز إن وجد)
+        let badgeHTML = '';
+        if (isSoldOut) {
+          badgeHTML = `<div class="product-badge soldout-badge">SOLD OUT</div>`;
+        } else if (p.badge) {
+          badgeHTML = `<div class="product-badge">${p.badge}</div>`;
+        }
+
+        return `
+          <div class="product-card reveal">
+            <div class="product-img-wrap">
+              <img src="${displayImg}" alt="${p.name || ''}" loading="lazy" style="${isSoldOut ? 'filter: grayscale(80%) opacity(0.6);' : ''}"/>
+              <div class="product-overlay">
+                <button class="quick-add" ${isSoldOut ? 'disabled' : ''} onclick="openModal(${p.id})">
+                  ${isSoldOut ? 'Sold Out' : 'Quick Add'}
+                </button>
+              </div>
+            </div>
+            ${badgeHTML}
+            <div class="product-info">
+              <div>
+                <div class="product-name">${p.name || ''}</div>
+                <div class="product-sub">${p.sub || 'Streetwear Edition'}</div>
+              </div>
+              <div class="product-price">${p.price || 0} EGP</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      // تفعيل انميشن الظهور للمنتجات الجديدة الكرتونية الأنيقة
+      document.querySelectorAll('.products-grid .reveal').forEach(el => observer.observe(el));
+    }
+
+    // تشغيل جلب البيانات فور تحميل الصفحة مباشرة
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchLiveProducts();
     });
 
     window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200));
@@ -433,7 +481,7 @@
     const observer = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('body > .reveal, .feature-strip .reveal, .editorial .reveal, .newsletter .reveal').forEach(el => observer.observe(el));
 
     function toggleMenu() {
       const isOpen = document.getElementById('mainNav').classList.contains('open');
@@ -459,9 +507,11 @@
 
     function openModal(id) {
       currentProduct = products.find(p => p.id === id);
+      if (!currentProduct || currentProduct.stock <= 0) return; // حماية إضافية ضد المنتجات المخلصة
+      
       selectedSize = null;
       document.getElementById('modalName').textContent = currentProduct.name;
-      document.getElementById('modalPrice').textContent = `$${currentProduct.price}`;
+      document.getElementById('modalPrice').textContent = `${currentProduct.price} EGP`;
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
       document.getElementById('modalOverlay').classList.add('open');
     }
@@ -494,17 +544,17 @@
       const countEl = document.getElementById('cartCount');
       countEl.textContent = count;
       countEl.classList.toggle('show', count > 0);
-      document.getElementById('cartTotal').textContent = `$${total}`;
+      document.getElementById('cartTotal').textContent = `${total} EGP`;
       if (!cart.length) {
         container.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">◻</div><p>Your bag is empty</p></div>`;
         return;
       }
       container.innerHTML = cart.map(i => `
         <div class="cart-item">
-          <img class="cart-item-img" src="${i.img}" alt="${i.name}"/>
+          <img class="cart-item-img" src="${i.image_path ? i.image_path : 'https://via.placeholder.com/80'}" alt="${i.name}"/>
           <div><div class="cart-item-name">${i.name}</div><div class="cart-item-size">Size: ${i.size} · Qty: ${i.qty}</div></div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <span class="cart-item-price">$${i.price * i.qty}</span>
+            <span class="cart-item-price">${i.price * i.qty} EGP</span>
             <button class="remove-item" onclick="removeFromCart(${i.id},'${i.size}')">✕</button>
           </div>
         </div>`).join('');
@@ -513,13 +563,6 @@
     function openCheckout() {
       if (!cart.length) { showNotif('Your bag is empty'); return; }
       document.getElementById('customerChoiceOverlay').classList.add('open');
-      return;
-      const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
-      const count = cart.reduce((a, i) => a + i.qty, 0);
-      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} · $${total}`;
-      document.getElementById('cartSidebar').classList.remove('open');
-      document.getElementById('cartOverlay').classList.remove('open');
-      document.getElementById('checkoutOverlay').classList.add('open');
     }
     function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
 
@@ -561,7 +604,7 @@
       const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
       const count = cart.reduce((a, i) => a + i.qty, 0);
       document.getElementById('co-email').placeholder = customerChoice === 'guest' ? 'Optional for guest checkout' : 'ahmed@email.com';
-      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} - $${total}`;
+      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} - ${total} EGP`;
       document.getElementById('cartSidebar').classList.remove('open');
       document.getElementById('cartOverlay').classList.remove('open');
       closeCustomerChoice();
@@ -600,12 +643,27 @@
       if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
       showNotif('Subscribing...');
       try {
-        const res = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
-        const data = await res.json();
-        if (data.success) { showNotif('Welcome to MONO ✓'); input.value = ''; }
-        else if (data.message === 'already_subscribed') { showNotif('Already subscribed!'); }
-        else { showNotif('Something went wrong'); }
-      } catch { showNotif('Something went wrong'); }
+        // نربطها بـ Supabase REST API مباشرة لإضافة المشتركين تلقائياً
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
+          method: 'POST',
+          headers: { 
+            'apikey': SUPABASE_KEY, 
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ email })
+        });
+        
+        if (res.ok) { 
+          showNotif('Welcome to MONO ✓'); 
+          input.value = ''; 
+        } else { 
+          showNotif('Something went wrong'); 
+        }
+      } catch { 
+        showNotif('Something went wrong'); 
+      }
     }
 
     function showNotif(msg) {
