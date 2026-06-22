@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -445,7 +447,6 @@
     t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   async function addProduct(){
   alert('Products panel connected successfully');
 }
