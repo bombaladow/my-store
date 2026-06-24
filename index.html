@@ -1,6 +1,3 @@
-إليك كود ملف `index.html` بالكامل بعد دمج التعديلات المطلوبة لحساب وعرض الخصومات داخل دالة `renderLiveProductsGrid` وإضافة الـ CSS الخاص بها بدقة دون تعديل أو حذف أي أجزاء أخرى:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -225,8 +222,6 @@
 </head>
 <body>
 
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
   <div class="loader" id="loader"><div class="loader-text">MONO</div></div>
   <div class="notif" id="notif"></div>
   <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -487,13 +482,6 @@
 
     window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200));
 
-    const cursor = document.getElementById('cursor');
-    const ring = document.getElementById('cursorRing');
-    document.addEventListener('mousemove', e => {
-      cursor.style.transform = `translate(${e.clientX-5}px,${e.clientY-5}px)`;
-      ring.style.transform = `translate(${e.clientX-18}px,${e.clientY-18}px)`;
-    });
-
     let lastScroll = 0;
     const siteHeader = document.getElementById('siteHeader');
     window.addEventListener('scroll', () => {
@@ -533,7 +521,7 @@
 
     function openModal(id) {
       currentProduct = products.find(p => p.id === id);
-      if (!currentProduct || currentProduct.stock <= 0) return; // حماية إضافية ضد المنتجات المخلصة
+      if (!currentProduct || currentProduct.stock <= 0) return; 
       
       selectedSize = null;
       document.getElementById('modalName').textContent = currentProduct.name;
@@ -669,7 +657,6 @@
       if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
       showNotif('Subscribing...');
       try {
-        // نربطها بـ Supabase REST API مباشرة لإضافة المشتركين تلقائياً
         const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
           method: 'POST',
           headers: { 
@@ -701,5 +688,3 @@
   </script>
 </body>
 </html>
-
-```
