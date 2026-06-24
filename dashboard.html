@@ -164,6 +164,25 @@
     .save-inline-btn:hover { opacity: .8; }
     .save-inline-btn:disabled { background: var(--gray); cursor: not-allowed; }
 
+    /* ── NEW STYLES FOR DISCOUNT & ACTIONS ── */
+    .discount-badge {
+      background: #fff3cd; color: #856404;
+      font-size: .6rem; padding: 2px 6px; border-radius: 2px;
+      margin-left: 4px;
+    }
+    .price-strike {
+      text-decoration: line-through; color: var(--gray);
+      font-size: .65rem; margin-right: 6px;
+    }
+    .final-price { font-weight: 500; color: var(--green); }
+    .delete-btn {
+      background: var(--red); color: var(--white); border: none;
+      padding: 6px 12px; font-size: .55rem; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer; margin-left: 6px;
+      transition: opacity .2s;
+    }
+    .delete-btn:hover { opacity: .8; }
+
     .search-bar {
       width: 100%; border: none; border-bottom: 1px solid var(--light);
       padding: 12px 0; font-family: 'Montserrat', sans-serif; font-size: .75rem;
@@ -207,7 +226,6 @@
 </head>
 <body>
 
-<!-- ── LOGIN SCREEN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">MONO</div>
   <div class="login-sub">Admin Dashboard</div>
@@ -216,10 +234,8 @@
   <div class="login-error" id="loginError">Incorrect password</div>
 </div>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
-<!-- ── DASHBOARD ── -->
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
@@ -233,7 +249,6 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <!-- VIEW 1: SUBSCRIBERS -->
   <div id="subscribersView" class="tab-view active">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-title">Total Subscribers</div></div>
@@ -259,7 +274,6 @@
     </div>
   </div>
 
-  <!-- VIEW 2: PRODUCTS & INVENTORY -->
   <div id="productsView" class="tab-view">
     <div class="section">
       <div class="section-title">Manage <em>Clothing & Inventory</em></div>
@@ -270,13 +284,14 @@
               <th>Image</th>
               <th>Model Name (الموديل)</th>
               <th>Price (EGP)</th>
+              <th>Discount %</th>
               <th>Stock (العدد)</th>
               <th>Status (الحالة)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="productsTable">
-            <tr><td colspan="6" style="text-align:center;padding:32px;">Loading products...</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:32px;">Loading products...</td></tr>
           </tbody>
         </table>
       </div>
@@ -395,7 +410,7 @@
   function renderProductsTable(products) {
     const tbody = document.getElementById('productsTable');
     if (!products || !products.length) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
       return;
     }
 
@@ -404,15 +419,31 @@
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
       const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/40';
+      const discount = p.discount || 0;
+      
+      const finalPrice = discount > 0 
+        ? (p.price - (p.price * discount / 100)).toFixed(2) 
+        : p.price;
+
+      const priceDisplay = discount > 0 
+        ? `<span class="price-strike">${p.price}</span><span class="final-price">${finalPrice}</span>` 
+        : `${p.price}`;
 
       return `
         <tr id="row-${p.id}">
           <td><img src="${displayImg}" class="prod-img" alt="product"/></td>
           <td><input type="text" id="name-${p.id}" value="${p.name || ''}" /></td>
-          <td><input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:90px;"/></td>
+          <td>
+            <input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:80px;"/>
+            <div style="margin-top:4px;font-size:.65rem;">${priceDisplay}</div>
+          </td>
+          <td><input type="number" id="discount-${p.id}" value="${discount}" style="width:60px;" placeholder="0" oninput="checkStatusLive(${p.id})"/></td>
           <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:70px;" oninput="checkStatusLive(${p.id})"/></td>
           <td><span id="badge-${p.id}" class="${badgeClass}">${badgeText}</span></td>
-          <td><button class="save-inline-btn" onclick="updateProductInDB(${p.id})">Save</button></td>
+          <td>
+            <button class="save-inline-btn" onclick="updateProductInDB(${p.id})">Save</button>
+            <button class="delete-btn" onclick="deleteProduct(${p.id})">Delete</button>
+          </td>
         </tr>
       `;
     }).join('');
@@ -433,6 +464,7 @@
   async function updateProductInDB(id) {
     const name = document.getElementById(`name-${id}`).value.trim();
     const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
+    const discount = parseFloat(document.getElementById(`discount-${id}`).value) || 0;
     const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
     const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
@@ -444,7 +476,7 @@
           'Authorization': `Bearer ${SUPABASE_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, price, stock, badge })
+        body: JSON.stringify({ name, price, discount, stock, badge })
       });
 
       if (res.ok) {
@@ -452,6 +484,30 @@
         loadProducts();
       } else {
         showToast('Failed to update data', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
+  }
+
+  async function deleteProduct(id) {
+    const confirmDelete = confirm('متأكد إنك عايز تمسح المنتج ده نهائياً؟');
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      });
+
+      if (res.ok) {
+        showToast('✓ Product deleted', 'success');
+        loadProducts();
+      } else {
+        showToast('Failed to delete product', 'error');
       }
     } catch (e) {
       showToast('Network error', 'error');
@@ -479,8 +535,7 @@
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // 1. محاولة رفع الصورة للـ Storage
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/PRODUCT/${filePath}`, {
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public_bucket/${filePath}`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -495,11 +550,10 @@
         throw new Error(`Storage Error: ${errData.message || uploadRes.statusText}`);
       }
 
-      const image_path = `${SUPABASE_URL}/storage/v1/object/public/PRODUCT/${filePath}`;
+      const image_path = `${SUPABASE_URL}/storage/v1/object/public/public_bucket/${filePath}`;
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
-      // 2. محاولة الحفظ في جدول الـ products
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
         headers: {
