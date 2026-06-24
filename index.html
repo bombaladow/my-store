@@ -1,3 +1,6 @@
+إليك كود ملف `index.html` بالكامل بعد دمج التعديلات المطلوبة لحساب وعرض الخصومات داخل دالة `renderLiveProductsGrid` وإضافة الـ CSS الخاص بها بدقة دون تعديل أو حذف أي أجزاء أخرى:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,6 +91,10 @@
     .product-name { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; }
     .product-sub { font-size: 0.65rem; color: var(--gray); margin-top: 4px; }
     .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
+    .product-price-wrap { display: flex; flex-direction: column; align-items: flex-end; }
+    .price-old { font-size: 0.65rem; color: var(--gray); text-decoration: line-through; }
+    .price-discount-tag { font-size: 0.55rem; background: var(--black); color: var(--white); padding: 2px 6px; margin-top: 2px; letter-spacing: 0.05em; }
+    .price-final { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--black); }
     .product-badge { position: absolute; top: 20px; left: 20px; background: var(--black); color: var(--white); font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 10px; z-index: 2; }
     .product-badge.soldout-badge { background: #c1121f; }
     .feature-strip { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray); margin: 80px 0; }
@@ -429,6 +436,25 @@
           badgeHTML = `<div class="product-badge">${p.badge}</div>`;
         }
 
+        // حساب السعر النهائي لو فيه خصم
+        const discount = p.discount || 0;
+        const finalPrice = discount > 0  
+          ? Math.round(p.price - (p.price * discount / 100))  
+          : p.price;
+
+        // شكل عرض السعر: لو فيه خصم، يظهر السعر القديم مشطوب + نسبة الخصم + السعر الجديد
+        let priceHTML = '';
+        if (discount > 0) {
+          priceHTML = `
+            <div class="product-price-wrap">
+              <span class="price-old">${p.price} EGP</span>
+              <span class="price-discount-tag">-${discount}%</span>
+              <div class="price-final">${finalPrice} EGP</div>
+            </div>`;
+        } else {
+          priceHTML = `<div class="product-price">${p.price} EGP</div>`;
+        }
+
         return `
           <div class="product-card reveal">
             <div class="product-img-wrap">
@@ -445,7 +471,7 @@
                 <div class="product-name">${p.name || ''}</div>
                 <div class="product-sub">${p.sub || 'Streetwear Edition'}</div>
               </div>
-              <div class="product-price">${p.price || 0} EGP</div>
+              ${priceHTML}
             </div>
           </div>`;
       }).join('');
@@ -675,3 +701,5 @@
   </script>
 </body>
 </html>
+
+```
