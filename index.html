@@ -9,7 +9,7 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --black: #0a0a0a; --white: #f9f9f7; --gray: #888; --light-gray: #e8e8e5; --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     html { scroll-behavior: smooth; }
-    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; cursor: none; }
+    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; }
     .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
     .loader.hidden { opacity: 0; visibility: hidden; }
     .loader-text { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--white); letter-spacing: 0.4em; animation: loaderPulse 1.5s ease-in-out infinite; }
@@ -30,7 +30,7 @@
     nav a { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none; position: relative; }
     nav a::after { content: ''; position: absolute; bottom: -3px; left: 0; width: 0; height: 1px; background: var(--white); transition: width 0.4s ease; }
     nav a:hover::after { width: 100%; }
-    .cart-btn { background: none; border: none; color: var(--white); cursor: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; font-weight: 300; position: relative; }
+    .cart-btn { background: none; border: none; color: var(--white); cursor: pointer; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; font-weight: 300; position: relative; }
     .cart-count { 
       position: absolute; top: -8px; right: -12px; 
       background: var(--white); color: var(--black); 
@@ -74,13 +74,13 @@
     .section-title em { font-style: italic; }
     .section-sub { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); }
     .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--light-gray); margin: 2px; }
-    .product-card { background: var(--white); position: relative; overflow: hidden; cursor: none; }
+    .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; }
     .product-img-wrap { aspect-ratio: 3/4; overflow: hidden; position: relative; }
     .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s ease; filter: grayscale(20%); }
     .product-card:hover .product-img-wrap img { transform: scale(1.07); filter: grayscale(0%); }
     .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); opacity: 0; transition: opacity 0.5s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30px; }
     .product-card:hover .product-overlay { opacity: 1; }
-    .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: none; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; }
+    .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; }
     .product-card:hover .quick-add { transform: translateY(0); }
     .quick-add:hover { background: var(--black); color: var(--white); }
     .quick-add:disabled { background: #ccc; color: #fff; cursor: not-allowed; opacity: 0.6; }
@@ -112,7 +112,7 @@
     .editorial-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; line-height: 1.15; margin-bottom: 24px; }
     .editorial-title em { font-style: italic; }
     .editorial-text { font-size: 0.75rem; line-height: 1.9; color: #aaa; max-width: 360px; margin-bottom: 40px; }
-    .btn-outline { display: inline-flex; align-items: center; gap: 14px; border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none; width: fit-content; transition: background 0.4s ease; cursor: none; }
+    .btn-outline { display: inline-flex; align-items: center; gap: 14px; border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none; width: fit-content; transition: background 0.4s ease; cursor: pointer; }
     .btn-outline:hover { background: var(--white); color: var(--black); }
     .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 500; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; backdrop-filter: blur(4px); }
     .cart-overlay.open { opacity: 1; visibility: visible; }
@@ -120,7 +120,7 @@
     .cart-sidebar.open { transform: translateX(0); }
     .cart-head { padding: 32px 40px; border-bottom: 1px solid var(--light-gray); display: flex; justify-content: space-between; align-items: center; }
     .cart-head-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; }
-    .close-btn { background: none; border: none; cursor: none; font-size: 1.2rem; color: var(--black); transition: transform 0.3s ease; }
+    .close-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--black); transition: transform 0.3s ease; }
     .close-btn:hover { transform: rotate(90deg); }
     .cart-items { flex: 1; overflow-y: auto; padding: 24px 40px; }
     .cart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; color: var(--gray); }
@@ -131,13 +131,13 @@
     .cart-item-name { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; }
     .cart-item-size { font-size: 0.6rem; color: var(--gray); margin-top: 4px; }
     .cart-item-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
-    .remove-item { background: none; border: none; cursor: none; color: var(--gray); font-size: 0.8rem; transition: color 0.3s; }
+    .remove-item { background: none; border: none; cursor: pointer; color: var(--gray); font-size: 0.8rem; transition: color 0.3s; }
     .remove-item:hover { color: var(--black); }
     .cart-foot { padding: 32px 40px; border-top: 1px solid var(--light-gray); }
     .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .cart-total-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; }
     .cart-total-price { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; }
-    .checkout-btn { width: 100%; padding: 18px; background: var(--black); color: var(--white); border: none; cursor: none; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
+    .checkout-btn { width: 100%; padding: 18px; background: var(--black); color: var(--white); border: none; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
     .checkout-btn:hover { background: #222; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 700; backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; }
     .modal-overlay.open { opacity: 1; visibility: visible; }
@@ -147,19 +147,19 @@
     .modal-product-price { font-size: 0.85rem; color: var(--gray); margin-bottom: 32px; }
     .modal-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
     .size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 32px; }
-    .size-btn { border: 1px solid var(--light-gray); background: none; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; cursor: none; transition: all 0.3s ease; }
+    .size-btn { border: 1px solid var(--light-gray); background: none; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; cursor: pointer; transition: all 0.3s ease; }
     .size-btn:hover, .size-btn.selected { background: var(--black); color: var(--white); border-color: var(--black); }
-    .modal-add-btn { width: 100%; padding: 16px; background: var(--black); color: var(--white); border: none; cursor: none; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
+    .modal-add-btn { width: 100%; padding: 16px; background: var(--black); color: var(--white); border: none; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
     .modal-add-btn:hover { background: #333; }
     .modal-add-btn:disabled { background: var(--gray); }
-    .modal-close { float: right; background: none; border: none; cursor: none; font-size: 1.2rem; color: var(--gray); transition: transform 0.3s; }
+    .modal-close { float: right; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--gray); transition: transform 0.3s; }
     .modal-close:hover { transform: rotate(90deg); color: var(--black); }
     .checkout-form { display: grid; gap: 20px; margin-bottom: 28px; }
     .checkout-input { width: 100%; border: none; border-bottom: 1px solid var(--light-gray); padding: 10px 0; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; outline: none; background: none; transition: border-color 0.3s; }
     .checkout-input:focus { border-color: var(--black); }
     .checkout-input::placeholder { color: var(--gray); }
     .checkout-choice { display: grid; gap: 12px; margin: 28px 0; }
-    .choice-btn { width: 100%; padding: 15px 18px; border: 1px solid var(--light-gray); background: none; color: var(--black); cursor: none; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; transition: all 0.3s ease; }
+    .choice-btn { width: 100%; padding: 15px 18px; border: 1px solid var(--light-gray); background: none; color: var(--black); cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; transition: all 0.3s ease; }
     .choice-btn:hover { border-color: var(--black); background: var(--black); color: var(--white); }
     .choice-panel { display: none; margin-top: 20px; }
     .choice-panel.open { display: block; }
@@ -170,7 +170,7 @@
     .newsletter-form { display: flex; max-width: 480px; margin: 0 auto; border-bottom: 1px solid rgba(255,255,255,0.3); }
     .newsletter-input { flex: 1; background: none; border: none; outline: none; color: var(--white); padding: 14px 0; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; }
     .newsletter-input::placeholder { color: var(--gray); }
-    .newsletter-submit { background: none; border: none; color: var(--white); cursor: none; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; padding: 0 0 0 20px; transition: opacity 0.3s; }
+    .newsletter-submit { background: none; border: none; color: var(--white); cursor: pointer; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; padding: 0 0 0 20px; transition: opacity 0.3s; }
     .newsletter-submit:hover { opacity: 0.6; }
     footer { padding: 60px; border-top: 1px solid var(--light-gray); display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
     .footer-brand .logo { color: var(--black); font-size: 1.5rem; }
@@ -394,7 +394,7 @@
     const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
     
     let db = null;
-    let products = []; // سيتم ملؤها ديناميكياً من الداتابيز
+    let products = [];
 
     // ── LOAD PRODUCTS DYNAMICALLY FROM SUPABASE ──
     async function fetchLiveProducts() {
@@ -423,7 +423,6 @@
         const isSoldOut = p.stock <= 0;
         const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/600x800';
         
-        // إعداد البادج الفرعي (لو Sold Out نكتبها بلون أحمر، غير كده نعرض الـ badge المكتوب في الداتابيز إن وجد)
         let badgeHTML = '';
         if (isSoldOut) {
           badgeHTML = `<div class="product-badge soldout-badge">SOLD OUT</div>`;
@@ -431,13 +430,11 @@
           badgeHTML = `<div class="product-badge">${p.badge}</div>`;
         }
 
-        // حساب السعر النهائي لو فيه خصم
         const discount = p.discount || 0;
         const finalPrice = discount > 0  
           ? Math.round(p.price - (p.price * discount / 100))  
           : p.price;
 
-        // شكل عرض السعر: لو فيه خصم، يظهر السعر القديم مشطوب + نسبة الخصم + السعر الجديد
         let priceHTML = '';
         if (discount > 0) {
           priceHTML = `
@@ -471,11 +468,9 @@
           </div>`;
       }).join('');
 
-      // تفعيل انميشن الظهور للمنتجات الجديدة الكرتونية الأنيقة
       document.querySelectorAll('.products-grid .reveal').forEach(el => observer.observe(el));
     }
 
-    // تشغيل جلب البيانات فور تحميل الصفحة مباشرة
     window.addEventListener('DOMContentLoaded', () => {
       fetchLiveProducts();
     });
