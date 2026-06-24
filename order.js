@@ -2,8 +2,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
+
+  // 1. طباعة الداتا اللي واصلة عشان تظهر لك في Vercel Logs
+  console.log('Received body:', JSON.stringify(req.body));
 
   try {
     const { name, email, phone, address, items, total } = req.body;
@@ -13,7 +17,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
+    // 2. معالجة الـ items بشكل آمن عشان لو جاية كـ String نرجعها Array وم يحصلش كراش
+    let itemsArray = [];
+    if (typeof items === 'string') {
+      try {
+        itemsArray = JSON.parse(items);
+      } catch (e) {
+        console.error("Failed to parse items string:", e);
+        itemsArray = [];
+      }
+    } else if (Array.isArray(items)) {
+      itemsArray = items;
+    }
+
+    // 3. توليد رقم أوردر فريد
     const orderNumber = 'MN-' + Date.now().toString().slice(-6);
+
+    // 4. تأمين البيانات المبعوتة لـ Supabase (تحويل الـ items لـ JSON string آمن)
+    const dbItems = JSON.stringify(itemsArray);
 
     // ── حفظ في Supabase ──
     const supaRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/orders`, {
@@ -24,7 +45,15 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({ order_number: orderNumber, name, email: orderEmail, phone, address, items, total })
+      body: JSON.stringify({ 
+        order_number: orderNumber, 
+        name, 
+        email: orderEmail, 
+        phone, 
+        address, 
+        items: dbItems, // نمررها كـ stringified لضمان الحفظ بدون خطأ نوع البيانات
+        total: Number(total) 
+      })
     });
 
     if (!supaRes.ok) {
@@ -33,8 +62,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Database error', details: errText });
     }
 
-    // ── إيميل تأكيد الأوردر (لو فشل، الأوردر يفضل مسجل عادي) ──
-    if (orderEmail) {
+    // ── إيميل تأكيد الأوردر للعميل ──
+    if (orderEmail && process.env.RESEND_KEY) {
       try {
         const emailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -46,45 +75,43 @@ export default async function handler(req, res) {
             from: 'MONO <onboarding@resend.dev>',
             to: orderEmail,
             subject: `Order Confirmed — ${orderNumber}`,
-            html: orderTemplate({ orderNumber, name, email: orderEmail, items, total, address, phone })
+            html: orderTemplate({ orderNumber, name, email: orderEmail, items: itemsArray, total, address, phone })
           })
         });
         if (!emailRes.ok) {
-          const emailErr = await emailRes.text();
-          console.error('Customer email failed:', emailErr);
+          console.error('Customer email failed:', await emailRes.text());
         }
       } catch (emailError) {
         console.error('Customer email exception:', emailError.message);
       }
     }
 
-    // ── إشعار لصاحب المتجر ──
-    try {
-      const notifyRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.RESEND_KEY}`
-        },
-        body: JSON.stringify({
-          from: 'MONO <onboarding@resend.dev>',
-          to: 'bombaladow@gmail.com',
-          subject: `🛍️ New Order — ${orderNumber}`,
-          html: `<div style="font-family:Arial,sans-serif;padding:24px">
-            <h2>New Order Received</h2>
-            <p><b>Order:</b> ${orderNumber}</p>
-            <p><b>Name:</b> ${name}</p>
-            <p><b>Phone:</b> ${phone}</p>
-            <p><b>Address:</b> ${address}</p>
-            <p><b>Total:</b> $${total}</p>
-          </div>`
-        })
-      });
-      if (!notifyRes.ok) {
-        console.error('Owner notification failed:', await notifyRes.text());
+    // ── إشعار لصاحب المتجر (محمود) ──
+    if (process.env.RESEND_KEY) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.RESEND_KEY}`
+          },
+          body: JSON.stringify({
+            from: 'MONO <onboarding@resend.dev>',
+            to: 'bombaladow@gmail.com',
+            subject: `🛍️ New Order — ${orderNumber}`,
+            html: `<div style="font-family:Arial,sans-serif;padding:24px">
+              <h2>New Order Received</h2>
+              <p><b>Order:</b> ${orderNumber}</p>
+              <p><b>Name:</b> ${name}</p>
+              <p><b>Phone:</b> ${phone}</p>
+              <p><b>Address:</b> ${address}</p>
+              <p><b>Total:</b> EGP ${total}</p>
+            </div>`
+          })
+        });
+      } catch (notifyError) {
+        console.error('Owner notification exception:', notifyError.message);
       }
-    } catch (notifyError) {
-      console.error('Owner notification exception:', notifyError.message);
     }
 
     return res.status(200).json({ success: true, orderNumber });
@@ -96,18 +123,32 @@ export default async function handler(req, res) {
 }
 
 function orderTemplate({ orderNumber, name, email, items, total, address, phone }) {
-  const itemsHTML = items.map(i => `
+  // التأكد المطلق إن الـ items عبارة عن مصفوفة عشان نمنع الـ Crash تماماً
+  const itemsArray = Array.isArray(items) ? items : [];
+
+  const itemsHTML = itemsArray.map(i => {
+    if (!i) return '';
+    
+    // حل مشكلة حساب الخصم: لو فيه sale_price وموجود فعلاً، استخدمه، غير كدة استخدم السعر العادي price
+    const itemPrice = i.sale_price && Number(i.sale_price) < Number(i.price) 
+      ? Number(i.sale_price) 
+      : (Number(i.price) || 0);
+      
+    const itemQty = Number(i.qty) || 1;
+
+    return `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #e8e8e5;font-family:Arial,sans-serif;font-size:.78rem;color:#333">
-        ${i.name} — ${i.sub}
+        ${i.name || 'Product'} — ${i.sub || ''}
       </td>
       <td style="padding:12px 0;border-bottom:1px solid #e8e8e5;font-family:Arial,sans-serif;font-size:.78rem;color:#333;text-align:center">
-        ${i.size}
+        ${i.size || 'Free Size'}
       </td>
       <td style="padding:12px 0;border-bottom:1px solid #e8e8e5;font-family:Arial,sans-serif;font-size:.78rem;color:#333;text-align:right">
-        $${i.price * i.qty}
+        EGP ${itemPrice * itemQty}
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   return `<!DOCTYPE html>
 <html>
@@ -131,9 +172,7 @@ function orderTemplate({ orderNumber, name, email, items, total, address, phone 
   .info-box{background:#fff;border:1px solid #e8e8e5;padding:20px 24px;margin-bottom:32px}
   .info-row{font-family:Arial,sans-serif;font-size:.75rem;color:#444;line-height:2}
   .info-row span{color:#888;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;margin-right:8px}
-  .btn{display:inline-block;background:#0a0a0a;color:#f9f9f7 !important;padding:14px 36px;
-       text-decoration:none;font-family:Arial,sans-serif;font-size:.65rem;
-       letter-spacing:.18em;text-transform:uppercase;margin-top:8px}
+  .btn{display:inline-block;background:#0a0a0a;color:#f9f9f7 !important;padding:14px 36px;text-decoration:none;font-family:Arial,sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;margin-top:8px}
   hr{border:none;border-top:1px solid #e8e8e5;margin:40px 0}
   .foot{font-family:Arial,sans-serif;font-size:.6rem;color:#bbb;letter-spacing:.06em;line-height:1.8}
 </style>
@@ -145,14 +184,12 @@ function orderTemplate({ orderNumber, name, email, items, total, address, phone 
   <div class="order-num">Order #${orderNumber} · Thank you, ${name.split(' ')[0]}.</div>
   <div class="section-label">Your Items</div>
   <table>
-    <thead>
-      <tr><th>Product</th><th>Size</th><th>Price</th></tr>
-    </thead>
+    <thead><tr><th>Product</th><th>Size</th><th>Price</th></tr></thead>
     <tbody>${itemsHTML}</tbody>
   </table>
   <div class="total-row">
     <span class="total-label">Total</span>
-    <span class="total-price">$${total}</span>
+    <span class="total-price">EGP ${total}</span>
   </div>
   <br/>
   <div class="section-label">Delivery Details</div>
