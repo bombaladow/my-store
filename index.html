@@ -139,6 +139,7 @@
     .cart-total-price { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; }
     .checkout-btn { width: 100%; padding: 18px; background: var(--black); color: var(--white); border: none; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
     .checkout-btn:hover { background: #222; }
+    
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 700; backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; }
     .modal-overlay.open { opacity: 1; visibility: visible; }
     
@@ -163,7 +164,7 @@
     .checkout-input::placeholder { color: var(--gray); }
     .checkout-choice { display: grid; gap: 12px; margin: 28px 0; }
     
-    /* ── IMPROVED CHOICE BUTTONS CSS ── */
+    /* ── CHOICE BUTTONS CSS ── */
     .choice-btn { width: 100%; padding: 16px 20px; border: 1.5px solid var(--light-gray); background: var(--white); color: var(--black); cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; }
     .choice-btn:hover { border-color: var(--black); background: var(--black); color: var(--white); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
     .choice-btn.google-btn { background: var(--white); border-color: #dadce0; }
@@ -202,7 +203,6 @@
         align-items: center;
         justify-content: center;
       }
-      
       #mainNav .cart-count {
         position: absolute;
         top: -8px;
@@ -244,6 +244,7 @@
       <a href="#products" onclick="closeMenu()">Collection</a>
       <a href="#about" onclick="closeMenu()">About</a>
       <a href="#newsletter" onclick="closeMenu()">Contact</a>
+      <button class="cart-btn" id="accountBtn" onclick="handleAccountClick()">Account</button>
       <button class="cart-btn" onclick="toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
     </nav>
   </header>
@@ -281,6 +282,14 @@
         <button class="size-btn" onclick="selectSize(this)">XL</button>
         <button class="size-btn" onclick="selectSize(this)">XXL</button>
       </div>
+      
+      <div class="modal-label">Quantity</div>
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px;">
+        <button onclick="changeQty(-1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">−</button>
+        <span id="qtyDisplay" style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;min-width:30px;text-align:center;">1</span>
+        <button onclick="changeQty(1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">+</button>
+      </div>
+
       <button class="modal-add-btn" id="modalAddBtn" onclick="confirmAdd()">Add to Bag</button>
     </div>
   </div>
@@ -409,7 +418,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // ── SUPABASE CREDENTIALS ──
     const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
     
@@ -417,7 +425,9 @@
     let products = [];
     let currentUser = null;
 
-    // ── LOAD PRODUCTS DYNAMICALLY FROM SUPABASE ──
+    // ── QUANTITY STATE VARIABLES ──
+    let selectedQty = 1;
+
     async function fetchLiveProducts() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=id.desc`, {
@@ -538,20 +548,28 @@
       if (error) { showNotif('حصل خطأ في تسجيل الدخول'); console.error(error); }
     }
 
+    // ── MODIFIED SESSION LOGIC (INDEPENDENT FROM CHECKOUT POPUP) ──
     async function checkUserSession() {
       const { data } = await db.auth.getSession();
       if (data.session) {
         currentUser = data.session.user;
-        document.getElementById('co-email').value = currentUser.email;
-        customerChoice = 'google';
-        closeCustomerChoice();
-        showCheckoutForm();
+        document.getElementById('accountBtn').textContent = currentUser.email.split('@')[0];
+      }
+    }
+
+    // ── ADDED ACCOUNT CLICK HANDLER ──
+    function handleAccountClick() {
+      if (currentUser) {
+        showNotif(`Signed in as ${currentUser.email}`);
+      } else {
+        loginWithGoogle();
       }
     }
 
     db.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         currentUser = session.user;
+        document.getElementById('accountBtn').textContent = currentUser.email.split('@')[0];
       }
     });
 
@@ -562,11 +580,14 @@
       document.getElementById('cartOverlay').classList.toggle('open');
     }
 
+    // ── MODIFIED OPEN MODAL TO RESET QUANTITY ──
     function openModal(id) {
       currentProduct = products.find(p => p.id === id);
       if (!currentProduct || currentProduct.stock <= 0) return; 
       
       selectedSize = null;
+      selectedQty = 1;
+      document.getElementById('qtyDisplay').textContent = 1;
       document.getElementById('modalName').textContent = currentProduct.name;
       document.getElementById('modalPrice').textContent = `${currentProduct.price} EGP`;
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
@@ -574,19 +595,30 @@
     }
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
+    // ── ADDED QUANTITY CHANGE FUNCTION ──
+    function changeQty(delta) {
+      selectedQty = Math.max(1, selectedQty + delta);
+      document.getElementById('qtyDisplay').textContent = selectedQty;
+    }
+
     function selectSize(btn) {
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedSize = btn.textContent;
     }
 
+    // ── MODIFIED CONFIRM ADD TO SUPPORT QUANTITY ──
     function confirmAdd() {
       if (!selectedSize) { showNotif('Please select a size'); return; }
       const existing = cart.find(i => i.id === currentProduct.id && i.size === selectedSize);
-      if (existing) { existing.qty++; } else { cart.push({ ...currentProduct, size: selectedSize, qty: 1 }); }
+      if (existing) { 
+        existing.qty += selectedQty; 
+      } else { 
+        cart.push({ ...currentProduct, size: selectedSize, qty: selectedQty }); 
+      }
       renderCart();
       closeModal();
-      showNotif(`${currentProduct.name} — ${selectedSize} added`);
+      showNotif(`${currentProduct.name} — ${selectedSize} ×${selectedQty} added`);
     }
 
     function removeFromCart(id, size) {
@@ -619,7 +651,14 @@
 
     function openCheckout() {
       if (!cart.length) { showNotif('Your bag is empty'); return; }
-      document.getElementById('customerChoiceOverlay').classList.add('open');
+      // If user is already logged in, skip choice and go directly to checkout form
+      if (currentUser) {
+        customerChoice = 'google';
+        document.getElementById('co-email').value = currentUser.email;
+        showCheckoutForm();
+      } else {
+        document.getElementById('customerChoiceOverlay').classList.add('open');
+      }
     }
     function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
 
