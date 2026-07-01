@@ -164,7 +164,7 @@
     .save-inline-btn:hover { opacity: .8; }
     .save-inline-btn:disabled { background: var(--gray); cursor: not-allowed; }
 
-    /* ── NEW STYLES FOR DISCOUNT & ACTIONS ── */
+    /* ── DISCOUNT & ACTIONS ── */
     .discount-badge {
       background: #fff3cd; color: #856404;
       font-size: .6rem; padding: 2px 6px; border-radius: 2px;
@@ -419,7 +419,6 @@
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
       
-      // التعديل: التعامل مع المسار إذا كان نصاً واحداً أو مصفوفة نصوص لعرض أول صورة في الجدول
       let displayImg = 'https://via.placeholder.com/40';
       if (p.image_path) {
         if (Array.isArray(p.image_path)) {
@@ -528,7 +527,6 @@
     }
   }
 
-  // التعديل الأساسي: دالة لرفع مصفوفة صور وحفظ المنتج
   async function addNewProductWithImages() {
     const name = document.getElementById('newProdName').value.trim();
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
@@ -546,7 +544,6 @@
     const imageUrlsArray = [];
 
     try {
-      // الـ Loop لرفع كل الصور وحفظ الروابط
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         btn.textContent = `Uploading Image (${i + 1}/${imageFiles.length})...`;
@@ -555,7 +552,8 @@
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public_bucket/${filePath}`, {
+        // التعديل: استخدام مسار الباكت الصحيح 'product' بدلاً من 'public_bucket' للرفع
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/product/${filePath}`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_KEY,
@@ -570,14 +568,14 @@
           throw new Error(`Storage Error: ${errData.message || uploadRes.statusText}`);
         }
 
-        const fullPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/public_bucket/${filePath}`;
+        // التعديل: توليد رابط العرض العام باستخدام الباكت الصحيح 'product'
+        const fullPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/product/${filePath}`;
         imageUrlsArray.push(fullPublicUrl);
       }
 
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
-      // إرسال مصفوفة الروابط كاملة إلى عمود image_path
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
         headers: {
@@ -590,7 +588,7 @@
           price, 
           stock, 
           sub, 
-          image_path: imageUrlsArray, // تم تمرير المصفوفة هنا
+          image_path: imageUrlsArray, 
           badge, 
           active: true 
         })
