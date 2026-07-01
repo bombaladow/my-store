@@ -282,7 +282,7 @@
       <div class="modal-product-name" style="margin-bottom:4px">How would you like to continue?</div>
       <div class="modal-product-price">Choose an option before checkout</div>
       <div class="checkout-choice">
-        <button class="choice-btn" onclick="showCustomerEmail('gmail')">Continue with Gmail</button>
+        <button class="choice-btn" onclick="loginWithGoogle()">Continue with Google</button>
         <button class="choice-btn" onclick="showCustomerEmail('email')">Enter Email</button>
         <button class="choice-btn" onclick="continueAsGuest()">Continue as Guest</button>
       </div>
@@ -393,8 +393,9 @@
     const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
     
-    let db = null;
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let products = [];
+    let currentUser = null;
 
     // ── LOAD PRODUCTS DYNAMICALLY FROM SUPABASE ──
     async function fetchLiveProducts() {
@@ -508,6 +509,33 @@
     let selectedSize = null;
     let customerChoice = 'guest';
     let customerEmailMode = 'email';
+
+    async function loginWithGoogle() {
+      const { error } = await db.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+      if (error) { showNotif('حصل خطأ في تسجيل الدخول'); console.error(error); }
+    }
+
+    async function checkUserSession() {
+      const { data } = await db.auth.getSession();
+      if (data.session) {
+        currentUser = data.session.user;
+        document.getElementById('co-email').value = currentUser.email;
+        customerChoice = 'google';
+        closeCustomerChoice();
+        showCheckoutForm();
+      }
+    }
+
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        currentUser = session.user;
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', checkUserSession);
 
     function toggleCart() {
       document.getElementById('cartSidebar').classList.toggle('open');
@@ -629,17 +657,23 @@
       const btn = document.getElementById('placeOrderBtn');
       btn.textContent = 'Placing order...';
       btn.disabled = true;
+      const orderNumber = 'MONO-' + Date.now().toString().slice(-6);
+      const total = cart.reduce((a,i) => a+i.price*i.qty, 0);
       try {
-        const res = await fetch('/api/order', {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, address, items: cart, total: cart.reduce((a,i) => a+i.price*i.qty, 0) })
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ name, email, phone, address, items: cart, total, order_number: orderNumber })
         });
-        const data = await res.json();
-        if (data.success) {
+        if (res.ok) {
           cart = []; renderCart(); closeCheckout();
           ['co-name','co-email','co-phone','co-address'].forEach(id => document.getElementById(id).value = '');
-          showNotif(`✓ Order ${data.orderNumber} confirmed!`);
+          showNotif(`✓ Order ${orderNumber} confirmed!`);
         } else { showNotif('Something went wrong'); }
       } catch { showNotif('Something went wrong'); }
       btn.textContent = 'Place Order →';
