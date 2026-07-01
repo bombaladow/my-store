@@ -9,10 +9,7 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --black: #0a0a0a; --white: #f9f9f7; --gray: #888; --light-gray: #e8e8e5; --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     html { scroll-behavior: smooth; }
-    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; cursor: none; }
-    .cursor { width: 10px; height: 10px; background: var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; }
-    .cursor-ring { width: 36px; height: 36px; border: 1px solid var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); opacity: 0.5; }
-    @media (max-width: 768px) { body { cursor: auto; } .cursor, .cursor-ring { display: none; } }
+    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; }
     .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
     .loader.hidden { opacity: 0; visibility: hidden; }
     .loader-text { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--white); letter-spacing: 0.4em; animation: loaderPulse 1.5s ease-in-out infinite; }
@@ -79,7 +76,6 @@
     .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--light-gray); margin: 2px; }
     .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; }
     
-    /* ── SLIDER STYLES FOR DYNAMIC PRODUCT IMAGES ── */
     .product-img-slider-wrap { aspect-ratio: 3/4; position: relative; overflow: hidden; }
     .product-images-container { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; }
     .product-images-container::-webkit-scrollbar { display: none; }
@@ -242,9 +238,6 @@
   </style>
 </head>
 <body>
-
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
 
   <div class="loader" id="loader"><div class="loader-text">MONO</div></div>
   <div class="notif" id="notif"></div>
@@ -440,10 +433,8 @@
     let products = [];
     let currentUser = null;
     let customerChoice = null;
-
     let selectedQty = 1;
 
-    // ── SLIDER INTERACTION LOGIC FOR DYNAMIC PRODUCT CARD IMAGES ──
     function moveSlider(button, direction, event) {
       event.stopPropagation(); 
       const sliderWrap = button.closest('.product-img-slider-wrap');
@@ -484,7 +475,6 @@
       grid.innerHTML = products.map(p => {
         const isSoldOut = p.stock <= 0;
         
-        // ── PROCESS DYNAMIC MULTIPLE IMAGES SAFELY ──
         let imageArray = [];
         if (p.image_path) {
           if (Array.isArray(p.image_path)) {
@@ -523,7 +513,6 @@
           priceHTML = `<div class="product-price">${p.price} EGP</div>`;
         }
 
-        // Generate slide structures and dots controls dynamically
         const imagesHTML = imageArray.map(imgUrl => `
           <img src="${imgUrl}" alt="${p.name || ''}" loading="lazy" style="${isSoldOut ? 'filter: grayscale(80%) opacity(0.6);' : ''}"/>
         `).join('');
@@ -566,14 +555,6 @@
 
       document.querySelectorAll('.products-grid .reveal').forEach(el => observer.observe(el));
     }
-
-    // Custom Minimal Architectural Cursor Logic
-    const cursor = document.getElementById('cursor');
-    const ring = document.getElementById('cursorRing');
-    document.addEventListener('mousemove', (e) => {
-      cursor.style.transform = `translate3d(${e.clientX - 5}px, ${e.clientY - 5}px, 0)`;
-      ring.style.transform = `translate3d(${e.clientX - 18}px, ${e.clientY - 18}px, 0)`;
-    });
 
     window.addEventListener('DOMContentLoaded', () => {
       fetchLiveProducts();
@@ -717,7 +698,6 @@
 
     async function loginWithGoogle() {
       showNotif('Connecting to Google Auth...');
-      // Static Simulation of authenticating user locally via client config auth
       setTimeout(() => {
         currentUser = { email: 'user.mono@gmail.com' };
         customerChoice = 'google';
@@ -793,7 +773,6 @@
           },
           body: JSON.stringify({ email })
         });
-        
         if (res.ok) { 
           showNotif('Welcome to MONO ✓'); 
           input.value = ''; 
