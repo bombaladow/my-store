@@ -320,13 +320,13 @@
           <input type="text" id="newProdSub" class="form-input" placeholder="e.g. Streetwear Edition"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Product Image (صورة المنتج)*</label>
-          <input type="file" id="newProdImage" class="form-input" accept="image/*" style="border:none; padding: 6px 0;"/>
+          <label class="form-label">Product Images (صور المنتج)*</label>
+          <input type="file" id="newProdImage" class="form-input" accept="image/*" multiple style="border:none; padding: 6px 0;"/>
         </div>
       </div>
 
-      <button id="addProductBtn" class="save-inline-btn" style="padding:16px 32px; margin-top: 16px;" onclick="addNewProductWithImage()">
-        Upload Image & Add Product →
+      <button id="addProductBtn" class="save-inline-btn" style="padding:16px 32px; margin-top: 16px;" onclick="addNewProductWithImages()">
+        Upload Images & Add Product →
       </button>
     </div>
   </div>
@@ -418,9 +418,23 @@
       const isSoldOut = p.stock <= 0;
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
-      const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/40';
-      const discount = p.discount || 0;
       
+      // التعديل: التعامل مع المسار إذا كان نصاً واحداً أو مصفوفة نصوص لعرض أول صورة في الجدول
+      let displayImg = 'https://via.placeholder.com/40';
+      if (p.image_path) {
+        if (Array.isArray(p.image_path)) {
+          displayImg = p.image_path[0] || displayImg;
+        } else if (p.image_path.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(p.image_path);
+            displayImg = parsed[0] || displayImg;
+          } catch(e) { displayImg = p.image_path; }
+        } else {
+          displayImg = p.image_path;
+        }
+      }
+
+      const discount = p.discount || 0;
       const finalPrice = discount > 0 
         ? (p.price - (p.price * discount / 100)).toFixed(2) 
         : p.price;
@@ -514,46 +528,56 @@
     }
   }
 
-  async function addNewProductWithImage() {
+  // التعديل الأساسي: دالة لرفع مصفوفة صور وحفظ المنتج
+  async function addNewProductWithImages() {
     const name = document.getElementById('newProdName').value.trim();
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
     const stock = parseInt(document.getElementById('newProdStock').value) || 0;
     const sub = document.getElementById('newProdSub').value.trim();
-    const imageFile = document.getElementById('newProdImage').files[0];
+    const imageFiles = document.getElementById('newProdImage').files;
     const btn = document.getElementById('addProductBtn');
 
-    if (!name || !price || !imageFile) {
-      showToast('Please enter Name, Price and choose an Image!', 'error');
+    if (!name || !price || imageFiles.length === 0) {
+      showToast('Please enter Name, Price and choose at least one Image!', 'error');
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = 'Uploading Image...';
+    const imageUrlsArray = [];
 
     try {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-      const filePath = `${fileName}`;
+      // الـ Loop لرفع كل الصور وحفظ الروابط
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        btn.textContent = `Uploading Image (${i + 1}/${imageFiles.length})...`;
 
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public_bucket/${filePath}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': imageFile.type
-        },
-        body: imageFile
-      });
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-      if (!uploadRes.ok) {
-        const errData = await uploadRes.json().catch(() => ({}));
-        throw new Error(`Storage Error: ${errData.message || uploadRes.statusText}`);
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public_bucket/${filePath}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': file.type
+          },
+          body: file
+        });
+
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(`Storage Error: ${errData.message || uploadRes.statusText}`);
+        }
+
+        const fullPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/public_bucket/${filePath}`;
+        imageUrlsArray.push(fullPublicUrl);
       }
 
-      const image_path = `${SUPABASE_URL}/storage/v1/object/public/public_bucket/${filePath}`;
       btn.textContent = 'Saving Product to Database...';
       const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
+      // إرسال مصفوفة الروابط كاملة إلى عمود image_path
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
         headers: {
@@ -561,11 +585,19 @@
           'Authorization': `Bearer ${SUPABASE_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, price, stock, sub, image_path, badge, active: true })
+        body: JSON.stringify({ 
+          name, 
+          price, 
+          stock, 
+          sub, 
+          image_path: imageUrlsArray, // تم تمرير المصفوفة هنا
+          badge, 
+          active: true 
+        })
       });
 
       if (insertRes.ok) {
-        showToast('✓ Product added successfully!', 'success');
+        showToast('✓ Product added successfully with all images!', 'success');
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdStock').value = '';
@@ -581,7 +613,7 @@
       showToast(error.message, 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Upload Image & Add Product →';
+      btn.textContent = 'Upload Images & Add Product →';
     }
   }
 
