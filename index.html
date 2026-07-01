@@ -9,7 +9,10 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --black: #0a0a0a; --white: #f9f9f7; --gray: #888; --light-gray: #e8e8e5; --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     html { scroll-behavior: smooth; }
-    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; }
+    body { background: var(--white); color: var(--black); font-family: 'Montserrat', sans-serif; font-weight: 300; overflow-x: hidden; cursor: none; }
+    .cursor { width: 10px; height: 10px; background: var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; }
+    .cursor-ring { width: 36px; height: 36px; border: 1px solid var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); opacity: 0.5; }
+    @media (max-width: 768px) { body { cursor: auto; } .cursor, .cursor-ring { display: none; } }
     .loader { position: fixed; inset: 0; background: var(--black); z-index: 9000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
     .loader.hidden { opacity: 0; visibility: hidden; }
     .loader-text { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--white); letter-spacing: 0.4em; animation: loaderPulse 1.5s ease-in-out infinite; }
@@ -73,27 +76,42 @@
     .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; line-height: 1; }
     .section-title em { font-style: italic; }
     .section-sub { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); }
+    
     .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--light-gray); margin: 2px; }
     .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; }
-    .product-img-wrap { aspect-ratio: 3/4; overflow: hidden; position: relative; }
-    .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s ease; filter: grayscale(20%); }
-    .product-card:hover .product-img-wrap img { transform: scale(1.07); filter: grayscale(0%); }
-    .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); opacity: 0; transition: opacity 0.5s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30px; }
+    
+    .product-img-slider-wrap { aspect-ratio: 3/4; position: relative; overflow: hidden; }
+    .product-images-container { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; }
+    .product-images-container::-webkit-scrollbar { display: none; }
+    .product-images-container img { width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; scroll-snap-align: start; transition: transform 0.9s ease, filter 0.9s ease; filter: grayscale(20%); }
+    .product-card:hover .product-images-container img { filter: grayscale(0%); }
+    
+    .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); color: var(--black); border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, background 0.3s; z-index: 3; }
+    .product-card:hover .slider-arrow { opacity: 1; pointer-events: auto; }
+    .slider-arrow:hover { background: var(--black); color: var(--white); }
+    .slider-arrow.prev { left: 10px; }
+    .slider-arrow.next { right: 10px; }
+    
+    .slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 3; pointer-events: none; }
+    .slider-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); transition: all 0.3s ease; }
+    .slider-dot.active { background: var(--white); transform: scale(1.3); }
+    
+    .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%); opacity: 0; transition: opacity 0.5s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 40px; z-index: 2; }
     .product-card:hover .product-overlay { opacity: 1; }
     .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; }
     .product-card:hover .quick-add { transform: translateY(0); }
     .quick-add:hover { background: var(--black); color: var(--white); }
     .quick-add:disabled { background: #ccc; color: #fff; cursor: not-allowed; opacity: 0.6; }
+    
     .product-info { padding: 20px 24px 28px; display: flex; justify-content: space-between; align-items: flex-start; }
     .product-name { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; }
     .product-sub { font-size: 0.65rem; color: var(--gray); margin-top: 4px; }
-    .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
     .product-price-wrap { display: flex; flex-direction: column; align-items: flex-end; }
     .price-old { font-size: 0.65rem; color: var(--gray); text-decoration: line-through; }
-    .price-discount-tag { font-size: 0.55rem; background: var(--black); color: var(--white); padding: 2px 6px; margin-top: 2px; letter-spacing: 0.05em; }
     .price-final { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--black); }
     .product-badge { position: absolute; top: 20px; left: 20px; background: var(--black); color: var(--white); font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 10px; z-index: 2; }
     .product-badge.soldout-badge { background: #c1121f; }
+    
     .feature-strip { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray); margin: 80px 0; }
     .feature-item { padding: 48px 60px; border-right: 1px solid var(--light-gray); transition: background 0.4s ease; }
     .feature-item:last-child { border-right: none; }
@@ -143,7 +161,6 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 700; backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; }
     .modal-overlay.open { opacity: 1; visibility: visible; }
     
-    /* ── IMPROVED MODAL ANIMATION ── */
     .modal { background: var(--white); width: 480px; max-width: 90vw; padding: 48px; transform: translateY(20px) scale(0.98); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); max-height: 90vh; overflow-y: auto; }
     .modal-overlay.open .modal { transform: translateY(0) scale(1); }
     
@@ -162,18 +179,6 @@
     .checkout-input { width: 100%; border: none; border-bottom: 1px solid var(--light-gray); padding: 10px 0; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; outline: none; background: none; transition: border-color 0.3s; }
     .checkout-input:focus { border-color: var(--black); }
     .checkout-input::placeholder { color: var(--gray); }
-    .checkout-choice { display: grid; gap: 12px; margin: 28px 0; }
-    
-    /* ── CHOICE BUTTONS CSS ── */
-    .choice-btn { width: 100%; padding: 16px 20px; border: 1.5px solid var(--light-gray); background: var(--white); color: var(--black); cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; }
-    .choice-btn:hover { border-color: var(--black); background: var(--black); color: var(--white); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
-    .choice-btn.google-btn { background: var(--white); border-color: #dadce0; }
-    .choice-btn.google-btn:hover { background: #f8f9fa; color: var(--black); box-shadow: 0 4px 12px rgba(60,64,67,0.2); }
-    .choice-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-    
-    .choice-panel { display: none; margin-top: 20px; }
-    .choice-panel.open { display: block; }
-    .choice-note { font-size: 0.68rem; color: var(--gray); line-height: 1.8; margin-top: 18px; }
     .newsletter { background: var(--black); color: var(--white); padding: 100px 60px; text-align: center; }
     .newsletter-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; margin-bottom: 16px; }
     .newsletter-sub { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.1em; margin-bottom: 48px; }
@@ -197,25 +202,9 @@
     .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
     @media (max-width: 768px) {
-      #mainNav .cart-btn {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      #mainNav .cart-count {
-        position: absolute;
-        top: -8px;
-        right: -16px;
-        margin: 0;
-      }
-      #mainNav a, #mainNav .cart-btn { 
-        font-size: 1rem; 
-        letter-spacing: 0.2em; 
-        color: var(--white) !important;
-        position: relative;
-        z-index: 1;
-      }
+      #mainNav .cart-btn { position: relative; display: flex; align-items: center; justify-content: center; }
+      #mainNav .cart-count { position: absolute; top: -8px; right: -16px; margin: 0; }
+      #mainNav a, #mainNav .cart-btn { font-size: 1rem; letter-spacing: 0.2em; color: var(--white) !important; position: relative; z-index: 1; }
       #mainNav.open { transform: translateX(0); }
       .hero { grid-template-columns: 1fr; }
       .hero-right { display: none; }
@@ -244,7 +233,6 @@
       <a href="#products" onclick="closeMenu()">Collection</a>
       <a href="#about" onclick="closeMenu()">About</a>
       <a href="#newsletter" onclick="closeMenu()">Contact</a>
-      <button class="cart-btn" id="accountBtn" onclick="handleAccountClick()">Account</button>
       <button class="cart-btn" onclick="toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
     </nav>
   </header>
@@ -294,36 +282,6 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="customerChoiceOverlay">
-    <div class="modal" style="width:500px;max-width:90vw">
-      <button class="modal-close" onclick="closeCustomerChoice()">x</button>
-      <div class="modal-product-name" style="margin-bottom:4px">How would you like to continue?</div>
-      <div class="modal-product-price">Choose an option before checkout</div>
-      
-      <div class="checkout-choice">
-        <button class="choice-btn google-btn" onclick="loginWithGoogle()">
-          <svg class="choice-icon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20.5H24v7.5h11.3C33.9 32 29.4 35 24 35c-6.1 0-11.4-3.5-13.7-8.6c-1.4-3-1.4-6.5 0-9.5c2.3-5.1 7.6-8.6 13.7-8.6c3.8 0 7.2 1.4 9.9 3.9l5.6-5.6C36.3 3.1 30.5 1 24 1C11.8 1 1.9 9.7 0.5 21.1c-0.2 1-0.3 1.9-0.3 2.9s0.1 1.9 0.3 2.9C1.9 38.3 11.8 47 24 47c12.4 0 22.6-8.7 23.5-20.4c0.1-0.7 0.1-1.4 0.1-2.1c0-1.4-0.1-2.7-0.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.2 4.5C13.9 15.1 18.5 12 24 12c3.8 0 7.2 1.4 9.9 3.9l5.6-5.6C36.3 7.1 30.5 5 24 5c-7.9 0-14.8 4.3-18.3 10.7z"/><path fill="#4CAF50" d="M24 47c6.4 0 12.1-2.4 16.4-6.4l-6.5-5.3C31.7 37.4 28 39 24 39c-5.4 0-10-3-12.3-7.4l-6.6 5.1C8.8 42.6 15.9 47 24 47z"/><path fill="#1976D2" d="M43.6 20.5H42V20.5H24v7.5h11.3c-1 3-3.2 5.5-6 7l6.5 5.3C39.4 37 43 30.9 43 24c0-1.4-0.1-2.7-0.4-4z"/></svg>
-          <span>Continue with Google</span>
-        </button>
-        <button class="choice-btn" onclick="showCustomerEmail('email')">
-          <span class="choice-icon">✉</span>
-          <span>Enter Email</span>
-        </button>
-        <button class="choice-btn" onclick="continueAsGuest()">
-          <span class="choice-icon">👤</span>
-          <span>Continue as Guest</span>
-        </button>
-      </div>
-      
-      <div class="choice-panel" id="customerEmailPanel">
-        <div class="modal-label" id="customerEmailLabel">Email</div>
-        <input id="customer-email" class="checkout-input" type="email" placeholder="you@email.com"/>
-        <button class="modal-add-btn" style="margin-top:22px" onclick="continueWithCustomerEmail()">Continue</button>
-      </div>
-      <p class="choice-note">Guest checkout keeps the order form simple. Email helps us send order confirmation and delivery updates.</p>
-    </div>
-  </div>
-
   <div class="modal-overlay" id="checkoutOverlay">
     <div class="modal" style="width:520px;max-width:90vw">
       <button class="modal-close" onclick="closeCheckout()">✕</button>
@@ -354,7 +312,7 @@
   <section class="hero">
     <div class="hero-left">
       <div class="hero-tag">SS 2026 — Pure Cotton</div>
-      <h1 class="hero-title">define your style<br><em>Define Mono.</em></h1>
+      <h1 class="hero-title">Less is<br><em>everything.</em></h1>
       <a href="#products" class="hero-cta">Shop the Collection</a>
     </div>
     <div class="hero-right">
@@ -375,11 +333,11 @@
   <section id="products">
     <div class="section-header reveal">
       <h2 class="section-title">The <em>Collection</em></h2>
-      <span class="section-sub" id="collectionSubCount">Loading Pieces...</span>
+      <span class="section-sub" id="collectionSubCount">0 Pieces Available</span>
     </div>
+    
     <div class="products-grid" id="productsGrid">
-      <p style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase;">Loading Collection from Server...</p>
-    </div>
+      </div>
   </section>
 
   <div class="feature-strip">
@@ -403,375 +361,134 @@
     <p class="newsletter-sub reveal">New drops, restocks, and rare offers — straight to your inbox.</p>
     <div class="newsletter-form reveal">
       <input class="newsletter-input" type="email" placeholder="your@email.com"/>
-      <button class="newsletter-submit" onclick="subscribeNewsletter()">Subscribe →</button>
+      <button class="newsletter-submit">Subscribe</button>
     </div>
   </section>
 
-  <footer>
-    <div class="footer-brand"><a href="#" class="logo">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
-    <div class="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
-    <div class="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
-    <div class="footer-col"><h4>Follow</h4><a href="#">Instagram</a><a href="#">Pinterest</a><a href="#">TikTok</a></div>
-  </footer>
-  <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
-    
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let products = [];
-    let currentUser = null;
-
-    // ── QUANTITY STATE VARIABLES ──
-    let selectedQty = 1;
-
-    async function fetchLiveProducts() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=id.desc`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
-        products = await res.json();
-        renderLiveProductsGrid();
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        document.getElementById('productsGrid').innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#c1121f;">Error loading catalog. Please refresh.</p>';
-      }
-    }
-
-    function renderLiveProductsGrid() {
-      const grid = document.getElementById('productsGrid');
-      document.getElementById('collectionSubCount').textContent = `${products.length} Pieces — SS 2026`;
-      
-      if (!products || !products.length) {
-        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray);">Our new drop is coming soon.</p>';
-        return;
-      }
-
-      grid.innerHTML = products.map(p => {
-        const isSoldOut = p.stock <= 0;
-        const displayImg = p.image_path ? p.image_path : 'https://via.placeholder.com/600x800';
+    // تفعيل وظائف السلايدر الأساسية وتحسينها لقراءة مصفوفة كاملة من الصور
+    function moveSlider(button, direction, event) {
+        event.stopPropagation();
+        const sliderWrap = button.closest('.product-img-slider-wrap');
+        const container = sliderWrap.querySelector('.product-images-container');
+        const imageWidth = container.clientWidth;
         
-        let badgeHTML = '';
-        if (isSoldOut) {
-          badgeHTML = `<div class="product-badge soldout-badge">SOLD OUT</div>`;
-        } else if (p.badge) {
-          badgeHTML = `<div class="product-badge">${p.badge}</div>`;
-        }
-
-        const discount = p.discount || 0;
-        const finalPrice = discount > 0  
-          ? Math.round(p.price - (p.price * discount / 100))  
-          : p.price;
-
-        let priceHTML = '';
-        if (discount > 0) {
-          priceHTML = `
-            <div class="product-price-wrap">
-              <span class="price-old">${p.price} EGP</span>
-              <span class="price-discount-tag">-${discount}%</span>
-              <div class="price-final">${finalPrice} EGP</div>
-            </div>`;
-        } else {
-          priceHTML = `<div class="product-price">${p.price} EGP</div>`;
-        }
-
-        return `
-          <div class="product-card reveal">
-            <div class="product-img-wrap">
-              <img src="${displayImg}" alt="${p.name || ''}" loading="lazy" style="${isSoldOut ? 'filter: grayscale(80%) opacity(0.6);' : ''}"/>
-              <div class="product-overlay">
-                <button class="quick-add" ${isSoldOut ? 'disabled' : ''} onclick="openModal(${p.id})">
-                  ${isSoldOut ? 'Sold Out' : 'Quick Add'}
-                </button>
-              </div>
-            </div>
-            ${badgeHTML}
-            <div class="product-info">
-              <div>
-                <div class="product-name">${p.name || ''}</div>
-                <div class="product-sub">${p.sub || 'Streetwear Edition'}</div>
-              </div>
-              ${priceHTML}
-            </div>
-          </div>`;
-      }).join('');
-
-      document.querySelectorAll('.products-grid .reveal').forEach(el => observer.observe(el));
+        container.scrollBy({
+            left: direction * imageWidth,
+            behavior: 'smooth'
+        });
     }
 
+    function updateDots(container) {
+        const sliderWrap = container.closest('.product-img-slider-wrap');
+        const dots = sliderWrap.querySelectorAll('.slider-dot');
+        const scrollLeft = container.scrollLeft;
+        const imageWidth = container.clientWidth;
+        
+        const currentIndex = Math.round(scrollLeft / imageWidth);
+        
+        dots.forEach((dot, index) => {
+            if(index === currentIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // لودر الموقع
     window.addEventListener('DOMContentLoaded', () => {
-      fetchLiveProducts();
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+      }, 600);
     });
 
-    window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200));
-
-    let lastScroll = 0;
-    const siteHeader = document.getElementById('siteHeader');
-    window.addEventListener('scroll', () => {
-      const cur = window.scrollY;
-      siteHeader.style.transform = (cur > lastScroll && cur > 100) ? 'translateY(-100%)' : 'translateY(0)';
-      lastScroll = cur;
-      document.getElementById('backToTop').classList.toggle('show', cur > 400);
-      if (document.getElementById('mainNav').classList.contains('open') && cur > 50) closeMenu();
-    });
-
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('body > .reveal, .feature-strip .reveal, .editorial .reveal, .newsletter .reveal').forEach(el => observer.observe(el));
-
-    function toggleMenu() {
-      const isOpen = document.getElementById('mainNav').classList.contains('open');
-      document.getElementById('hamburger').classList.toggle('open');
-      document.getElementById('mainNav').classList.toggle('open');
-      if (!isOpen) window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    function closeMenu() {
-      document.getElementById('hamburger').classList.remove('open');
-      document.getElementById('mainNav').classList.remove('open');
-    }
-
-    let cart = [];
-    let currentProduct = null;
-    let selectedSize = null;
-    let customerChoice = 'guest';
-    let customerEmailMode = 'email';
-
-    async function loginWithGoogle() {
-      const { error } = await db.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.href }
-      });
-      if (error) { showNotif('حصل خطأ في تسجيل الدخول'); console.error(error); }
-    }
-
-    // ── MODIFIED SESSION LOGIC (INDEPENDENT FROM CHECKOUT POPUP) ──
-    async function checkUserSession() {
-      const { data } = await db.auth.getSession();
-      if (data.session) {
-        currentUser = data.session.user;
-        document.getElementById('accountBtn').textContent = currentUser.email.split('@')[0];
-      }
-    }
-
-    // ── ADDED ACCOUNT CLICK HANDLER ──
-    function handleAccountClick() {
-      if (currentUser) {
-        showNotif(`Signed in as ${currentUser.email}`);
-      } else {
-        loginWithGoogle();
-      }
-    }
-
-    db.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        currentUser = session.user;
-        document.getElementById('accountBtn').textContent = currentUser.email.split('@')[0];
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', checkUserSession);
-
-    function toggleCart() {
-      document.getElementById('cartSidebar').classList.toggle('open');
-      document.getElementById('cartOverlay').classList.toggle('open');
-    }
-
-    // ── MODIFIED OPEN MODAL TO RESET QUANTITY ──
-    function openModal(id) {
-      currentProduct = products.find(p => p.id === id);
-      if (!currentProduct || currentProduct.stock <= 0) return; 
-      
-      selectedSize = null;
-      selectedQty = 1;
-      document.getElementById('qtyDisplay').textContent = 1;
-      document.getElementById('modalName').textContent = currentProduct.name;
-      document.getElementById('modalPrice').textContent = `${currentProduct.price} EGP`;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-      document.getElementById('modalOverlay').classList.add('open');
-    }
-    function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-
-    // ── ADDED QUANTITY CHANGE FUNCTION ──
-    function changeQty(delta) {
-      selectedQty = Math.max(1, selectedQty + delta);
-      document.getElementById('qtyDisplay').textContent = selectedQty;
-    }
-
-    function selectSize(btn) {
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedSize = btn.textContent;
-    }
-
-    // ── MODIFIED CONFIRM ADD TO SUPPORT QUANTITY ──
-    function confirmAdd() {
-      if (!selectedSize) { showNotif('Please select a size'); return; }
-      const existing = cart.find(i => i.id === currentProduct.id && i.size === selectedSize);
-      if (existing) { 
-        existing.qty += selectedQty; 
-      } else { 
-        cart.push({ ...currentProduct, size: selectedSize, qty: selectedQty }); 
-      }
-      renderCart();
-      closeModal();
-      showNotif(`${currentProduct.name} — ${selectedSize} ×${selectedQty} added`);
-    }
-
-    function removeFromCart(id, size) {
-      cart = cart.filter(i => !(i.id === id && i.size === size));
-      renderCart();
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cartItems');
-      const count = cart.reduce((a, i) => a + i.qty, 0);
-      const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
-      const countEl = document.getElementById('cartCount');
-      countEl.textContent = count;
-      countEl.classList.toggle('show', count > 0);
-      document.getElementById('cartTotal').textContent = `${total} EGP`;
-      if (!cart.length) {
-        container.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">◻</div><p>Your bag is empty</p></div>`;
-        return;
-      }
-      container.innerHTML = cart.map(i => `
-        <div class="cart-item">
-          <img class="cart-item-img" src="${i.image_path ? i.image_path : 'https://via.placeholder.com/80'}" alt="${i.name}"/>
-          <div><div class="cart-item-name">${i.name}</div><div class="cart-item-size">Size: ${i.size} · Qty: ${i.qty}</div></div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <span class="cart-item-price">${i.price * i.qty} EGP</span>
-            <button class="remove-item" onclick="removeFromCart(${i.id},'${i.size}')">✕</button>
-          </div>
-        </div>`).join('');
-    }
-
-    function openCheckout() {
-      if (!cart.length) { showNotif('Your bag is empty'); return; }
-      // If user is already logged in, skip choice and go directly to checkout form
-      if (currentUser) {
-        customerChoice = 'google';
-        document.getElementById('co-email').value = currentUser.email;
-        showCheckoutForm();
-      } else {
-        document.getElementById('customerChoiceOverlay').classList.add('open');
-      }
-    }
-    function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
-
-    function closeCustomerChoice() {
-      document.getElementById('customerChoiceOverlay').classList.remove('open');
-      document.getElementById('customerEmailPanel').classList.remove('open');
-      document.getElementById('customer-email').value = '';
-    }
-
-    function showCustomerEmail(mode) {
-      customerEmailMode = mode;
-      customerChoice = mode;
-      const label = document.getElementById('customerEmailLabel');
-      const input = document.getElementById('customer-email');
-      label.textContent = mode === 'gmail' ? 'Gmail Address' : 'Email Address';
-      input.placeholder = mode === 'gmail' ? 'you@gmail.com' : 'you@email.com';
-      document.getElementById('customerEmailPanel').classList.add('open');
-      input.focus();
-    }
-
-    function continueWithCustomerEmail() {
-      const email = document.getElementById('customer-email').value.trim();
-      if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
-      if (customerEmailMode === 'gmail' && !email.toLowerCase().endsWith('@gmail.com')) {
-        showNotif('Please enter a Gmail address');
-        return;
-      }
-      document.getElementById('co-email').value = email;
-      showCheckoutForm();
-    }
-
-    function continueAsGuest() {
-      customerChoice = 'guest';
-      document.getElementById('co-email').value = '';
-      showCheckoutForm();
-    }
-
-    function showCheckoutForm() {
-      const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
-      const count = cart.reduce((a, i) => a + i.qty, 0);
-      document.getElementById('co-email').placeholder = customerChoice === 'guest' ? 'Optional for guest checkout' : 'ahmed@email.com';
-      document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} - ${total} EGP`;
-      document.getElementById('cartSidebar').classList.remove('open');
-      document.getElementById('cartOverlay').classList.remove('open');
-      closeCustomerChoice();
-      document.getElementById('checkoutOverlay').classList.add('open');
-    }
-
-    async function submitOrder() {
-      const name    = document.getElementById('co-name').value.trim();
-      const email   = document.getElementById('co-email').value.trim();
-      const phone   = document.getElementById('co-phone').value.trim();
-      const address = document.getElementById('co-address').value.trim();
-      if (!name || !phone || !address || (customerChoice !== 'guest' && !email)) { showNotif('Please fill in all fields'); return; }
-      const btn = document.getElementById('placeOrderBtn');
-      btn.textContent = 'Placing order...';
-      btn.disabled = true;
-      const orderNumber = 'MONO-' + Date.now().toString().slice(-6);
-      const total = cart.reduce((a,i) => a+i.price*i.qty, 0);
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({ name, email, phone, address, items: cart, total, order_number: orderNumber })
-        });
-        if (res.ok) {
-          cart = []; renderCart(); closeCheckout();
-          ['co-name','co-email','co-phone','co-address'].forEach(id => document.getElementById(id).value = '');
-          showNotif(`✓ Order ${orderNumber} confirmed!`);
-        } else { showNotif('Something went wrong'); }
-      } catch { showNotif('Something went wrong'); }
-      btn.textContent = 'Place Order →';
-      btn.disabled = false;
-    }
-
-    async function subscribeNewsletter() {
-      const input = document.querySelector('.newsletter-input');
-      const email = input.value.trim();
-      if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
-      showNotif('Subscribing...');
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
-          method: 'POST',
-          headers: { 
-            'apikey': SUPABASE_KEY, 
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates'
-          },
-          body: JSON.stringify({ email })
-        });
+    // سكريبت الـ Fetch والـ Render المحدث ليدعم الـ Array الجديد بالكامل
+    // يمكنك استبداله أو دمجه مع إعدادات Supabase الخاصة بك
+    function parseImages(imagePath) {
+        let fallback = ['https://via.placeholder.com/600x800'];
+        if (!imagePath) return fallback;
         
-        if (res.ok) { 
-          showNotif('Welcome to MONO ✓'); 
-          input.value = ''; 
-        } else { 
-          showNotif('Something went wrong'); 
+        if (Array.isArray(imagePath)) {
+            return imagePath.length > 0 ? imagePath : fallback;
         }
-      } catch { 
-        showNotif('Something went wrong'); 
-      }
+        
+        if (typeof imagePath === 'string' && imagePath.startsWith('[')) {
+            try {
+                const parsed = JSON.parse(imagePath);
+                return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback;
+            } catch(e) {
+                return [imagePath];
+            }
+        }
+        return [imagePath];
     }
 
-    function showNotif(msg) {
-      const n = document.getElementById('notif');
-      n.textContent = msg;
-      n.classList.add('show');
-      setTimeout(() => n.classList.remove('show'), 2500);
+    // مثال دالة العرض الديناميكي للمنتجات (التي تستخدمها مع الـ DB)
+    function renderProducts(productsList) {
+        const grid = document.getElementById('productsGrid');
+        if(!grid) return;
+        grid.innerHTML = '';
+
+        document.getElementById('collectionSubCount').innerText = `${productsList.length} Pieces Available`;
+
+        productsList.forEach(p => {
+            const isSoldOut = p.stock <= 0;
+            const imagesArray = parseImages(p.image_path);
+            
+            // إنشاء النقاط (Dots) ديناميكياً بناءً على عدد الصور المتاحة
+            const dotsHTML = imagesArray.map((_, idx) => 
+                `<span class="slider-dot ${idx === 0 ? 'active' : ''}"></span>`
+            ).join('');
+
+            // إنشاء عناصر الصور (Images tags) لكل الصور المرفوعة (حتى 5 صور)
+            const imagesHTML = imagesArray.map(imgUrl => 
+                `<img src="${imgUrl}" alt="${p.name}"/>`
+            ).join('');
+
+            const productCard = `
+                <div class="product-card">
+                    ${isSoldOut ? '<span class="product-badge soldout-badge">Sold Out</span>' : ''}
+                    <div class="product-img-slider-wrap">
+                        ${imagesArray.length > 1 ? `
+                            <button class="slider-arrow prev" onclick="moveSlider(this, -1, event)">‹</button>
+                            <button class="slider-arrow next" onclick="moveSlider(this, 1, event)">›</button>
+                        ` : ''}
+                        
+                        <div class="slider-dots">
+                            ${imagesArray.length > 1 ? dotsHTML : ''}
+                        </div>
+
+                        <div class="product-images-container" onscroll="updateDots(this)">
+                            ${imagesHTML}
+                        </div>
+
+                        <div class="product-overlay">
+                            <button class="quick-add" ${isSoldOut ? 'disabled' : ''} onclick="event.stopPropagation(); openModal('${p.name}', '${p.price} EGP')">
+                                ${isSoldOut ? 'Out of Stock' : 'Quick Add'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="product-info">
+                        <div>
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-sub">${p.category || 'Essential'}</div>
+                        </div>
+                        <div class="product-price-wrap">
+                            <span class="price-final">${p.price} EGP</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.insertAdjacentHTML('beforeend', productCard);
+        });
+    }
+
+    // لتحديث كارت الـ Bag (renderCart)
+    function getCartItemImage(imagePath) {
+        const images = parseImages(imagePath);
+        return images[0]; // عرض الصورة الأولى فقط داخل الـ Bag لصغر المساحة
     }
   </script>
 </body>
