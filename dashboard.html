@@ -154,6 +154,41 @@
     .badge { font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; display: inline-block; font-weight: 500; }
     .badge.contained, .badge.in-stock { background: #e2f0d9; color: var(--green); }
     .badge.sold-out { background: #fce4d6; color: var(--red); }
+    .badge.pending { background: #fff3cd; color: #856404; }
+    .badge.confirmed, .badge.shipped { background: #d4e6f1; color: #1a5276; }
+
+    .status-select {
+      font-family: 'Montserrat', sans-serif; font-size: .65rem; letter-spacing: .05em;
+      padding: 6px 8px; border: 1px solid var(--light); background: var(--white); cursor: pointer;
+    }
+    .view-items-btn {
+      background: var(--white); color: var(--black); border: 1px solid var(--light);
+      padding: 6px 12px; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; transition: all .2s;
+    }
+    .view-items-btn:hover { background: var(--black); color: var(--white); }
+
+    .new-order-pulse { animation: pulseRow 1.6s ease; }
+    @keyframes pulseRow { 0% { background: #fff3cd; } 100% { background: transparent; } }
+
+    /* ── ORDER MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: var(--white); padding: 40px; max-width: 460px; width: 90%;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; margin-bottom: 6px; }
+    .modal-sub { font-size: .65rem; color: var(--gray); letter-spacing: .05em; margin-bottom: 24px; }
+    .modal-item { padding: 12px 0; border-bottom: 1px solid var(--light); font-size: .75rem; display: flex; justify-content: space-between; gap: 12px; }
+    .modal-meta { margin-top: 20px; font-size: .7rem; color: #333; line-height: 1.8; }
+    .modal-close {
+      margin-top: 24px; background: var(--black); color: var(--white); border: none;
+      padding: 12px 28px; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    }
     .prod-img { width: 40px; height: 40px; object-fit: cover; border-radius: 2px; background: #eee; }
 
     .save-inline-btn {
@@ -236,20 +271,60 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <h3 id="modalOrderTitle">Order Details</h3>
+    <div class="modal-sub" id="modalOrderStatus"></div>
+    <div id="modalOrderItems"></div>
+    <div class="modal-meta" id="modalOrderMeta"></div>
+    <button class="modal-close" onclick="closeOrderModal()">Close</button>
+  </div>
+</div>
+
 <div class="dashboard" id="dashboard">
 
   <div class="dash-header">
     <div style="display:flex; align-items:center;">
       <div class="dash-logo">MONO</div>
       <div class="dash-tabs">
-        <button class="tab-btn active" onclick="switchTab('subscribersView', this)">Subscribers</button>
+        <button class="tab-btn active" onclick="switchTab('ordersView', this)">Orders</button>
+        <button class="tab-btn" onclick="switchTab('subscribersView', this)">Subscribers</button>
         <button class="tab-btn" onclick="switchTab('productsView', this)">Clothing & Inventory</button>
       </div>
     </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <div id="subscribersView" class="tab-view active">
+  <div id="ordersView" class="tab-view active">
+    <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="stat-card"><div class="stat-num" id="statOrdersTotal">—</div><div class="stat-title">Total Orders</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOrdersPending">—</div><div class="stat-title">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOrdersToday">—</div><div class="stat-title">Today</div></div>
+      <div class="stat-card"><div class="stat-num" id="statOrdersRevenue">—</div><div class="stat-title">Total Revenue</div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">All <em>Orders</em></div>
+      <input class="search-bar" id="ordersSearchBar" placeholder="Search by name, phone, or order number..." oninput="filterOrdersTable()"/>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTable"><tr><td colspan="7" style="text-align:center;padding:32px;">Loading orders...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="subscribersView" class="tab-view">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-title">Total Subscribers</div></div>
       <div class="stat-card"><div class="stat-num" id="statToday">—</div><div class="stat-title">Joined Today</div></div>
@@ -342,6 +417,7 @@
   let db = null;
   let allSubscribers = [];
   let allProducts = [];
+  let allOrders = [];
 
   function login() {
     const pass = document.getElementById('passInput').value;
@@ -370,12 +446,183 @@
     try {
       if (window.supabase) {
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        loadOrders();
         loadProducts();
         loadSubscribers();
+        subscribeOrdersRealtime();
       }
     } catch (e) {
       console.error(e);
     }
+  }
+
+  /* ══════════════ ORDERS ══════════════ */
+
+  async function loadOrders() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error('Fetch failed');
+      allOrders = await res.json();
+      renderOrderStats();
+      renderOrdersTable(allOrders);
+    } catch (e) {
+      console.error(e);
+      document.getElementById('ordersTable').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:32px;">Orders table not found or failed to load.</td></tr>`;
+    }
+  }
+
+  function subscribeOrdersRealtime() {
+    if (!db) return;
+    db.channel('orders-live-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          allOrders.unshift(payload.new);
+          renderOrderStats();
+          renderOrdersTable(allOrders);
+          showToast('🛎 New order received!', 'success');
+          flashNewOrderRow(payload.new.id);
+        } else if (payload.eventType === 'UPDATE') {
+          const idx = allOrders.findIndex(o => o.id === payload.new.id);
+          if (idx > -1) allOrders[idx] = payload.new;
+          renderOrderStats();
+          renderOrdersTable(allOrders);
+        } else if (payload.eventType === 'DELETE') {
+          allOrders = allOrders.filter(o => o.id !== payload.old.id);
+          renderOrderStats();
+          renderOrdersTable(allOrders);
+        }
+      })
+      .subscribe();
+  }
+
+  function flashNewOrderRow(id) {
+    setTimeout(() => {
+      const row = document.getElementById(`order-row-${id}`);
+      if (row) row.classList.add('new-order-pulse');
+    }, 50);
+  }
+
+  function renderOrderStats() {
+    document.getElementById('statOrdersTotal').textContent = allOrders.length;
+    document.getElementById('statOrdersPending').textContent = allOrders.filter(o => (o.status || 'Pending') === 'Pending').length;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    document.getElementById('statOrdersToday').textContent = allOrders.filter(o => o.created_at?.startsWith(todayStr)).length;
+    const revenue = allOrders.reduce((sum, o) => sum + (Number(o.total) || Number(o.total_price) || 0), 0);
+    document.getElementById('statOrdersRevenue').textContent = revenue.toLocaleString() + ' EGP';
+  }
+
+  function getOrderItemsArray(order) {
+    let items = order.items;
+    if (typeof items === 'string') {
+      try { items = JSON.parse(items); } catch (e) { items = []; }
+    }
+    return Array.isArray(items) ? items : [];
+  }
+
+  function renderOrdersTable(orders) {
+    const tbody = document.getElementById('ordersTable');
+    if (!orders || !orders.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;">No orders yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+      const custName = o.customer_name || o.name || '—';
+      const custEmail = o.customer_email || o.email || '';
+      const custPhone = o.phone || '—';
+      const total = o.total ?? o.total_price ?? 0;
+      const status = o.status || 'Pending';
+      const orderNum = o.order_number || o.id.slice(0, 8).toUpperCase();
+      const date = o.created_at ? new Date(o.created_at).toLocaleString('en-GB') : '—';
+      const itemsArr = getOrderItemsArray(o);
+      const itemsCount = o.items_count ?? itemsArr.length;
+      const statusClass = status.toLowerCase() === 'pending' ? 'badge pending'
+        : status.toLowerCase() === 'cancelled' ? 'badge sold-out'
+        : 'badge confirmed';
+
+      return `
+        <tr id="order-row-${o.id}">
+          <td>${orderNum}</td>
+          <td>${custName}<br><span style="color:var(--gray);font-size:.65rem;">${custEmail}</span></td>
+          <td>${custPhone}</td>
+          <td><button class="view-items-btn" onclick="showOrderItems('${o.id}')">${itemsCount} item(s)</button></td>
+          <td>${Number(total).toLocaleString()} EGP</td>
+          <td>
+            <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+              ${['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map(s =>
+                `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+            <div style="margin-top:4px;"><span class="${statusClass}">${status}</span></div>
+          </td>
+          <td>${date}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterOrdersTable() {
+    const q = document.getElementById('ordersSearchBar').value.toLowerCase();
+    const filtered = allOrders.filter(o =>
+      (o.customer_name || o.name || '').toLowerCase().includes(q) ||
+      (o.phone || '').toLowerCase().includes(q) ||
+      (o.order_number || '').toLowerCase().includes(q)
+    );
+    renderOrdersTable(filtered);
+  }
+
+  async function updateOrderStatus(id, newStatus) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        showToast('✓ Order status updated', 'success');
+      } else {
+        showToast('Failed to update status', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
+  }
+
+  function showOrderItems(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+    const items = getOrderItemsArray(order);
+
+    document.getElementById('modalOrderTitle').textContent = `Order #${order.order_number || order.id.slice(0, 8).toUpperCase()}`;
+    document.getElementById('modalOrderStatus').textContent = `Status: ${order.status || 'Pending'}`;
+
+    document.getElementById('modalOrderItems').innerHTML = items.length
+      ? items.map(it => `
+          <div class="modal-item">
+            <span>${it.name || it.product_name || 'Item'} ${it.size ? '(' + it.size + ')' : ''} × ${it.quantity || it.qty || 1}</span>
+            <span>${it.price ? Number(it.price).toLocaleString() + ' EGP' : ''}</span>
+          </div>
+        `).join('')
+      : '<p style="font-size:.75rem;color:var(--gray);">No itemized product details recorded for this order.</p>';
+
+    const total = order.total ?? order.total_price ?? 0;
+    document.getElementById('modalOrderMeta').innerHTML = `
+      <strong>Customer:</strong> ${order.customer_name || order.name || '—'}<br>
+      <strong>Phone:</strong> ${order.phone || '—'}<br>
+      <strong>Address:</strong> ${order.address || '—'}<br>
+      <strong>Total:</strong> ${Number(total).toLocaleString()} EGP
+    `;
+
+    document.getElementById('orderModal').classList.add('show');
+  }
+
+  function closeOrderModal() {
+    document.getElementById('orderModal').classList.remove('show');
   }
 
   async function loadSubscribers() {
