@@ -182,6 +182,10 @@
     .choice-panel { display: none; margin-top: 20px; border-top: 1px solid var(--light-gray); padding-top: 20px; }
     .choice-note { font-size: 0.6rem; color: var(--gray); line-height: 1.6; margin-top: 20px; text-align: center; }
 
+    .account-order-row { border-bottom: 1px solid var(--light-gray); padding: 14px 0; }
+    .account-order-top { display: flex; justify-content: space-between; font-size: 0.75rem; }
+    .account-order-bottom { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray); margin-top: 4px; }
+
     .newsletter { background: var(--black); color: var(--white); padding: 100px 60px; text-align: center; }
     .newsletter-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; margin-bottom: 16px; }
     .newsletter-sub { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.1em; margin-bottom: 48px; }
@@ -303,32 +307,25 @@
   </div>
 
   <div class="modal-overlay" id="customerChoiceOverlay">
-    <div class="modal" style="width:500px;max-width:90vw">
+    <div class="modal" style="width:440px;max-width:90vw">
       <button class="modal-close" onclick="closeCustomerChoice()">✕</button>
-      <div class="modal-product-name" style="margin-bottom:4px">How would you like to continue?</div>
-      <div class="modal-product-price">Choose an option before checkout</div>
+      <div class="modal-product-name" style="margin-bottom:4px">Sign In</div>
+      <div class="modal-product-price">Track your orders and check out faster.</div>
       
       <div class="checkout-choice">
         <button class="choice-btn" onclick="loginWithGoogle()">
           <svg class="choice-icon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20.5H24v7.5h11.3C33.9 32 29.4 35 24 35c-6.1 0-11.4-3.5-13.7-8.6c-1.4-3-1.4-6.5 0-9.5c2.3-5.1 7.6-8.6 13.7-8.6c3.8 0 7.2 1.4 9.9 3.9l5.6-5.6C36.3 3.1 30.5 1 24 1C11.8 1 1.9 9.7 0.5 21.1c-0.2 1-0.3 1.9-0.3 2.9s0.1 1.9 0.3 2.9C1.9 38.3 11.8 47 24 47c12.4 0 22.6-8.7 23.5-20.4c0.1-0.7 0.1-1.4 0.1-2.1c0-1.4-0.1-2.7-0.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.2 4.5C13.9 15.1 18.5 12 24 12c3.8 0 7.2 1.4 9.9 3.9l5.6-5.6C36.3 7.1 30.5 5 24 5c-7.9 0-14.8 4.3-18.3 10.7z"/><path fill="#4CAF50" d="M24 47c6.4 0 12.1-2.4 16.4-6.4l-6.5-5.3C31.7 37.4 28 39 24 39c-5.4 0-10-3-12.3-7.4l-6.6 5.1C8.8 42.6 15.9 47 24 47z"/><path fill="#1976D2" d="M43.6 20.5H42V20.5H24v7.5h11.3c-1 3-3.2 5.5-6 7l6.5 5.3C39.4 37 43 30.9 43 24c0-1.4-0.1-2.7-0.4-4z"/></svg>
           <span>Continue with Google</span>
         </button>
-        <button class="choice-btn" onclick="showCustomerEmail('email')">
-          <span class="choice-icon">✉</span>
-          <span>Enter Email</span>
-        </button>
-        <button class="choice-btn" onclick="continueAsGuest()">
-          <span class="choice-icon">👤</span>
-          <span>Continue as Guest</span>
-        </button>
       </div>
-      
-      <div class="choice-panel" id="customerEmailPanel">
-        <div class="modal-label" id="customerEmailLabel">Email</div>
-        <input id="customer-email" class="checkout-input" type="email" placeholder="you@email.com"/>
-        <button class="modal-add-btn" style="margin-top:22px" onclick="continueWithCustomerEmail()">Continue</button>
-      </div>
-      <p class="choice-note">Guest checkout keeps the order form simple. Email helps us send order confirmation and delivery updates.</p>
+      <p class="choice-note">You can still browse and check out as a guest without signing in.</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="accountOverlay">
+    <div class="modal" style="width:460px;max-width:90vw">
+      <button class="modal-close" onclick="closeAccountPanel()">✕</button>
+      <div id="accountPanelContent"></div>
     </div>
   </div>
 
@@ -432,7 +429,6 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let products = [];
     let currentUser = null;
-    let customerChoice = null;
     let selectedQty = 1;
 
     function moveSlider(button, direction, event) {
@@ -557,7 +553,10 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      loadCartFromStorage();
+      renderCart();
       fetchLiveProducts();
+      initAuth();
     });
 
     window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200));
@@ -591,6 +590,16 @@
     let cart = [];
     let currentProduct = null;
     let selectedSize = null;
+
+    function saveCartToStorage() {
+      try { localStorage.setItem('mono_cart', JSON.stringify(cart)); } catch (e) {}
+    }
+    function loadCartFromStorage() {
+      try {
+        const saved = localStorage.getItem('mono_cart');
+        if (saved) cart = JSON.parse(saved);
+      } catch (e) { cart = []; }
+    }
 
     function toggleCart() {
       document.getElementById('cartSidebar').classList.toggle('open');
@@ -648,6 +657,7 @@
       countEl.textContent = count;
       countEl.classList.toggle('show', count > 0);
       document.getElementById('cartTotal').textContent = `${total} EGP`;
+      saveCartToStorage();
       if (!cart.length) {
         container.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">◻</div><p>Your bag is empty</p></div>`;
         return;
@@ -663,9 +673,56 @@
         </div>`).join('');
     }
 
+    /* ══════════════ AUTH ══════════════ */
+
+    async function initAuth() {
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (session?.user) {
+          currentUser = session.user;
+          updateAccountButton();
+        }
+      } catch (e) { console.error(e); }
+
+      db.auth.onAuthStateChange((event, session) => {
+        currentUser = session?.user || null;
+        updateAccountButton();
+        if (event === 'SIGNED_IN') {
+          closeCustomerChoice();
+          showNotif(`Signed in as ${currentUser.email}`);
+        }
+      });
+    }
+
+    function updateAccountButton() {
+      const btn = document.getElementById('accountBtn');
+      if (currentUser) {
+        const first = currentUser.user_metadata?.full_name?.split(' ')[0];
+        btn.textContent = first || 'Account';
+      } else {
+        btn.textContent = 'Account';
+      }
+    }
+
+    async function loginWithGoogle() {
+      const { error } = await db.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      });
+      if (error) showNotif('Google sign-in failed');
+    }
+
+    async function logoutUser() {
+      await db.auth.signOut();
+      currentUser = null;
+      updateAccountButton();
+      closeAccountPanel();
+      showNotif('Signed out');
+    }
+
     function handleAccountClick() {
       if (currentUser) {
-        showNotif(`Logged in as: ${currentUser.email}`);
+        openAccountPanel();
       } else {
         document.getElementById('customerChoiceOverlay').classList.add('open');
       }
@@ -675,49 +732,94 @@
       document.getElementById('customerChoiceOverlay').classList.remove('open');
     }
 
-    function showCustomerEmail(type) {
-      document.getElementById('customerEmailPanel').style.display = 'block';
-      document.getElementById('customerEmailLabel').textContent = type === 'gmail' ? 'Google/Gmail Address' : 'Email Address';
+    function openAccountPanel() {
+      renderAccountPanel();
+      document.getElementById('accountOverlay').classList.add('open');
     }
 
-    function continueAsGuest() {
-      customerChoice = 'guest';
-      closeCustomerChoice();
-      openCheckout();
+    function closeAccountPanel() {
+      document.getElementById('accountOverlay').classList.remove('open');
     }
 
-    function continueWithCustomerEmail() {
-      const email = document.getElementById('customer-email').value.trim();
-      if (!email.includes('@')) { showNotif('Please enter a valid email'); return; }
-      currentUser = { email: email };
-      customerChoice = 'email';
-      document.getElementById('accountBtn').textContent = 'Profile';
-      closeCustomerChoice();
-      openCheckout();
+    function renderAccountPanel() {
+      const container = document.getElementById('accountPanelContent');
+      if (!currentUser) {
+        container.innerHTML = `<p style="font-size:0.75rem;color:var(--gray);">You're not signed in.</p>`;
+        return;
+      }
+      const name = currentUser.user_metadata?.full_name || currentUser.email;
+      const avatar = currentUser.user_metadata?.avatar_url;
+
+      container.innerHTML = `
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
+          ${avatar ? `<img src="${avatar}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;"/>` : ''}
+          <div>
+            <div class="modal-product-name" style="margin-bottom:2px;font-size:1.3rem;">${name}</div>
+            <div class="modal-product-price" style="margin-bottom:0;">${currentUser.email}</div>
+          </div>
+        </div>
+        <div class="modal-label">Order History</div>
+        <div id="accountOrdersList" style="margin-bottom:28px;max-height:320px;overflow-y:auto;">
+          <p style="font-size:0.7rem;color:var(--gray);">Loading your orders...</p>
+        </div>
+        <button class="modal-add-btn" style="background:none;color:var(--black);border:1px solid var(--light-gray);" onclick="logoutUser()">Sign Out</button>
+      `;
+      loadUserOrders();
     }
 
-    async function loginWithGoogle() {
-      showNotif('Connecting to Google Auth...');
-      setTimeout(() => {
-        currentUser = { email: 'user.mono@gmail.com' };
-        customerChoice = 'google';
-        document.getElementById('accountBtn').textContent = 'Profile';
-        closeCustomerChoice();
-        openCheckout();
-        showNotif('Signed in with Google');
-      }, 1000);
+    async function loadUserOrders() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&user_id=eq.${currentUser.id}&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        if (!res.ok) throw new Error('fetch failed');
+        const orders = await res.json();
+        renderUserOrders(orders);
+      } catch (e) {
+        console.error(e);
+        const el = document.getElementById('accountOrdersList');
+        if (el) el.innerHTML = `<p style="font-size:0.7rem;color:var(--gray);">Couldn't load your orders right now.</p>`;
+      }
     }
+
+    function renderUserOrders(orders) {
+      const el = document.getElementById('accountOrdersList');
+      if (!el) return;
+      if (!orders || !orders.length) {
+        el.innerHTML = `<p style="font-size:0.7rem;color:var(--gray);">No orders yet — start shopping the collection.</p>`;
+        return;
+      }
+      el.innerHTML = orders.map(o => {
+        const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-GB') : '—';
+        const itemsArr = Array.isArray(o.items) ? o.items : [];
+        const total = o.total ?? o.total_price ?? 0;
+        return `
+          <div class="account-order-row">
+            <div class="account-order-top">
+              <span>#${o.order_number || o.id.slice(0, 8).toUpperCase()}</span>
+              <span>${Number(total).toLocaleString()} EGP</span>
+            </div>
+            <div class="account-order-bottom">
+              <span>${date} · ${itemsArr.length} item(s)</span>
+              <span>${o.status || 'Pending'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ══════════════ CHECKOUT ══════════════ */
 
     function openCheckout() {
       if (!cart.length) { showNotif('Your bag is empty'); return; }
       const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
       const count = cart.reduce((a, i) => a + i.qty, 0);
-      
-      if (currentUser && currentUser.email) {
-        document.getElementById('co-email').value = currentUser.email;
+
+      if (currentUser) {
+        document.getElementById('co-email').value = currentUser.email || '';
+        document.getElementById('co-name').value = currentUser.user_metadata?.full_name || '';
       }
-      
-      document.getElementById('co-email').placeholder = customerChoice === 'guest' ? 'Optional for guest checkout' : 'ahmed@email.com';
+
       document.getElementById('checkoutTotal').textContent = `${count} item${count > 1 ? 's' : ''} - ${total} EGP`;
       document.getElementById('cartSidebar').classList.remove('open');
       document.getElementById('cartOverlay').classList.remove('open');
@@ -730,7 +832,7 @@
       const email   = document.getElementById('co-email').value.trim();
       const phone   = document.getElementById('co-phone').value.trim();
       const address = document.getElementById('co-address').value.trim();
-      if (!name || !phone || !address || (customerChoice !== 'guest' && !email)) { showNotif('Please fill in all fields'); return; }
+      if (!name || !phone || !address) { showNotif('Please fill in all required fields'); return; }
       const btn = document.getElementById('placeOrderBtn');
       btn.textContent = 'Placing order...';
       btn.disabled = true;
@@ -745,7 +847,7 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ name, email, phone, address, items: cart, total, order_number: orderNumber })
+          body: JSON.stringify({ name, email, phone, address, items: cart, total, order_number: orderNumber, user_id: currentUser ? currentUser.id : null })
         });
         if (res.ok) {
           cart = []; renderCart(); closeCheckout();
