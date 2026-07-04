@@ -226,6 +226,11 @@
     }
     .search-bar:focus { border-color: var(--black); }
 
+    /* ── SIZES ── */
+    .sizes-group { display: flex; flex-wrap: wrap; gap: 6px; max-width: 160px; }
+    .size-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .6rem; letter-spacing: .05em; border: 1px solid var(--light); padding: 3px 6px; cursor: pointer; }
+    .size-chip input { width: auto !important; margin: 0; cursor: pointer; }
+
     /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
@@ -361,12 +366,14 @@
               <th>Price (EGP)</th>
               <th>Discount %</th>
               <th>Stock (العدد)</th>
+              <th>Sizes (المقاسات)</th>
+              <th>Category (القسم)</th>
               <th>Status (الحالة)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="productsTable">
-            <tr><td colspan="7" style="text-align:center;padding:32px;">Loading products...</td></tr>
+            <tr><td colspan="9" style="text-align:center;padding:32px;">Loading products...</td></tr>
           </tbody>
         </table>
       </div>
@@ -400,6 +407,21 @@
         </div>
       </div>
 
+      <div class="form-grid" style="grid-template-columns: 1fr 2fr; margin-top: 10px;">
+        <div class="form-group">
+          <label class="form-label">Category (القسم)</label>
+          <select id="newProdCategory" class="form-input" style="cursor:pointer;">
+            <option value="unisex">Unisex (يظهر في الاتنين)</option>
+            <option value="him">For Him</option>
+            <option value="her">For Her</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Available Sizes (المقاسات المتاحة)</label>
+          <div class="sizes-group" id="newProdSizes"></div>
+        </div>
+      </div>
+
       <button id="addProductBtn" class="save-inline-btn" style="padding:16px 32px; margin-top: 16px;" onclick="addNewProductWithImages()">
         Upload Images & Add Product →
       </button>
@@ -413,6 +435,7 @@
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
   const ADMIN_PASSWORD = 'mono2026';
+  const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
   let db = null;
   let allSubscribers = [];
@@ -450,10 +473,41 @@
         loadProducts();
         loadSubscribers();
         subscribeOrdersRealtime();
+        renderSizeCheckboxes('newProdSizes', 'newSize', []);
       }
     } catch (e) {
       console.error(e);
     }
+  }
+
+  /* ══════════════ SIZES HELPERS ══════════════ */
+
+  function parseSizes(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+      return raw.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  function renderSizeCheckboxes(containerId, idPrefix, selectedSizes) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = ALL_SIZES.map(size => `
+      <label class="size-chip">
+        <input type="checkbox" id="${idPrefix}-${size}" value="${size}" ${selectedSizes.includes(size) ? 'checked' : ''}/>
+        ${size}
+      </label>
+    `).join('');
+  }
+
+  function getCheckedSizes(idPrefix) {
+    return ALL_SIZES.filter(size => document.getElementById(`${idPrefix}-${size}`)?.checked);
   }
 
   /* ══════════════ ORDERS ══════════════ */
@@ -657,7 +711,7 @@
   function renderProductsTable(products) {
     const tbody = document.getElementById('productsTable');
     if (!products || !products.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;">No clothing models found.</td></tr>`;
       return;
     }
 
@@ -665,6 +719,7 @@
       const isSoldOut = p.stock <= 0;
       const badgeClass = isSoldOut ? 'badge sold-out' : 'badge in-stock';
       const badgeText = isSoldOut ? 'Sold Out' : 'Available';
+      const productSizes = parseSizes(p.sizes);
       
       let displayImg = 'https://via.placeholder.com/40';
       if (p.image_path) {
@@ -699,6 +754,14 @@
           </td>
           <td><input type="number" id="discount-${p.id}" value="${discount}" style="width:60px;" placeholder="0" oninput="checkStatusLive(${p.id})"/></td>
           <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:70px;" oninput="checkStatusLive(${p.id})"/></td>
+          <td><div class="sizes-group" id="sizes-${p.id}"></div></td>
+          <td>
+            <select class="status-select" id="category-${p.id}">
+              <option value="unisex" ${(!p.category || p.category === 'unisex') ? 'selected' : ''}>Unisex</option>
+              <option value="him" ${p.category === 'him' ? 'selected' : ''}>For Him</option>
+              <option value="her" ${p.category === 'her' ? 'selected' : ''}>For Her</option>
+            </select>
+          </td>
           <td><span id="badge-${p.id}" class="${badgeClass}">${badgeText}</span></td>
           <td>
             <button class="save-inline-btn" onclick="updateProductInDB(${p.id})">Save</button>
@@ -707,6 +770,8 @@
         </tr>
       `;
     }).join('');
+
+    products.forEach(p => renderSizeCheckboxes(`sizes-${p.id}`, `size-${p.id}`, parseSizes(p.sizes)));
   }
 
   function checkStatusLive(id) {
@@ -726,6 +791,8 @@
     const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
     const discount = parseFloat(document.getElementById(`discount-${id}`).value) || 0;
     const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+    const sizes = getCheckedSizes(`size-${id}`);
+    const category = document.getElementById(`category-${id}`).value;
     const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
     try {
@@ -736,7 +803,7 @@
           'Authorization': `Bearer ${SUPABASE_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, price, discount, stock, badge })
+        body: JSON.stringify({ name, price, discount, stock, badge, sizes, category })
       });
 
       if (res.ok) {
@@ -779,6 +846,8 @@
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
     const stock = parseInt(document.getElementById('newProdStock').value) || 0;
     const sub = document.getElementById('newProdSub').value.trim();
+    const sizes = getCheckedSizes('newSize');
+    const category = document.getElementById('newProdCategory').value;
     const imageFiles = document.getElementById('newProdImage').files;
     const btn = document.getElementById('addProductBtn');
 
@@ -836,6 +905,8 @@
           stock, 
           sub, 
           image_path: imageUrlsArray, 
+          sizes,
+          category,
           badge, 
           active: true 
         })
@@ -848,6 +919,8 @@
         document.getElementById('newProdStock').value = '';
         document.getElementById('newProdSub').value = '';
         document.getElementById('newProdImage').value = '';
+        document.getElementById('newProdCategory').value = 'unisex';
+        renderSizeCheckboxes('newProdSizes', 'newSize', []);
         loadProducts();
       } else {
         const errData = await insertRes.json().catch(() => ({}));

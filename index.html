@@ -87,6 +87,10 @@
     .marquee-track span { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); opacity: 0.5; }
     .marquee-track .dot { opacity: 1; }
     @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .category-tabs { display: flex; justify-content: center; gap: 48px; padding: 60px 24px 0; }
+    .category-tab { background: none; border: none; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray); cursor: pointer; padding-bottom: 12px; position: relative; transition: color 0.3s ease; }
+    .category-tab.active { color: var(--black); }
+    .category-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--black); }
     .section-header { display: flex; align-items: flex-end; justify-content: space-between; padding: 80px 60px 40px; border-bottom: 1px solid var(--light-gray); }
     .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; line-height: 1; }
     .section-title em { font-style: italic; }
@@ -269,6 +273,7 @@
         position: static;
         margin: 0;
       }
+      .category-tabs { gap: 24px; padding: 40px 16px 0; }
       .hero { grid-template-columns: 1fr; }
       .hero-right { display: none; }
       .products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -419,6 +424,11 @@
   </div>
 
   <section id="products">
+    <div class="category-tabs">
+      <button class="category-tab active" data-cat="all" onclick="filterByCategory('all', this)">All</button>
+      <button class="category-tab" data-cat="him" onclick="filterByCategory('him', this)">For Him</button>
+      <button class="category-tab" data-cat="her" onclick="filterByCategory('her', this)">For Her</button>
+    </div>
     <div class="section-header reveal">
       <h2 class="section-title">The <em>Collection</em></h2>
       <span class="section-sub" id="collectionSubCount">Loading Pieces...</span>
@@ -471,6 +481,14 @@
     let products = [];
     let currentUser = null;
     let selectedQty = 1;
+    let currentCategory = 'all';
+
+    function filterByCategory(cat, btn) {
+      currentCategory = cat;
+      document.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLiveProductsGrid();
+    }
 
     function moveSlider(button, direction, event) {
       event.stopPropagation(); 
@@ -502,14 +520,19 @@
 
     function renderLiveProductsGrid() {
       const grid = document.getElementById('productsGrid');
-      document.getElementById('collectionSubCount').textContent = `${products.length} Pieces — SS 2026`;
+      const filteredProducts = products.filter(p => {
+        if (currentCategory === 'all') return true;
+        const cat = (p.category || 'unisex').toLowerCase();
+        return cat === currentCategory || cat === 'unisex';
+      });
+      document.getElementById('collectionSubCount').textContent = `${filteredProducts.length} Pieces — SS 2026`;
       
-      if (!products || !products.length) {
+      if (!filteredProducts.length) {
         grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray);">Our new drop is coming soon.</p>';
         return;
       }
 
-      grid.innerHTML = products.map(p => {
+      grid.innerHTML = filteredProducts.map(p => {
         const isSoldOut = p.stock <= 0;
         
         let imageArray = [];
