@@ -65,6 +65,7 @@
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .hamburger-badge.show { transform: scale(1); }
+    .menu-backdrop { display: none; }
     .hero { height: 100vh; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
     .hero-left { background: var(--black); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding: 80px 60px; position: relative; overflow: hidden; }
     .hero-left::before { content: ''; position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80') center/cover; opacity: 0.35; transition: transform 8s ease; }
@@ -231,51 +232,57 @@
     .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
     @media (max-width: 768px) {
-      header.menu-open {
-        mix-blend-mode: normal;
-        background: rgba(10, 10, 10, 0.55);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-      }
       .hamburger { display: flex; }
-      #mainNav {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0;
-        background: rgba(10, 10, 10, 0.45);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 0 0 16px 16px;
-        max-height: 0;
-        overflow: hidden;
+      .menu-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.15);
         opacity: 0;
         pointer-events: none;
-        transition: max-height 0.5s ease, opacity 0.4s ease, background 0.4s ease;
+        transition: opacity 0.35s ease;
+        z-index: 190;
       }
-      #mainNav.open {
-        max-height: 100vh;
+      .menu-backdrop.show {
         opacity: 1;
         pointer-events: auto;
-        padding: 4px 32px 28px;
+      }
+      #mainNav {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 220px;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(10, 10, 10, 0.55);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 18px;
+        padding: 32px 28px;
+        gap: 14px;
+        transform: translate(-50%, -50%) scale(0.92);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.3s ease;
+        z-index: 195;
+      }
+      #mainNav.open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        pointer-events: auto;
       }
       #mainNav a, #mainNav .cart-btn {
         width: 100%;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         gap: 10px;
-        padding: 18px 2px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        font-size: 0.8rem;
+        padding: 4px 2px;
+        font-size: 0.85rem;
         font-weight: 300;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.15em;
         color: var(--white) !important;
       }
-      #mainNav a:last-child, #mainNav .cart-btn:last-child { border-bottom: none; }
       #mainNav .cart-count {
         position: static;
         margin: 0;
@@ -312,6 +319,7 @@
       <button class="cart-btn" id="accountBtn" onclick="closeMenu(); handleAccountClick()">Account</button>
       <button class="cart-btn" onclick="closeMenu(); toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
     </nav>
+    <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
   </header>
 
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -643,7 +651,12 @@
     const siteHeader = document.getElementById('siteHeader');
     window.addEventListener('scroll', () => {
       const cur = window.scrollY;
-      siteHeader.style.transform = (cur > lastScroll && cur > 100) ? 'translateY(-100%)' : 'translateY(0)';
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        siteHeader.style.transform = 'translateY(0)';
+      } else {
+        siteHeader.style.transform = (cur > lastScroll && cur > 100) ? 'translateY(-100%)' : 'translateY(0)';
+      }
       lastScroll = cur;
       document.getElementById('backToTop').classList.toggle('show', cur > 400);
       if (document.getElementById('mainNav').classList.contains('open') && cur > 50) closeMenu();
@@ -655,16 +668,14 @@
     document.querySelectorAll('body > .reveal, .feature-strip .reveal, .editorial .reveal, .newsletter .reveal').forEach(el => observer.observe(el));
 
     function toggleMenu() {
-      const isOpen = document.getElementById('mainNav').classList.contains('open');
       document.getElementById('hamburger').classList.toggle('open');
       document.getElementById('mainNav').classList.toggle('open');
-      document.getElementById('siteHeader').classList.toggle('menu-open');
-      if (!isOpen) window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('menuBackdrop').classList.toggle('show');
     }
     function closeMenu() {
       document.getElementById('hamburger').classList.remove('open');
       document.getElementById('mainNav').classList.remove('open');
-      document.getElementById('siteHeader').classList.remove('menu-open');
+      document.getElementById('menuBackdrop').classList.remove('show');
     }
 
     let cart = [];
