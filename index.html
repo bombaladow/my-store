@@ -233,7 +233,9 @@
     @media (max-width: 768px) {
       header.menu-open {
         mix-blend-mode: normal;
-        background: var(--black);
+        background: rgba(10, 10, 10, 0.55);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
       }
       .hamburger { display: flex; }
       #mainNav {
@@ -244,18 +246,21 @@
         flex-direction: column;
         align-items: stretch;
         gap: 0;
-        background: var(--black);
+        background: rgba(10, 10, 10, 0.45);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 0 0 16px 16px;
         max-height: 0;
         overflow: hidden;
         opacity: 0;
         pointer-events: none;
-        transition: max-height 0.5s ease, opacity 0.4s ease;
+        transition: max-height 0.5s ease, opacity 0.4s ease, background 0.4s ease;
       }
       #mainNav.open {
         max-height: 100vh;
         opacity: 1;
         pointer-events: auto;
-        padding: 8px 32px 32px;
+        padding: 4px 32px 28px;
       }
       #mainNav a, #mainNav .cart-btn {
         width: 100%;
@@ -263,12 +268,14 @@
         align-items: center;
         justify-content: flex-start;
         gap: 10px;
-        padding: 16px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.12);
-        font-size: 0.95rem;
-        letter-spacing: 0.2em;
+        padding: 18px 2px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        font-size: 0.8rem;
+        font-weight: 300;
+        letter-spacing: 0.18em;
         color: var(--white) !important;
       }
+      #mainNav a:last-child, #mainNav .cart-btn:last-child { border-bottom: none; }
       #mainNav .cart-count {
         position: static;
         margin: 0;
