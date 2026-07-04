@@ -99,7 +99,7 @@
     .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; }
     
     .product-img-slider-wrap { aspect-ratio: 3/4; position: relative; overflow: hidden; }
-    .product-images-container { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; touch-action: pan-x; }
+    .product-images-container { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; touch-action: auto; }
     .product-images-container::-webkit-scrollbar { display: none; }
     .product-images-container img { width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; scroll-snap-align: start; transition: transform 0.9s ease, filter 0.9s ease; filter: grayscale(20%); -webkit-user-drag: none; user-select: none; }
     .product-card:hover .product-images-container img { filter: grayscale(0%); }
