@@ -113,9 +113,9 @@
     .slider-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); transition: all 0.3s ease; }
     .slider-dot.active { background: var(--white); transform: scale(1.3); }
 
-    .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); opacity: 0; transition: opacity 0.5s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30px; z-index: 2; }
+    .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); opacity: 0; transition: opacity 0.5s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30px; z-index: 2; pointer-events: none; }
     .product-card:hover .product-overlay { opacity: 1; }
-    .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; }
+    .quick-add { background: var(--white); color: var(--black); border: none; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transform: translateY(10px); transition: transform 0.4s ease, background 0.3s; pointer-events: auto; }
     .product-card:hover .quick-add { transform: translateY(0); }
     .quick-add:hover { background: var(--black); color: var(--white); }
     .quick-add:disabled { background: #ccc; color: #fff; cursor: not-allowed; opacity: 0.6; }
@@ -332,20 +332,14 @@
       <div class="modal-product-name" id="modalName"></div>
       <div class="modal-product-price" id="modalPrice"></div>
       <div class="modal-label">Select Size</div>
-      <div class="size-grid">
-        <button class="size-btn" onclick="selectSize(this)">XS</button>
-        <button class="size-btn" onclick="selectSize(this)">S</button>
-        <button class="size-btn" onclick="selectSize(this)">M</button>
-        <button class="size-btn" onclick="selectSize(this)">L</button>
-        <button class="size-btn" onclick="selectSize(this)">XL</button>
-        <button class="size-btn" onclick="selectSize(this)">XXL</button>
-      </div>
+      <div class="size-grid" id="sizeGrid"></div>
       
       <div class="modal-label">Quantity</div>
       <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px;">
-        <button onclick="changeQty(-1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">−</button>
+        <button id="qtyMinusBtn" onclick="changeQty(-1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">−</button>
         <span id="qtyDisplay" style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;min-width:30px;text-align:center;">1</span>
-        <button onclick="changeQty(1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">+</button>
+        <button id="qtyPlusBtn" onclick="changeQty(1)" style="width:36px;height:36px;border:1px solid var(--light-gray);background:none;cursor:pointer;font-size:1rem;">+</button>
+        <span id="stockHint" style="font-size:0.65rem;color:var(--gray);letter-spacing:0.05em;"></span>
       </div>
 
       <button class="modal-add-btn" id="modalAddBtn" onclick="confirmAdd()">Add to Bag</button>
@@ -488,6 +482,19 @@
       document.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderLiveProductsGrid();
+    }
+
+    function parseSizes(raw) {
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+        return raw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [];
     }
 
     function moveSlider(button, direction, event) {
@@ -672,23 +679,51 @@
       document.getElementById('cartOverlay').classList.toggle('open');
     }
 
+    let maxQty = 1;
+
+    function getCartQtyForProduct(id) {
+      return cart.filter(i => i.id === id).reduce((a, i) => a + i.qty, 0);
+    }
+
     function openModal(id) {
       currentProduct = products.find(p => p.id === id);
       if (!currentProduct || currentProduct.stock <= 0) return; 
       
       selectedSize = null;
       selectedQty = 1;
+      const alreadyInCart = getCartQtyForProduct(id);
+      maxQty = Math.max(0, (currentProduct.stock || 0) - alreadyInCart);
+      if (maxQty === 0) {
+        showNotif('You already have the max available quantity in your bag');
+        return;
+      }
       document.getElementById('qtyDisplay').textContent = 1;
       document.getElementById('modalName').textContent = currentProduct.name;
       document.getElementById('modalPrice').textContent = `${currentProduct.price} EGP`;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+
+      const availableSizes = parseSizes(currentProduct.sizes);
+      const sizesToShow = availableSizes.length ? availableSizes : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+      document.getElementById('sizeGrid').innerHTML = sizesToShow.map(s =>
+        `<button class="size-btn" onclick="selectSize(this)">${s}</button>`
+      ).join('');
+
+      document.getElementById('stockHint').textContent = maxQty <= 5 ? `Only ${maxQty} left` : '';
+      updateQtyButtons();
       document.getElementById('modalOverlay').classList.add('open');
     }
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
+    function updateQtyButtons() {
+      document.getElementById('qtyPlusBtn').disabled = selectedQty >= maxQty;
+      document.getElementById('qtyPlusBtn').style.opacity = selectedQty >= maxQty ? '0.4' : '1';
+      document.getElementById('qtyMinusBtn').disabled = selectedQty <= 1;
+      document.getElementById('qtyMinusBtn').style.opacity = selectedQty <= 1 ? '0.4' : '1';
+    }
+
     function changeQty(delta) {
-      selectedQty = Math.max(1, selectedQty + delta);
+      selectedQty = Math.min(maxQty, Math.max(1, selectedQty + delta));
       document.getElementById('qtyDisplay').textContent = selectedQty;
+      updateQtyButtons();
     }
 
     function selectSize(btn) {
