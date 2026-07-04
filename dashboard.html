@@ -228,6 +228,9 @@
 
     /* ── SIZES ── */
     .sizes-group { display: flex; flex-wrap: wrap; gap: 6px; max-width: 160px; }
+    .colors-group { display: flex; flex-wrap: wrap; gap: 8px; max-width: 180px; }
+    .color-swatch-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--light); cursor: pointer; padding: 0; transition: all .2s ease; position: relative; }
+    .color-swatch-btn.selected { border-color: var(--black); box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--black); }
     .size-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .6rem; letter-spacing: .05em; border: 1px solid var(--light); padding: 3px 6px; cursor: pointer; }
     .size-chip input { width: auto !important; margin: 0; cursor: pointer; }
 
@@ -367,13 +370,14 @@
               <th>Discount %</th>
               <th>Stock (العدد)</th>
               <th>Sizes (المقاسات)</th>
+              <th>Colors (الألوان)</th>
               <th>Category (القسم)</th>
               <th>Status (الحالة)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="productsTable">
-            <tr><td colspan="9" style="text-align:center;padding:32px;">Loading products...</td></tr>
+            <tr><td colspan="10" style="text-align:center;padding:32px;">Loading products...</td></tr>
           </tbody>
         </table>
       </div>
@@ -420,6 +424,10 @@
           <label class="form-label">Available Sizes (المقاسات المتاحة)</label>
           <div class="sizes-group" id="newProdSizes"></div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Available Colors (الألوان المتاحة)</label>
+          <div class="colors-group" id="newProdColors"></div>
+        </div>
       </div>
 
       <button id="addProductBtn" class="save-inline-btn" style="padding:16px 32px; margin-top: 16px;" onclick="addNewProductWithImages()">
@@ -436,6 +444,16 @@
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
   const ADMIN_PASSWORD = 'mono2026';
   const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const COLOR_PALETTE = [
+    { name: 'Black', hex: '#0a0a0a' },
+    { name: 'White', hex: '#f9f9f7' },
+    { name: 'Gray', hex: '#888888' },
+    { name: 'Navy', hex: '#1c2a4a' },
+    { name: 'Beige', hex: '#d8c9a3' },
+    { name: 'Olive', hex: '#5b5e3d' },
+    { name: 'Brown', hex: '#5b3a29' },
+    { name: 'Red', hex: '#8c1f1f' }
+  ];
 
   let db = null;
   let allSubscribers = [];
@@ -474,6 +492,7 @@
         loadSubscribers();
         subscribeOrdersRealtime();
         renderSizeCheckboxes('newProdSizes', 'newSize', []);
+        renderColorSwatches('newProdColors', 'newColor', []);
       }
     } catch (e) {
       console.error(e);
@@ -508,6 +527,35 @@
 
   function getCheckedSizes(idPrefix) {
     return ALL_SIZES.filter(size => document.getElementById(`${idPrefix}-${size}`)?.checked);
+  }
+
+  /* ══════════════ COLORS HELPERS ══════════════ */
+
+  function parseColors(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+      return raw.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  function renderColorSwatches(containerId, idPrefix, selectedColors) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = COLOR_PALETTE.map(c => `
+      <button type="button" class="color-swatch-btn ${selectedColors.includes(c.name) ? 'selected' : ''}"
+        id="${idPrefix}-${c.name}" style="background:${c.hex};" title="${c.name}"
+        onclick="this.classList.toggle('selected')"></button>
+    `).join('');
+  }
+
+  function getCheckedColors(idPrefix) {
+    return COLOR_PALETTE.filter(c => document.getElementById(`${idPrefix}-${c.name}`)?.classList.contains('selected')).map(c => c.name);
   }
 
   /* ══════════════ ORDERS ══════════════ */
@@ -755,6 +803,7 @@
           <td><input type="number" id="discount-${p.id}" value="${discount}" style="width:60px;" placeholder="0" oninput="checkStatusLive(${p.id})"/></td>
           <td><input type="number" id="stock-${p.id}" value="${p.stock || 0}" style="width:70px;" oninput="checkStatusLive(${p.id})"/></td>
           <td><div class="sizes-group" id="sizes-${p.id}"></div></td>
+          <td><div class="colors-group" id="colors-${p.id}"></div></td>
           <td>
             <select class="status-select" id="category-${p.id}">
               <option value="unisex" ${(!p.category || p.category === 'unisex') ? 'selected' : ''}>Unisex</option>
@@ -772,6 +821,7 @@
     }).join('');
 
     products.forEach(p => renderSizeCheckboxes(`sizes-${p.id}`, `size-${p.id}`, parseSizes(p.sizes)));
+    products.forEach(p => renderColorSwatches(`colors-${p.id}`, `color-${p.id}`, parseColors(p.colors)));
   }
 
   function checkStatusLive(id) {
@@ -792,6 +842,7 @@
     const discount = parseFloat(document.getElementById(`discount-${id}`).value) || 0;
     const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
     const sizes = getCheckedSizes(`size-${id}`);
+    const colors = getCheckedColors(`color-${id}`);
     const category = document.getElementById(`category-${id}`).value;
     const badge = stock <= 0 ? 'Sold Out' : 'Available';
 
@@ -803,7 +854,7 @@
           'Authorization': `Bearer ${SUPABASE_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, price, discount, stock, badge, sizes, category })
+        body: JSON.stringify({ name, price, discount, stock, badge, sizes, colors, category })
       });
 
       if (res.ok) {
@@ -847,6 +898,7 @@
     const stock = parseInt(document.getElementById('newProdStock').value) || 0;
     const sub = document.getElementById('newProdSub').value.trim();
     const sizes = getCheckedSizes('newSize');
+    const colors = getCheckedColors('newColor');
     const category = document.getElementById('newProdCategory').value;
     const imageFiles = document.getElementById('newProdImage').files;
     const btn = document.getElementById('addProductBtn');
@@ -906,6 +958,7 @@
           sub, 
           image_path: imageUrlsArray, 
           sizes,
+          colors,
           category,
           badge, 
           active: true 
@@ -921,6 +974,7 @@
         document.getElementById('newProdImage').value = '';
         document.getElementById('newProdCategory').value = 'unisex';
         renderSizeCheckboxes('newProdSizes', 'newSize', []);
+        renderColorSwatches('newProdColors', 'newColor', []);
         loadProducts();
       } else {
         const errData = await insertRes.json().catch(() => ({}));

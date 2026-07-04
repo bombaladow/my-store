@@ -196,6 +196,9 @@
     .size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 32px; }
     .size-btn { border: 1px solid var(--light-gray); background: none; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; cursor: pointer; transition: all 0.3s ease; }
     .size-btn:hover, .size-btn.selected { background: var(--black); color: var(--white); border-color: var(--black); }
+    .color-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 32px; }
+    .color-btn { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--light-gray); cursor: pointer; padding: 0; transition: all 0.25s ease; }
+    .color-btn.selected { border-color: var(--black); box-shadow: 0 0 0 2px var(--white), 0 0 0 3px var(--black); }
     .modal-add-btn { width: 100%; padding: 16px; background: var(--black); color: var(--white); border: none; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.3s; }
     .modal-add-btn:hover { background: #333; }
     .modal-add-btn:disabled { background: var(--gray); }
@@ -362,6 +365,11 @@
       <div class="modal-product-price" id="modalPrice"></div>
       <div class="modal-label">Select Size</div>
       <div class="size-grid" id="sizeGrid"></div>
+
+      <div id="colorSection" style="display:none;">
+        <div class="modal-label">Select Color</div>
+        <div class="color-grid" id="colorGrid"></div>
+      </div>
       
       <div class="modal-label">Quantity</div>
       <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px;">
@@ -524,6 +532,35 @@
         return raw.split(',').map(s => s.trim()).filter(Boolean);
       }
       return [];
+    }
+
+    const COLOR_PALETTE = [
+      { name: 'Black', hex: '#0a0a0a' },
+      { name: 'White', hex: '#f9f9f7' },
+      { name: 'Gray', hex: '#888888' },
+      { name: 'Navy', hex: '#1c2a4a' },
+      { name: 'Beige', hex: '#d8c9a3' },
+      { name: 'Olive', hex: '#5b5e3d' },
+      { name: 'Brown', hex: '#5b3a29' },
+      { name: 'Red', hex: '#8c1f1f' }
+    ];
+
+    function parseColors(raw) {
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+        return raw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [];
+    }
+
+    function colorHex(name) {
+      const match = COLOR_PALETTE.find(c => c.name.toLowerCase() === String(name).toLowerCase());
+      return match ? match.hex : '#ccc';
     }
 
     function moveSlider(button, direction, event) {
@@ -695,6 +732,7 @@
     let cart = [];
     let currentProduct = null;
     let selectedSize = null;
+    let selectedColor = null;
 
     function saveCartToStorage() {
       try { localStorage.setItem('mono_cart', JSON.stringify(cart)); } catch (e) {}
@@ -722,6 +760,7 @@
       if (!currentProduct || currentProduct.stock <= 0) return; 
       
       selectedSize = null;
+      selectedColor = null;
       selectedQty = 1;
       const alreadyInCart = getCartQtyForProduct(id);
       maxQty = Math.max(0, (currentProduct.stock || 0) - alreadyInCart);
@@ -738,6 +777,18 @@
       document.getElementById('sizeGrid').innerHTML = sizesToShow.map(s =>
         `<button class="size-btn" onclick="selectSize(this)">${s}</button>`
       ).join('');
+
+      const availableColors = parseColors(currentProduct.colors);
+      const colorSection = document.getElementById('colorSection');
+      if (availableColors.length) {
+        colorSection.style.display = 'block';
+        document.getElementById('colorGrid').innerHTML = availableColors.map(c =>
+          `<button class="color-btn" style="background:${colorHex(c)};" title="${c}" onclick="selectColor(this, '${c}')"></button>`
+        ).join('');
+      } else {
+        colorSection.style.display = 'none';
+        document.getElementById('colorGrid').innerHTML = '';
+      }
 
       document.getElementById('stockHint').textContent = maxQty <= 5 ? `Only ${maxQty} left` : '';
       updateQtyButtons();
@@ -764,21 +815,30 @@
       selectedSize = btn.textContent;
     }
 
+    function selectColor(btn, colorName) {
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedColor = colorName;
+    }
+
     function confirmAdd() {
       if (!selectedSize) { showNotif('Please select a size'); return; }
-      const existing = cart.find(i => i.id === currentProduct.id && i.size === selectedSize);
+      const colorRequired = document.getElementById('colorSection').style.display !== 'none';
+      if (colorRequired && !selectedColor) { showNotif('Please select a color'); return; }
+      const existing = cart.find(i => i.id === currentProduct.id && i.size === selectedSize && (i.color || null) === (selectedColor || null));
       if (existing) { 
         existing.qty += selectedQty; 
       } else { 
-        cart.push({ ...currentProduct, size: selectedSize, qty: selectedQty }); 
+        cart.push({ ...currentProduct, size: selectedSize, color: selectedColor, qty: selectedQty }); 
       }
       renderCart();
       closeModal();
-      showNotif(`${currentProduct.name} — ${selectedSize} ×${selectedQty} added`);
+      showNotif(`${currentProduct.name} — ${selectedSize}${selectedColor ? ' / ' + selectedColor : ''} ×${selectedQty} added`);
     }
 
-    function removeFromCart(id, size) {
-      cart = cart.filter(i => !(i.id === id && i.size === size));
+    function removeFromCart(id, size, color) {
+      const normalizedColor = color || null;
+      cart = cart.filter(i => !(i.id === id && i.size === size && (i.color || null) === normalizedColor));
       renderCart();
     }
 
@@ -803,10 +863,10 @@
       container.innerHTML = cart.map(i => `
         <div class="cart-item">
           <img class="cart-item-img" src="${i.image_path ? (Array.isArray(i.image_path) ? i.image_path[0] : (i.image_path.startsWith('[') ? JSON.parse(i.image_path)[0] : i.image_path.split(',')[0])) : 'https://via.placeholder.com/80'}" alt="${i.name}"/>
-          <div><div class="cart-item-name">${i.name}</div><div class="cart-item-size">Size: ${i.size} · Qty: ${i.qty}</div></div>
+          <div><div class="cart-item-name">${i.name}</div><div class="cart-item-size">Size: ${i.size}${i.color ? ' · Color: ' + i.color : ''} · Qty: ${i.qty}</div></div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
             <span class="cart-item-price">${i.price * i.qty} EGP</span>
-            <button class="remove-item" onclick="removeFromCart(${i.id},'${i.size}')">✕</button>
+            <button class="remove-item" onclick="removeFromCart(${i.id},'${i.size}','${i.color || ''}')">✕</button>
           </div>
         </div>`).join('');
     }
