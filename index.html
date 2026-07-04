@@ -23,7 +23,7 @@
       justify-content: space-between; 
       padding: 24px 48px; 
       mix-blend-mode: difference; 
-      transition: transform 0.4s ease; 
+      transition: transform 0.4s ease, background 0.3s ease; 
     }
     .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 0.3em; color: var(--white); text-decoration: none; }
     nav { display: flex; gap: 36px; align-items: center; }
@@ -42,11 +42,29 @@
       z-index: 2;
     }
     .cart-count.show { transform: scale(1); }
-    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; z-index: 200; padding: 4px; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; z-index: 200; padding: 4px; position: relative; }
     .hamburger span { display: block; width: 24px; height: 1px; background: var(--white); transition: all 0.4s ease; }
     .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    .hamburger-badge {
+      position: absolute;
+      top: -8px;
+      right: -12px;
+      background: var(--white);
+      color: var(--black);
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      transform: scale(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hamburger-badge.show { transform: scale(1); }
     .hero { height: 100vh; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
     .hero-left { background: var(--black); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding: 80px 60px; position: relative; overflow: hidden; }
     .hero-left::before { content: ''; position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80') center/cover; opacity: 0.35; transition: transform 8s ease; }
@@ -209,26 +227,48 @@
     .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
     @media (max-width: 768px) {
-      #mainNav .cart-btn {
-        position: relative;
+      header.menu-open {
+        mix-blend-mode: normal;
+        background: var(--black);
+      }
+      .hamburger { display: flex; }
+      #mainNav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background: var(--black);
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.5s ease, opacity 0.4s ease;
+      }
+      #mainNav.open {
+        max-height: 100vh;
+        opacity: 1;
+        pointer-events: auto;
+        padding: 8px 32px 32px;
+      }
+      #mainNav a, #mainNav .cart-btn {
+        width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+        font-size: 0.95rem;
+        letter-spacing: 0.2em;
+        color: var(--white) !important;
       }
       #mainNav .cart-count {
-        position: absolute;
-        top: -8px;
-        right: -16px;
+        position: static;
         margin: 0;
       }
-      #mainNav a, #mainNav .cart-btn { 
-        font-size: 1rem; 
-        letter-spacing: 0.2em; 
-        color: var(--white) !important;
-        position: relative;
-        z-index: 1;
-      }
-      #mainNav.open { transform: translateX(0); }
       .hero { grid-template-columns: 1fr; }
       .hero-right { display: none; }
       .products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -251,13 +291,14 @@
     <a href="#" class="logo">MONO</a>
     <button class="hamburger" id="hamburger" onclick="toggleMenu()">
       <span></span><span></span><span></span>
+      <span class="hamburger-badge" id="hamburgerBadge">0</span>
     </button>
     <nav id="mainNav">
       <a href="#products" onclick="closeMenu()">Collection</a>
       <a href="#about" onclick="closeMenu()">About</a>
       <a href="#newsletter" onclick="closeMenu()">Contact</a>
-      <button class="cart-btn" id="accountBtn" onclick="handleAccountClick()">Account</button>
-      <button class="cart-btn" onclick="toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
+      <button class="cart-btn" id="accountBtn" onclick="closeMenu(); handleAccountClick()">Account</button>
+      <button class="cart-btn" onclick="closeMenu(); toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
     </nav>
   </header>
 
@@ -416,7 +457,7 @@
     <div class="footer-brand"><a href="#" class="logo">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
     <div class="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
     <div class="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
-    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mono.store.official/?hl=ar">Instagram</a><a href="https://www.pinterest.com/mohamedelmaghrby68/">Pinterest</a><a href="https://www.tiktok.com/@mohamedelmaghrby68">TikTok</a></div>
+    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mohamedelmaghrby68/?hl=ar">Instagram</a><a href="#">Pinterest</a><a href="#">TikTok</a></div>
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
 
@@ -580,11 +621,13 @@
       const isOpen = document.getElementById('mainNav').classList.contains('open');
       document.getElementById('hamburger').classList.toggle('open');
       document.getElementById('mainNav').classList.toggle('open');
+      document.getElementById('siteHeader').classList.toggle('menu-open');
       if (!isOpen) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function closeMenu() {
       document.getElementById('hamburger').classList.remove('open');
       document.getElementById('mainNav').classList.remove('open');
+      document.getElementById('siteHeader').classList.remove('menu-open');
     }
 
     let cart = [];
@@ -656,6 +699,11 @@
       const countEl = document.getElementById('cartCount');
       countEl.textContent = count;
       countEl.classList.toggle('show', count > 0);
+      const hbBadge = document.getElementById('hamburgerBadge');
+      if (hbBadge) {
+        hbBadge.textContent = count;
+        hbBadge.classList.toggle('show', count > 0);
+      }
       document.getElementById('cartTotal').textContent = `${total} EGP`;
       saveCartToStorage();
       if (!cart.length) {
