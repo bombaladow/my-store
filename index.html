@@ -523,7 +523,7 @@
       const filteredProducts = products.filter(p => {
         if (currentCategory === 'all') return true;
         const cat = (p.category || 'unisex').toLowerCase();
-        return cat === currentCategory || cat === 'unisex';
+        return cat === currentCategory;
       });
       document.getElementById('collectionSubCount').textContent = `${filteredProducts.length} Pieces — SS 2026`;
       
