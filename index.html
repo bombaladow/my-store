@@ -27,6 +27,14 @@
     }
     .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 0.3em; color: var(--white); text-decoration: none; }
     nav { display: flex; gap: 36px; align-items: center; }
+    #mainNav {
+      position: fixed;
+      top: 0;
+      right: 48px;
+      height: 79px;
+      z-index: 200;
+      mix-blend-mode: difference;
+    }
     nav a { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none; position: relative; }
     nav a::after { content: ''; position: absolute; bottom: -3px; left: 0; width: 0; height: 1px; background: var(--white); transition: width 0.4s ease; }
     nav a:hover::after { width: 100%; }
@@ -253,6 +261,9 @@
         position: fixed;
         top: 50%;
         left: 50%;
+        right: auto;
+        height: auto;
+        mix-blend-mode: normal;
         width: 80vw;
         max-width: 320px;
         flex-direction: column;
@@ -315,15 +326,15 @@
       <span></span><span></span><span></span>
       <span class="hamburger-badge" id="hamburgerBadge">0</span>
     </button>
-    <nav id="mainNav">
-      <a href="#products" onclick="closeMenu()">Collection</a>
-      <a href="#about" onclick="closeMenu()">About</a>
-      <a href="#newsletter" onclick="closeMenu()">Contact</a>
-      <button class="cart-btn" id="accountBtn" onclick="closeMenu(); handleAccountClick()">Account</button>
-      <button class="cart-btn" onclick="closeMenu(); toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
-    </nav>
-    <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
   </header>
+  <nav id="mainNav">
+    <a href="#products" onclick="closeMenu()">Collection</a>
+    <a href="#about" onclick="closeMenu()">About</a>
+    <a href="#newsletter" onclick="closeMenu()">Contact</a>
+    <button class="cart-btn" id="accountBtn" onclick="closeMenu(); handleAccountClick()">Account</button>
+    <button class="cart-btn" onclick="closeMenu(); toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
+  </nav>
+  <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
 
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 
@@ -430,8 +441,8 @@
 
   <div class="marquee-wrap">
     <div class="marquee-track">
-      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over 1000EGP</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
-      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over 1000EGP</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
+      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over $80</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
+      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over $80</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
     </div>
   </div>
 
@@ -452,8 +463,8 @@
 
   <div class="feature-strip">
     <div class="feature-item reveal"><div class="feature-icon">◎</div><div class="feature-title">Pure Cotton</div><div class="feature-desc">100% Egyptian combed cotton. Breathable, durable, and gets better with every wash.</div></div>
-    <div class="feature-item reveal"><div class="feature-icon">◈</div><div class="feature-title">Free Returns</div><div class="feature-desc">Not in love? Return within 15 days, no questions asked.</div></div>
-    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Shipping</div><div class="feature-desc">Free shipping on orders over 1000EGP. Delivered in 3–5 business days.</div></div>
+    <div class="feature-item reveal"><div class="feature-icon">◈</div><div class="feature-title">Free Returns</div><div class="feature-desc">Not in love? Return within 30 days, no questions asked.</div></div>
+    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Worldwide Shipping</div><div class="feature-desc">Free shipping on orders over $80. Delivered in 3–5 business days.</div></div>
   </div>
 
   <section class="editorial" id="about">
@@ -479,7 +490,7 @@
     <div class="footer-brand"><a href="#" class="logo">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
     <div class="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
     <div class="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
-    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mono.store.official/?hl=ar">Instagram</a><a href="#">TikTok</a></div>
+    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mohamedelmaghrby68/?hl=ar">Instagram</a><a href="#">Pinterest</a><a href="#">TikTok</a></div>
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
 
