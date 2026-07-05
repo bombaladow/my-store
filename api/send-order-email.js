@@ -1,3 +1,22 @@
+// Lightweight in-memory rate limiter: blocks an IP after too many orders
+// in a short window. This resets when the serverless instance recycles,
+// so it's a first line of defense, not a perfect global limiter — but it
+// stops a simple script from hammering the endpoint in one run.
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5; // max orders per IP per window
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
 export default async function handler(req, res) {
   // ── إعدادات الـ CORS والأمان ──
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -6,6 +25,12 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
+
+  const ip = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+  if (isRateLimited(ip)) {
+    console.warn('Rate limit hit for IP:', ip);
+    return res.status(429).json({ error: 'Too many orders from this device. Please try again later.' });
+  }
 
   // طباعة البيانات في الـ Logs لمراقبة الطلبات من الـ Dashboard
   console.log('Received body:', JSON.stringify(req.body));
