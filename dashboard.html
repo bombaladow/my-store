@@ -492,14 +492,19 @@
     await db.auth.signOut();
   }
 
+  let dashboardInitialized = false;
+
   async function checkAdminSession(session) {
     const email = (session?.user?.email || '').toLowerCase().trim();
     if (session && email === ADMIN_EMAIL.toLowerCase()) {
-      currentSession = session;
+      currentSession = session; // always keep the freshest token, even on refresh
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('dashboard').classList.add('visible');
       document.getElementById('loginError').classList.remove('show');
-      initAndLoad();
+      if (!dashboardInitialized) {
+        dashboardInitialized = true;
+        initAndLoad();
+      }
     } else if (session) {
       // Signed in with Google, but not the authorized admin account
       document.getElementById('loginError').textContent = "This Google account isn't authorized for admin access";
@@ -516,6 +521,7 @@
       if (event === 'SIGNED_IN') checkAdminSession(session);
       if (event === 'SIGNED_OUT') {
         currentSession = null;
+        dashboardInitialized = false;
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('dashboard').classList.remove('visible');
       }
@@ -1076,6 +1082,50 @@
     const s = document.getElementById('emailSubject').value;
     const m = document.getElementById('emailMessage').value;
     document.getElementById('emailPreview').textContent = s || m ? `${s}\n\n${m}` : 'Your message preview...';
+  }
+
+  async function sendUpdate() {
+    const subject = document.getElementById('emailSubject').value.trim();
+    const message = document.getElementById('emailMessage').value.trim();
+
+    if (!subject || !message) {
+      showToast('Please fill in both subject and message', 'error');
+      return;
+    }
+
+    const btn = document.querySelector('button[onclick="sendUpdate()"]');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/api/send-newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession ? currentSession.access_token : ''}`
+        },
+        body: JSON.stringify({ subject, message })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        showToast(`✓ Sent to ${data.sent}/${data.total} subscribers`, 'success');
+        if (data.failed > 0) {
+          showToast(`${data.failed} email(s) failed — check Vercel logs`, 'error');
+        }
+        document.getElementById('emailSubject').value = '';
+        document.getElementById('emailMessage').value = '';
+        updatePreview();
+      } else {
+        showToast(data.error || 'Failed to send newsletter', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 
   function showToast(msg, type = 'success') {
