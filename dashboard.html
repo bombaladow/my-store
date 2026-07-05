@@ -964,6 +964,19 @@
       return;
     }
 
+    const MAX_IMAGE_MB = 5;
+    for (let i = 0; i < imageFiles.length; i++) {
+      const f = imageFiles[i];
+      if (!f.type.startsWith('image/')) {
+        showToast(`"${f.name}" isn't a valid image file`, 'error');
+        return;
+      }
+      if (f.size > MAX_IMAGE_MB * 1024 * 1024) {
+        showToast(`"${f.name}" is larger than ${MAX_IMAGE_MB}MB`, 'error');
+        return;
+      }
+    }
+
     btn.disabled = true;
     const imageUrlsArray = [];
 
