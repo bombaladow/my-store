@@ -324,9 +324,10 @@
               <th>Total</th>
               <th>Status</th>
               <th>Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="ordersTable"><tr><td colspan="7" style="text-align:center;padding:32px;">Loading orders...</td></tr></tbody>
+          <tbody id="ordersTable"><tr><td colspan="8" style="text-align:center;padding:32px;">Loading orders...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -571,7 +572,7 @@
       renderOrdersTable(allOrders);
     } catch (e) {
       console.error(e);
-      document.getElementById('ordersTable').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:32px;">Orders table not found or failed to load.</td></tr>`;
+      document.getElementById('ordersTable').innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:32px;">Orders table not found or failed to load.</td></tr>`;
     }
   }
 
@@ -626,7 +627,7 @@
   function renderOrdersTable(orders) {
     const tbody = document.getElementById('ordersTable');
     if (!orders || !orders.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;">No orders yet.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;">No orders yet.</td></tr>`;
       return;
     }
 
@@ -659,9 +660,36 @@
             <div style="margin-top:4px;"><span class="${statusClass}">${status}</span></div>
           </td>
           <td>${date}</td>
+          <td><button class="delete-btn" onclick="deleteOrder('${o.id}')">Delete</button></td>
         </tr>
       `;
     }).join('');
+  }
+
+  async function deleteOrder(id) {
+    const confirmDelete = confirm('متأكد إنك عايز تمسح الأوردر ده نهائياً؟');
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      });
+
+      if (res.ok) {
+        allOrders = allOrders.filter(o => o.id !== id);
+        renderOrderStats();
+        renderOrdersTable(allOrders);
+        showToast('✓ Order deleted', 'success');
+      } else {
+        showToast('Failed to delete order', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
   }
 
   function filterOrdersTable() {
