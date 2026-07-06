@@ -44,6 +44,20 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
+    // 1.b التحقق من صيغة رقم الموبايل (مصري) والإيميل، حتى لو الطلب جاي مباشرة مش من الفورم
+    const egyptPhonePattern = /^(\+20|0)?1[0125]\d{8}$/;
+    const cleanedPhone = String(phone).replace(/[\s-]/g, '');
+    if (!egyptPhonePattern.test(cleanedPhone)) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
+    }
+
+    if (orderEmail) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(orderEmail)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+    }
+
     // 2. معالجة الـ items وتحويلها لـ Array بشكل آمن لمنع كراش السيرفر
     let itemsArray = [];
     if (typeof items === 'string') {
