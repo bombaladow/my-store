@@ -550,6 +550,17 @@
 
   /* ══════════════ SIZES HELPERS ══════════════ */
 
+  // Escapes untrusted data (customer-submitted order fields) before it's
+  // inserted into innerHTML, to prevent stored XSS in the dashboard.
+  function escapeHTML(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function parseSizes(raw) {
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
@@ -680,12 +691,12 @@
     }
 
     tbody.innerHTML = orders.map(o => {
-      const custName = o.customer_name || o.name || '—';
-      const custEmail = o.customer_email || o.email || '';
-      const custPhone = o.phone || '—';
+      const custName = escapeHTML(o.customer_name || o.name || '—');
+      const custEmail = escapeHTML(o.customer_email || o.email || '');
+      const custPhone = escapeHTML(o.phone || '—');
       const total = o.total ?? o.total_price ?? 0;
       const status = o.status || 'Pending';
-      const orderNum = o.order_number || o.id.slice(0, 8).toUpperCase();
+      const orderNum = escapeHTML(o.order_number || o.id.slice(0, 8).toUpperCase());
       const date = o.created_at ? new Date(o.created_at).toLocaleString('en-GB') : '—';
       const itemsArr = getOrderItemsArray(o);
       const itemsCount = o.items_count ?? itemsArr.length;
@@ -775,7 +786,7 @@
     document.getElementById('modalOrderItems').innerHTML = items.length
       ? items.map(it => `
           <div class="modal-item">
-            <span>${it.name || it.product_name || 'Item'} ${it.size ? '(' + it.size + ')' : ''} × ${it.quantity || it.qty || 1}</span>
+            <span>${escapeHTML(it.name || it.product_name || 'Item')} ${it.size ? '(' + escapeHTML(it.size) + ')' : ''} × ${Number(it.quantity || it.qty || 1)}</span>
             <span>${it.price ? Number(it.price).toLocaleString() + ' EGP' : ''}</span>
           </div>
         `).join('')
@@ -783,9 +794,9 @@
 
     const total = order.total ?? order.total_price ?? 0;
     document.getElementById('modalOrderMeta').innerHTML = `
-      <strong>Customer:</strong> ${order.customer_name || order.name || '—'}<br>
-      <strong>Phone:</strong> ${order.phone || '—'}<br>
-      <strong>Address:</strong> ${order.address || '—'}<br>
+      <strong>Customer:</strong> ${escapeHTML(order.customer_name || order.name || '—')}<br>
+      <strong>Phone:</strong> ${escapeHTML(order.phone || '—')}<br>
+      <strong>Address:</strong> ${escapeHTML(order.address || '—')}<br>
       <strong>Total:</strong> ${Number(total).toLocaleString()} EGP
     `;
 
@@ -1063,7 +1074,7 @@
   function renderSubscribersTable(data) {
     const tbody = document.getElementById('subscriberTable');
     tbody.innerHTML = data.map((s, i) => `
-      <tr><td>${i + 1}</td><td>${s.email}</td><td>${new Date(s.created_at).toLocaleDateString('en-GB')}</td></tr>
+      <tr><td>${i + 1}</td><td>${escapeHTML(s.email)}</td><td>${new Date(s.created_at).toLocaleDateString('en-GB')}</td></tr>
     `).join('');
   }
 
