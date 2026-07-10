@@ -242,6 +242,23 @@
     .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
     .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .promo-overlay { position: fixed; inset: 0; background: rgba(10,10,10,0.7); backdrop-filter: blur(8px); z-index: 850; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s ease; display: flex; align-items: center; justify-content: center; }
+    .promo-overlay.open { opacity: 1; visibility: visible; }
+    .promo-box { background: var(--black); color: var(--white); width: 440px; max-width: 88vw; padding: 56px 44px; text-align: center; position: relative; transform: translateY(16px) scale(0.97); transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .promo-overlay.open .promo-box { transform: translateY(0) scale(1); }
+    .promo-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--gray); font-size: 1.1rem; cursor: pointer; transition: color 0.3s, transform 0.3s; }
+    .promo-close:hover { color: var(--white); transform: rotate(90deg); }
+    .promo-tag { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gray); margin-bottom: 20px; }
+    .promo-title { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 300; line-height: 1.15; margin-bottom: 16px; }
+    .promo-title em { font-style: italic; }
+    .promo-text { font-size: 0.75rem; color: #bbb; line-height: 1.8; margin-bottom: 32px; max-width: 320px; margin-left: auto; margin-right: auto; }
+    .promo-cta { display: inline-flex; align-items: center; gap: 12px; background: var(--white); color: var(--black); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; }
+    .promo-cta:hover { opacity: 0.8; }
+    @media (max-width: 768px) {
+      .promo-box { padding: 44px 28px; }
+      .promo-title { font-size: 1.9rem; }
+    }
     @media (max-width: 768px) {
       .hamburger { display: flex; }
       .menu-backdrop {
@@ -322,6 +339,16 @@
   <div class="loader" id="loader"><div class="loader-text">MONO</div></div>
   <div class="notif" id="notif"></div>
   <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <div class="promo-overlay" id="promoOverlay">
+    <div class="promo-box">
+      <button class="promo-close" onclick="closePromo()">✕</button>
+      <div class="promo-tag">For a Limited Time</div>
+      <h2 class="promo-title">Free Shipping<br><em>on all orders.</em></h2>
+      <p class="promo-text">No minimum spend, no conditions — every order ships free while the offer lasts.</p>
+      <button class="promo-cta" onclick="closePromo(); document.getElementById('products').scrollIntoView({behavior:'smooth'});">Shop the Collection →</button>
+    </div>
+  </div>
 
   <header id="siteHeader">
     <a href="#" class="logo">MONO</a>
@@ -449,8 +476,8 @@
 
   <div class="marquee-wrap">
     <div class="marquee-track">
-      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Shipping is free</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
-      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Shipping is free</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
+      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over 1199 EGP</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
+      <span>100% Egyptian Cotton</span><span class="dot">·</span><span>Minimal Design</span><span class="dot">·</span><span>Made to Last</span><span class="dot">·</span><span>Free Shipping Over 1199 EGP</span><span class="dot">·</span><span>Black & White Essentials</span><span class="dot">·</span><span>SS 2026</span><span class="dot">·</span>
     </div>
   </div>
 
@@ -472,7 +499,7 @@
   <div class="feature-strip">
     <div class="feature-item reveal"><div class="feature-icon">◎</div><div class="feature-title">Pure Cotton</div><div class="feature-desc">100% Egyptian combed cotton. Breathable, durable, and gets better with every wash.</div></div>
     <div class="feature-item reveal"><div class="feature-icon">◈</div><div class="feature-title">Free Returns</div><div class="feature-desc">Not in love? Return within 7 days, no questions asked.</div></div>
-    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Shipping</div><div class="feature-desc">Shipping is free on all orders. Delivered in 3–5 business days.</div></div>
+    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Shipping</div><div class="feature-desc">Free shipping on orders over 1199 EGP. Delivered in 3–5 business days.</div></div>
   </div>
 
   <section class="editorial" id="about">
@@ -498,7 +525,7 @@
     <div class="footer-brand"><a href="#" class="logo">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
     <div class="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
     <div class="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
-    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mono.store.official">Instagram</a><a href="https://www.tiktok.com/@mono.store.offici?_r=1&_t=ZS-97ktxsljexF">TikTok</a></div>
+    <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mono.store.official">Instagram</a><a href="https://www.instagram.com/mono.store.official">TikTok</a></div>
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
 
@@ -696,7 +723,26 @@
       initAuth();
     });
 
-    window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200));
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        showPromoIfNeeded();
+      }, 1200);
+    });
+
+    function showPromoIfNeeded() {
+      try {
+        if (sessionStorage.getItem('mono_promo_seen')) return;
+      } catch (e) {}
+      setTimeout(() => {
+        document.getElementById('promoOverlay').classList.add('open');
+      }, 500);
+    }
+
+    function closePromo() {
+      document.getElementById('promoOverlay').classList.remove('open');
+      try { sessionStorage.setItem('mono_promo_seen', '1'); } catch (e) {}
+    }
 
     let lastScroll = 0;
     const siteHeader = document.getElementById('siteHeader');
