@@ -192,6 +192,22 @@
     
     .modal-product-name { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 8px; }
     .modal-product-price { font-size: 0.85rem; color: var(--gray); margin-bottom: 32px; }
+    .modal-img-wrap { position: relative; aspect-ratio: 4/5; overflow: hidden; margin-bottom: 24px; background: var(--light-gray); cursor: zoom-in; }
+    .modal-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .modal-img-hint { position: absolute; bottom: 10px; right: 10px; background: rgba(10,10,10,0.65); color: var(--white); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 10px; pointer-events: none; }
+    .modal-img-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.85); border: none; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; z-index: 2; }
+    .modal-img-arrow.prev { left: 8px; }
+    .modal-img-arrow.next { right: 8px; }
+    .modal-img-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+    .modal-img-dots span { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+    .modal-img-dots span.active { background: var(--white); }
+    .modal-description { font-size: 0.78rem; color: #444; line-height: 1.8; margin-bottom: 28px; }
+
+    .zoom-overlay { position: fixed; inset: 0; background: rgba(10,10,10,0.92); z-index: 900; opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .zoom-overlay.open { opacity: 1; visibility: visible; }
+    .zoom-overlay img { max-width: 92vw; max-height: 92vh; object-fit: contain; cursor: zoom-in; transition: transform 0.35s ease; transform-origin: center center; }
+    .zoom-overlay img.zoomed { cursor: zoom-out; transform: scale(2); }
+    .zoom-close { position: absolute; top: 24px; right: 28px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; z-index: 2; }
     .modal-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
     .size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 32px; }
     .size-btn { border: 1px solid var(--light-gray); background: none; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; cursor: pointer; transition: all 0.3s ease; }
@@ -232,7 +248,7 @@
     .footer-brand .logo { color: var(--black); font-size: 1.5rem; }
     .footer-brand p { font-size: 0.65rem; color: var(--gray); line-height: 1.8; margin-top: 16px; max-width: 200px; }
     .footer-col h4 { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; margin-bottom: 20px; }
-    .footer-col a { display: block; font-size: 0.7rem; color: var(--gray); text-decoration: none; margin-bottom: 10px; transition: color 0.3s; }
+    .footer-col a { display: block; font-size: 0.7rem; color: var(--gray); text-decoration: none; margin-bottom: 10px; transition: color 0.3s; background: none; border: none; cursor: pointer; padding: 0; text-align: left; font-family: 'Montserrat', sans-serif; }
     .footer-col a:hover { color: var(--black); }
     .footer-bottom { padding: 24px 60px; border-top: 1px solid var(--light-gray); display: flex; justify-content: space-between; }
     .footer-bottom p { font-size: 0.65rem; color: var(--gray); }
@@ -388,8 +404,14 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-img-wrap" id="modalImgWrap" onclick="openImageZoom()">
+        <img id="modalImage" src="" alt=""/>
+        <div class="modal-img-hint">Tap to Zoom</div>
+        <div class="modal-img-dots" id="modalImgDots"></div>
+      </div>
       <div class="modal-product-name" id="modalName"></div>
       <div class="modal-product-price" id="modalPrice"></div>
+      <div class="modal-description" id="modalDescription"></div>
       <div class="modal-label">Select Size</div>
       <div class="size-grid" id="sizeGrid"></div>
 
@@ -499,7 +521,7 @@
   <div class="feature-strip">
     <div class="feature-item reveal"><div class="feature-icon">◎</div><div class="feature-title">Pure Cotton</div><div class="feature-desc">100% Egyptian combed cotton. Breathable, durable, and gets better with every wash.</div></div>
     <div class="feature-item reveal"><div class="feature-icon">◈</div><div class="feature-title">Free Returns</div><div class="feature-desc">Not in love? Return within 7 days, no questions asked.</div></div>
-    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Shipping</div><div class="feature-desc">shipping is free at all orders. Delivered in 3–5 business days.</div></div>
+    <div class="feature-item reveal"><div class="feature-icon">◉</div><div class="feature-title">Shipping</div><div class="feature-desc">enjoy free shipping now. Delivered in 3–5 business days.</div></div>
   </div>
 
   <section class="editorial" id="about">
@@ -524,10 +546,22 @@
   <footer>
     <div class="footer-brand"><a href="#" class="logo">MONO</a><p>Pure cotton essentials. Black & white, nothing more.</p></div>
     <div class="footer-col"><h4>Shop</h4><a href="#products">White Tees</a><a href="#products">Black Tees</a><a href="#products">New Arrivals</a></div>
-    <div class="footer-col"><h4>Help</h4><a href="#">Sizing Guide</a><a href="#">Shipping</a><a href="#">Returns</a></div>
+    <div class="footer-col"><h4>Help</h4><a href="#" onclick="openInfoModal('sizing'); return false;">Sizing Guide</a><a href="#" onclick="openInfoModal('shipping'); return false;">Shipping</a><a href="#" onclick="openInfoModal('returns'); return false;">Returns</a></div>
     <div class="footer-col"><h4>Follow</h4><a href="https://www.instagram.com/mono.store.official">Instagram</a><a href="https://www.tiktok.com/@mono.store.offici?_r=1&_t=ZS-97ktxsljexF">TikTok</a></div>
   </footer>
   <div class="footer-bottom"><p>© 2026 MONO. All rights reserved.</p><p>Crafted with intention.</p></div>
+
+  <div class="zoom-overlay" id="zoomOverlay" onclick="closeImageZoom()">
+    <button class="zoom-close" onclick="event.stopPropagation(); closeImageZoom();">✕</button>
+    <img id="zoomImage" src="" alt="" onclick="event.stopPropagation(); this.classList.toggle('zoomed');"/>
+  </div>
+
+  <div class="modal-overlay" id="infoModalOverlay">
+    <div class="modal" style="width:560px;max-width:92vw;">
+      <button class="modal-close" onclick="closeInfoModal()">✕</button>
+      <div id="infoModalContent"></div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -588,6 +622,22 @@
     function colorHex(name) {
       const match = COLOR_PALETTE.find(c => c.name.toLowerCase() === String(name).toLowerCase());
       return match ? match.hex : '#ccc';
+    }
+
+    function parseImages(product) {
+      let imageArray = [];
+      if (product.image_path) {
+        if (Array.isArray(product.image_path)) {
+          imageArray = product.image_path;
+        } else if (typeof product.image_path === 'string') {
+          if (product.image_path.trim().startsWith('[')) {
+            try { imageArray = JSON.parse(product.image_path); } catch (e) { imageArray = [product.image_path]; }
+          } else {
+            imageArray = product.image_path.split(',').map(s => s.trim());
+          }
+        }
+      }
+      return imageArray.length ? imageArray : ['https://via.placeholder.com/600x800'];
     }
 
     function moveSlider(button, direction, event) {
@@ -689,7 +739,7 @@
         ` : '';
 
         return `
-          <div class="product-card reveal">
+          <div class="product-card reveal" onclick="openModal(${p.id})">
             <div class="product-img-slider-wrap">
               <div class="product-images-container" onscroll="updateDots(this)">
                 ${imagesHTML}
@@ -697,7 +747,7 @@
               ${arrowsHTML}
               ${dotsHTML}
               <div class="product-overlay">
-                <button class="quick-add" ${isSoldOut ? 'disabled' : ''} onclick="openModal(${p.id})">
+                <button class="quick-add" ${isSoldOut ? 'disabled' : ''} onclick="event.stopPropagation(); openModal(${p.id})">
                   ${isSoldOut ? 'Sold Out' : 'Quick Add'}
                 </button>
               </div>
@@ -742,6 +792,100 @@
     function closePromo() {
       document.getElementById('promoOverlay').classList.remove('open');
       try { sessionStorage.setItem('mono_promo_seen', '1'); } catch (e) {}
+    }
+
+    /* ══════════════ FOOTER INFO MODALS (Sizing / Shipping / Returns) ══════════════ */
+
+    const INFO_CONTENT = {
+      sizing: {
+        title: 'Sizing <em>Guide</em>',
+        body: `
+          <p style="font-size:0.75rem;color:var(--gray);line-height:1.8;margin-bottom:24px;">
+            All MONO pieces are cut for a relaxed, true-to-size fit. Measurements are in centimeters — for the best fit, compare against a similar item you already own.
+          </p>
+          <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--black);">
+                <th style="text-align:left;padding:8px 4px;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);">Size</th>
+                <th style="text-align:left;padding:8px 4px;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);">Chest</th>
+                <th style="text-align:left;padding:8px 4px;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);">Length</th>
+                <th style="text-align:left;padding:8px 4px;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);">Shoulder</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--light-gray);"><td style="padding:10px 4px;">XS</td><td style="padding:10px 4px;">92 cm</td><td style="padding:10px 4px;">66 cm</td><td style="padding:10px 4px;">42 cm</td></tr>
+              <tr style="border-bottom:1px solid var(--light-gray);"><td style="padding:10px 4px;">S</td><td style="padding:10px 4px;">98 cm</td><td style="padding:10px 4px;">68 cm</td><td style="padding:10px 4px;">44 cm</td></tr>
+              <tr style="border-bottom:1px solid var(--light-gray);"><td style="padding:10px 4px;">M</td><td style="padding:10px 4px;">104 cm</td><td style="padding:10px 4px;">70 cm</td><td style="padding:10px 4px;">46 cm</td></tr>
+              <tr style="border-bottom:1px solid var(--light-gray);"><td style="padding:10px 4px;">L</td><td style="padding:10px 4px;">110 cm</td><td style="padding:10px 4px;">72 cm</td><td style="padding:10px 4px;">48 cm</td></tr>
+              <tr style="border-bottom:1px solid var(--light-gray);"><td style="padding:10px 4px;">XL</td><td style="padding:10px 4px;">116 cm</td><td style="padding:10px 4px;">74 cm</td><td style="padding:10px 4px;">50 cm</td></tr>
+              <tr><td style="padding:10px 4px;">XXL</td><td style="padding:10px 4px;">122 cm</td><td style="padding:10px 4px;">76 cm</td><td style="padding:10px 4px;">52 cm</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.65rem;color:var(--gray);line-height:1.7;margin-top:20px;">
+            Between sizes? We recommend sizing up for a relaxed fit, or sizing down for a more fitted look.
+          </p>
+        `
+      },
+      shipping: {
+        title: 'Shipping <em>Policy</em>',
+        body: `
+          <div style="display:grid;gap:20px;">
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Delivery Time</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Orders are delivered within 3–5 business days across Egypt.</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Shipping Cost</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Shipping is currently free on all orders, no minimum spend required.</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Order Tracking</div>
+              <p style="font-size:0.8rem;line-height:1.7;">You'll receive updates on your order status directly through your account under "Order History".</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Payment</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Cash on Delivery is available on all orders.</p>
+            </div>
+          </div>
+        `
+      },
+      returns: {
+        title: 'Returns <em>& Exchanges</em>',
+        body: `
+          <div style="display:grid;gap:20px;">
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Return Window</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Not in love with your order? You can return it within 7 days of delivery, no questions asked.</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Condition</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Items must be unworn, unwashed, and with original tags attached.</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Exchanges</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Need a different size or color? Reach out through Instagram or the contact section and we'll arrange it.</p>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;">Refunds</div>
+              <p style="font-size:0.8rem;line-height:1.7;">Once your return is received and inspected, your refund will be processed within 3–5 business days.</p>
+            </div>
+          </div>
+        `
+      }
+    };
+
+    function openInfoModal(type) {
+      const info = INFO_CONTENT[type];
+      if (!info) return;
+      document.getElementById('infoModalContent').innerHTML = `
+        <div class="modal-product-name" style="margin-bottom:24px;">${info.title}</div>
+        ${info.body}
+      `;
+      document.getElementById('infoModalOverlay').classList.add('open');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('infoModalOverlay').classList.remove('open');
     }
 
     let lastScroll = 0;
@@ -796,6 +940,8 @@
     }
 
     let maxQty = 1;
+    let modalImages = [];
+    let modalImageIndex = 0;
 
     function getCartQtyForProduct(id) {
       return cart.filter(i => i.id === id).reduce((a, i) => a + i.qty, 0);
@@ -817,6 +963,11 @@
       document.getElementById('qtyDisplay').textContent = 1;
       document.getElementById('modalName').textContent = currentProduct.name;
       document.getElementById('modalPrice').textContent = `${currentProduct.price} EGP`;
+      document.getElementById('modalDescription').textContent = currentProduct.description || currentProduct.sub || '';
+
+      modalImages = parseImages(currentProduct);
+      modalImageIndex = 0;
+      renderModalImage();
 
       const availableSizes = parseSizes(currentProduct.sizes);
       const sizesToShow = availableSizes.length ? availableSizes : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -839,6 +990,42 @@
       document.getElementById('stockHint').textContent = maxQty <= 5 ? `Only ${maxQty} left` : '';
       updateQtyButtons();
       document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function renderModalImage() {
+      const wrap = document.getElementById('modalImgWrap');
+      document.getElementById('modalImage').src = modalImages[modalImageIndex];
+
+      wrap.querySelectorAll('.modal-img-arrow').forEach(el => el.remove());
+      if (modalImages.length > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'modal-img-arrow prev';
+        prevBtn.textContent = '‹';
+        prevBtn.onclick = (e) => { e.stopPropagation(); modalImageIndex = (modalImageIndex - 1 + modalImages.length) % modalImages.length; renderModalImage(); };
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'modal-img-arrow next';
+        nextBtn.textContent = '›';
+        nextBtn.onclick = (e) => { e.stopPropagation(); modalImageIndex = (modalImageIndex + 1) % modalImages.length; renderModalImage(); };
+
+        wrap.appendChild(prevBtn);
+        wrap.appendChild(nextBtn);
+      }
+
+      document.getElementById('modalImgDots').innerHTML = modalImages.length > 1
+        ? modalImages.map((_, i) => `<span class="${i === modalImageIndex ? 'active' : ''}"></span>`).join('')
+        : '';
+    }
+
+    function openImageZoom() {
+      document.getElementById('zoomImage').src = modalImages[modalImageIndex];
+      document.getElementById('zoomImage').classList.remove('zoomed');
+      document.getElementById('zoomOverlay').classList.add('open');
+    }
+
+    function closeImageZoom() {
+      document.getElementById('zoomOverlay').classList.remove('open');
+      document.getElementById('zoomImage').classList.remove('zoomed');
     }
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 

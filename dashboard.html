@@ -414,6 +414,11 @@
         </div>
       </div>
 
+      <div class="form-group" style="margin-top: 10px;">
+        <label class="form-label">Description (وصف المنتج)</label>
+        <textarea id="newProdDescription" class="form-input" rows="3" style="border:1px solid var(--light);padding:12px;resize:vertical;" placeholder="Fabric, fit, and details the customer should know before buying..."></textarea>
+      </div>
+
       <div class="form-grid" style="grid-template-columns: 1fr 2fr; margin-top: 10px;">
         <div class="form-group">
           <label class="form-label">Category (القسم)</label>
@@ -875,7 +880,10 @@
       return `
         <tr id="row-${p.id}">
           <td><img src="${displayImg}" class="prod-img" alt="product"/></td>
-          <td><input type="text" id="name-${p.id}" value="${p.name || ''}" /></td>
+          <td>
+            <input type="text" id="name-${p.id}" value="${p.name || ''}" />
+            <textarea id="description-${p.id}" placeholder="Description..." style="width:100%;font-size:.65rem;margin-top:6px;padding:4px;border:1px solid var(--light);resize:vertical;min-height:32px;font-family:'Montserrat',sans-serif;">${p.description || ''}</textarea>
+          </td>
           <td>
             <input type="number" id="price-${p.id}" value="${p.price || 0}" style="width:80px;"/>
             <div style="margin-top:4px;font-size:.65rem;">${priceDisplay}</div>
@@ -918,6 +926,7 @@
 
   async function updateProductInDB(id) {
     const name = document.getElementById(`name-${id}`).value.trim();
+    const description = document.getElementById(`description-${id}`).value.trim();
     const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
     const discount = parseFloat(document.getElementById(`discount-${id}`).value) || 0;
     const stock = parseInt(document.getElementById(`stock-${id}`).value) || 0;
@@ -930,7 +939,7 @@
       const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
         method: 'PATCH',
         headers: getAdminHeaders(),
-        body: JSON.stringify({ name, price, discount, stock, badge, sizes, colors, category })
+        body: JSON.stringify({ name, description, price, discount, stock, badge, sizes, colors, category })
       });
 
       if (res.ok) {
@@ -970,6 +979,7 @@
     const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
     const stock = parseInt(document.getElementById('newProdStock').value) || 0;
     const sub = document.getElementById('newProdSub').value.trim();
+    const description = document.getElementById('newProdDescription').value.trim();
     const sizes = getCheckedSizes('newSize');
     const colors = getCheckedColors('newColor');
     const category = document.getElementById('newProdCategory').value;
@@ -1038,6 +1048,7 @@
           price, 
           stock, 
           sub, 
+          description,
           image_path: imageUrlsArray, 
           sizes,
           colors,
@@ -1053,6 +1064,7 @@
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdStock').value = '';
         document.getElementById('newProdSub').value = '';
+        document.getElementById('newProdDescription').value = '';
         document.getElementById('newProdImage').value = '';
         document.getElementById('newProdCategory').value = 'unisex';
         renderSizeCheckboxes('newProdSizes', 'newSize', []);
