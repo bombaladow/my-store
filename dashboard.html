@@ -450,7 +450,7 @@
 <script>
   const SUPABASE_URL = 'https://zxvzpwdueqbgwetylmng.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_3Hlrrp_fF7OHqTS3gvoGpA_vdqivpYV';
-  const ADMIN_EMAIL = 'bombaladow@gmail.com';
+  const ADMIN_EMAILS = ['bombaladow@gmail.com', 'shrifalamedalamed@gmail.com'];
   const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const COLOR_PALETTE = [
     { name: 'Black', hex: '#0a0a0a' },
@@ -501,7 +501,7 @@
 
   async function checkAdminSession(session) {
     const email = (session?.user?.email || '').toLowerCase().trim();
-    if (session && email === ADMIN_EMAIL.toLowerCase()) {
+    if (session && ADMIN_EMAILS.includes(email)) {
       currentSession = session; // always keep the freshest token, even on refresh
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('dashboard').classList.add('visible');
