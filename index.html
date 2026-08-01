@@ -104,9 +104,16 @@
     .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; line-height: 1; }
     .section-title em { font-style: italic; }
     .section-sub { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); }
-    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--light-gray); margin: 2px; }
-    .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; }
-    
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--light-gray); margin: 2px; perspective: 1400px; }
+    .product-card { background: var(--white); position: relative; cursor: pointer; will-change: transform; }
+    /* Higher specificity than .reveal's transition shorthand so scroll-in animation can't clobber the tilt's own timing */
+    .products-grid .product-card { transition: box-shadow 0.5s ease; }
+
+    /* Subtle tilt only on real pointer devices — untouched on mobile/tablet */
+    @media (hover: hover) and (pointer: fine) {
+      .products-grid .product-card:hover { box-shadow: 0 30px 50px rgba(0,0,0,0.18); z-index: 5; }
+    }
+
     .product-img-slider-wrap { aspect-ratio: 3/4; position: relative; overflow: hidden; }
     .product-images-container { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; touch-action: auto; }
     .product-images-container::-webkit-scrollbar { display: none; }
@@ -764,6 +771,36 @@
       }).join('');
 
       document.querySelectorAll('.products-grid .reveal').forEach(el => observer.observe(el));
+      attachProductTilt();
+    }
+
+    /* ══════════════ PRODUCT CARD 3D TILT (desktop/mouse only) ══════════════ */
+    const CAN_TILT = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const TILT_MAX_DEG = 6;
+
+    function attachProductTilt() {
+      if (!CAN_TILT) return;
+      document.querySelectorAll('.products-grid .product-card').forEach(card => {
+        card.addEventListener('mousemove', onTiltMove);
+        card.addEventListener('mouseleave', onTiltLeave);
+      });
+    }
+
+    function onTiltMove(e) {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * TILT_MAX_DEG;
+      const rotateX = -((y - rect.height / 2) / (rect.height / 2)) * TILT_MAX_DEG;
+      card.style.transition = 'transform 0.1s ease-out';
+      card.style.transform = `perspective(1400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)`;
+    }
+
+    function onTiltLeave(e) {
+      const card = e.currentTarget;
+      card.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      card.style.transform = 'perspective(1400px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
